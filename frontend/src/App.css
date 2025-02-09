@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap');
+
+* {
+  font-family: 'Poppins', sans-serif; /* Style spécifique au body */
+  margin: 0; /* Si vous souhaitez supprimer les marges du body */
+  padding: 0; /* Si vous souhaitez supprimer le padding du body */
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #cbdbff;
+}
+.form-container {
+  width: 1000px;
+}
+
+.title,
+.slogan {
+  text-align: center;
+}
+
