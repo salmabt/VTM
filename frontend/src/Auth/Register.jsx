@@ -1,14 +1,32 @@
 import React from 'react';
-import { Alert, Card, Flex, Form, Typography,Input,Spin, Button } from 'antd';
+import { Alert, Card, Flex, Form, Typography, Input, Spin, Button } from 'antd';
 import { Link } from 'react-router-dom';
 import registerImage from '../assets/register.png';
 import useSignup from '../hooks/useSignup';
 
 const Register = () => {
-  const{loading, error, registerUser}= useSignup();
-  const handleRegister =(values) => {
-    registerUser(values);
+  const { loading, error, registerUser } = useSignup();
+
+  const handleRegister = async (values) => {
+    const validRoles = ['admin', 'gestionnaire', 'technicien']; // Liste des rôles valides
+    const { role } = values;
+
+    // Vérification du rôle
+    console.log('Role selected:', role); // Log de la valeur du rôle
+    if (!validRoles.includes(role.toLowerCase().trim())) {
+      alert('Invalid role. Please choose a valid role: admin, gestionnaire, or technicien.');
+      return; // Arrêter l'exécution si le rôle n'est pas valide
+    }
+
+    // Si le rôle est valide, appeler la fonction pour enregistrer l'utilisateur
+    try {
+      console.log('Registering user with values:', values); // Log des données envoyées
+      await registerUser(values); // Attendre que l'enregistrement soit terminé
+    } catch (err) {
+      console.error('Error during registration:', err);
+    }
   };
+
   return (
     <Card className="form-container">
       <Flex gap="large" align="center">
@@ -20,95 +38,108 @@ const Register = () => {
           <Typography.Text type="secondary" strong className="slogan">
             Join for exclusive access!
           </Typography.Text>
-        <Form layout="vertical" onFinish={handleRegister} autoComplete="off">
+          <Form layout="vertical" onFinish={handleRegister} autoComplete="off">
             <Form.Item
-                label="Full Name"
-                name="name"
-                rules={[
+              label="Full Name"
+              name="name"
+              rules={[
                 {
-                    required: true,
-                    message: 'Please input your full name!',
+                  required: true,
+                  message: 'Please input your full name!',
                 },
-                 ]}
+              ]}
             >
-                <Input size="large" placeholder="Enter your full name" />
+              <Input size="large" placeholder="Enter your full name" />
             </Form.Item>
 
             <Form.Item
-                label="Email"
-                name="email"
-                rules={[
+              label="Email"
+              name="email"
+              rules={[
                 {
-                    required: true,
-                    message: 'Please input your Email!',
+                  required: true,
+                  message: 'Please input your Email!',
                 },
                 {
                   type: 'email',
-                  message: 'The input is not valid Email!'
+                  message: 'The input is not valid Email!',
                 },
-                 ]}
+              ]}
             >
-                <Input size="large" placeholder="Enter your email" />
-            </Form.Item>
-            <Form.Item
-                label="Password"
-                name="password"
-                rules={[
-                {
-                    required: true,
-                    message: 'Please input your Password!',
-                },
-                 ]}
-            >
-                <Input.Password size="large" placeholder="Enter your password" />
-            </Form.Item>
-            <Form.Item
-                label="Confirm Password"
-                name="passwordConfirm"
-                rules={[
-                {
-                    required: true,
-                    message: 'Please input your Confirm Password!',
-                },
-                 ]}
-            >
-                <Input.Password size="large" placeholder="Re-enter your password" />
+              <Input size="large" placeholder="Enter your email" />
             </Form.Item>
 
-            { error && (
-                <Alert 
-                description={error} 
-                type='error' 
+            <Form.Item
+              label="Role"
+              name="role"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your Role!',
+                },
+              ]}
+            >
+              <Input size="large" placeholder="Enter your role" />
+            </Form.Item>
+
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your Password!',
+                },
+              ]}
+            >
+              <Input.Password size="large" placeholder="Enter your password" />
+            </Form.Item>
+            <Form.Item
+              label="Confirm Password"
+              name="passwordConfirm"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your Confirm Password!',
+                },
+              ]}
+            >
+              <Input.Password size="large" placeholder="Re-enter your password" />
+            </Form.Item>
+
+            {error && (
+              <Alert
+                description={error}
+                type="error"
                 showIcon
                 closable
                 className="alert"
-                />
-            )} 
+              />
+            )}
             <Form.Item>
-              <Button 
-               type={`${loading ? '' : 'primary'}`}
-               htmlType="submit"
-               size="large"
-               className="btn"
-               >
+              <Button
+                type={`${loading ? '' : 'primary'}`}
+                htmlType="submit"
+                size="large"
+                className="btn"
+              >
                 {loading ? <Spin /> : 'Create Account'}
-    
               </Button>
             </Form.Item>
 
             <Form.Item>
-                  <Link to="/login">
-                    <Button size="large" className="btn">
-                     Sign In
-                    </Button>
-                  </Link>
+              <Link to="/login">
+                <Button size="large" className="btn">
+                  Sign In
+                </Button>
+              </Link>
             </Form.Item>
-        </Form>
+          </Form>
         </Flex>
 
         {/* Image */}
         <Flex flex={1}>
-          <img src={registerImage} className="auth-image"/>
+          <img src={registerImage} className="auth-image" />
         </Flex>
       </Flex>
     </Card>

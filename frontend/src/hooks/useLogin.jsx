@@ -12,7 +12,7 @@ const useLogin = () => {
         try{
             setError(null);
             setLoading(true);
-            const res = await fetch('http://localhost:5000/api/auth/login',{
+            const res = await fetch('http://localhost:3000/api/auth/login',{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -25,17 +25,20 @@ const useLogin = () => {
             if ( res.status === 200) {
                 message.success(data.message);
                 login(data.token, data.user);
+
+                return data.user;
             }else if (res.status === 404){
                 setError(data.message);
             }
             else{
-                message.error('Registration failed');
+                message.error('Login failed');
             }
         } catch (error) {
             message.error('error');
         }finally{
             setLoading(false);
         }
+        return null;
     };
 
     return {loading, error, loginUser };
