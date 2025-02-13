@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import './App.css';
 import Register from './Auth/Register';
 import Login from './Auth/Login';
+import PendingApproval from './pages/PendingApproval';
 import AdminDashboard from './pages/AdminDashboard';
 import GestionnaireDashboard from './pages/GestionnaireDashboard';
 import TechnicienDashboard from './pages/TechnicienDashboard';
@@ -35,6 +36,7 @@ const App = () => {
         {/* Redirection dynamique après connexion */}
         <Route path="/" element={!isAuthenticated ? <Register /> : <Navigate to={getDashboardRoute()} />} />
         <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to={getDashboardRoute()} />} />
+        <Route path="/pending-approval" element={<PendingApproval />} />
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={getDashboardRoute()} />} />
 
         {/* Routes des tableaux de bord */}

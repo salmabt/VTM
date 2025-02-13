@@ -1,36 +1,48 @@
 import React from 'react';
 import { Alert, Card, Flex, Form, Typography, Input, Spin, Button } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import registerImage from '../assets/register.png';
 import useSignup from '../hooks/useSignup';
 
 const Register = () => {
   const { loading, error, registerUser } = useSignup();
+  const navigate = useNavigate();
 
   const handleRegister = async (values) => {
     const validRoles = ['admin', 'gestionnaire', 'technicien']; // Liste des rôles valides
-    const { role } = values;
+    const { role, password, passwordConfirm } = values;
 
     // Vérification du rôle
-    console.log('Role selected:', role); // Log de la valeur du rôle
     if (!validRoles.includes(role.toLowerCase().trim())) {
       alert('Invalid role. Please choose a valid role: admin, gestionnaire, or technicien.');
-      return; // Arrêter l'exécution si le rôle n'est pas valide
+      return;
     }
 
-    // Si le rôle est valide, appeler la fonction pour enregistrer l'utilisateur
+    // Vérification des mots de passe
+    if (password !== passwordConfirm) {
+      alert('Passwords do not match. Please check your password and try again.');
+      return;
+    }
+
+    // Si le rôle et les mots de passe sont valides, appeler la fonction pour enregistrer l'utilisateur
     try {
       console.log('Registering user with values:', values); // Log des données envoyées
-      await registerUser(values); // Attendre que l'enregistrement soit terminé
+      const result = await registerUser(values); // Attendre que l'enregistrement soit terminé
+
+      // Redirection vers la page d'attente après une inscription réussie
+      if (result.success) {
+        navigate('/pending-approval');
+      }
     } catch (err) {
       console.error('Error during registration:', err);
+      alert('An error occurred during registration. Please try again later.'); // Afficher un message d'erreur à l'utilisateur
     }
   };
 
   return (
     <Card className="form-container">
       <Flex gap="large" align="center">
-        {/* form */}
+        {/* Formulaire */}
         <Flex vertical flex={1}>
           <Typography.Title level={3} strong className="title">
             Create an account
@@ -94,14 +106,24 @@ const Register = () => {
             >
               <Input.Password size="large" placeholder="Enter your password" />
             </Form.Item>
+
             <Form.Item
               label="Confirm Password"
               name="passwordConfirm"
+              dependencies={['password']} // Dépendance pour la validation
               rules={[
                 {
                   required: true,
-                  message: 'Please input your Confirm Password!',
+                  message: 'Please confirm your password!',
                 },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue('password') === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error('The two passwords do not match!'));
+                  },
+                }),
               ]}
             >
               <Input.Password size="large" placeholder="Re-enter your password" />
@@ -116,6 +138,7 @@ const Register = () => {
                 className="alert"
               />
             )}
+
             <Form.Item>
               <Button
                 type={`${loading ? '' : 'primary'}`}
