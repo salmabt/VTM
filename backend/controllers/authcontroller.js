@@ -33,9 +33,9 @@ exports.signup = async (req, res, next) => {
     }
 
     // Vérification du rôle
-    const validRoles = ['gestionnaire', 'technicien'];
+    const validRoles = ['technicien'];
     if (!validRoles.includes(req.body.role)) {
-      return next(new createError('Invalid role. Role must be one of gestionnaire, or technicien.', 400));
+      return next(new createError('Invalid role. Role must be just technicien.', 400));
     }
 
     // Hachage du mot de passe

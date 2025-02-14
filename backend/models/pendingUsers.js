@@ -5,7 +5,7 @@ const PendingUser = mongoose.models.PendingUser || mongoose.model('PendingUser',
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, required: true, enum: ['gestionnaire', 'technicien'] },
+  role: { type: String, required: true, enum: ['technicien'] },
   isApproved: { type: Boolean, default: false },
 }));
 
