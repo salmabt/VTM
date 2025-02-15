@@ -1,5 +1,5 @@
-//frontend /src/pages/GestionnaireDashboard
 import React, { useState } from 'react';
+
 import { Layout, Menu, Input, Badge, Avatar, Typography, Button, Card, Popover, List } from 'antd';
 import { 
   UserOutlined, 
@@ -7,7 +7,8 @@ import {
   FileTextOutlined, 
   UnorderedListOutlined, 
   BellOutlined, 
-  SearchOutlined 
+  SearchOutlined,
+  CarOutlined 
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
@@ -26,14 +27,52 @@ const GestionnaireDashboard = () => {
     { id: 1, title: 'Nouveau rapport disponible', date: '2024-03-15' },
     { id: 2, title: 'Tâche échéance demain', date: '2024-03-16' },
   ]);
+  
+  // État pour la gestion des voitures
+  const [cars, setCars] = useState([]);
+  const [newCar, setNewCar] = useState({ marque: '', modele: '', annee: '' });
+  
+  // État pour la gestion du calendrier
+  const [events, setEvents] = useState([]);
 
   const handleLogout = () => logout();
+//---------------------------
 
+
+
+  // Configuration du menu
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
     { key: '2', icon: <FileTextOutlined />, label: 'Rapports' },
     { key: '3', icon: <UnorderedListOutlined />, label: 'Tâches' },
+    { key: '4', icon: <CarOutlined />, label: 'Voitures' },
   ];
+
+  // Gestion des voitures
+  const handleAddCar = () => {
+    if (newCar.marque && newCar.modele && newCar.annee) {
+      setCars([...cars, { ...newCar, id: Date.now() }]);
+      setNewCar({ marque: '', modele: '', annee: '' });
+    }
+  };
+
+  const handleDeleteCar = (id) => {
+    setCars(cars.filter(car => car.id !== id));
+  };
+
+  // Gestion du calendrier
+  const handleSelectSlot = ({ start, end }) => {
+    const title = prompt('Entrez le titre de l\'événement:');
+    if (title) {
+      const newEvent = {
+        title,
+        start,
+        end,
+        id: Date.now()
+      };
+      setEvents([...events, newEvent]);
+    }
+  };
 
   const notificationsContent = (
     <List
@@ -51,7 +90,6 @@ const GestionnaireDashboard = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* Sidebar */}
       <Sider collapsible theme="light">
         <div className="logo" style={{ padding: '16px', textAlign: 'center' }}>
           <Title level={4}>Tableau de Bord</Title>
@@ -67,7 +105,6 @@ const GestionnaireDashboard = () => {
       </Sider>
 
       <Layout>
-        {/* Navbar */}
         <Header style={{ 
           background: '#fff', 
           padding: '0 24px', 
@@ -97,30 +134,87 @@ const GestionnaireDashboard = () => {
           </div>
         </Header>
 
-        {/* Contenu Principal */}
         <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
           {selectedMenu === '1' && (
             <Calendar
               localizer={localizer}
-              events={[]}
+              events={events}
               startAccessor="start"
               endAccessor="end"
               style={{ height: 500 }}
               culture="fr"
+              selectable
+              onSelectSlot={handleSelectSlot}
+              messages={{
+                today: "Aujourd'hui",
+                previous: 'Précédent',
+                next: 'Suivant',
+                month: 'Mois',
+                week: 'Semaine',
+                day: 'Jour',
+                agenda: 'Agenda',
+                date: 'Date',
+                time: 'Heure',
+                event: 'Événement',
+              }}
             />
           )}
 
           {selectedMenu === '2' && (
             <Card title="Rapports">
-              {/* Ajouter votre composant de rapports ici */}
               <p>Contenu des rapports...</p>
             </Card>
           )}
 
           {selectedMenu === '3' && (
             <Card title="Gestion des Tâches">
-              {/* Ajouter votre composant de gestion de tâches ici */}
               <p>Liste des tâches...</p>
+            </Card>
+          )}
+
+          {selectedMenu === '4' && (
+            <Card title="Gestion des Voitures">
+              <div style={{ marginBottom: 16 }}>
+                <Input
+                  placeholder="Marque"
+                  value={newCar.marque}
+                  onChange={(e) => setNewCar({ ...newCar, marque: e.target.value })}
+                  style={{ width: 200, marginRight: 8 }}
+                />
+                <Input
+                  placeholder="Modèle"
+                  value={newCar.modele}
+                  onChange={(e) => setNewCar({ ...newCar, modele: e.target.value })}
+                  style={{ width: 200, marginRight: 8 }}
+                />
+                <Input
+                  placeholder="Année"
+                  type="number"
+                  value={newCar.annee}
+                  onChange={(e) => setNewCar({ ...newCar, annee: e.target.value })}
+                  style={{ width: 100, marginRight: 8 }}
+                />
+                <Button type="primary" onClick={handleAddCar}>
+                  Ajouter Voiture
+                </Button>
+              </div>
+              <List
+                dataSource={cars}
+                renderItem={item => (
+                  <List.Item
+                    actions={[
+                      <Button danger onClick={() => handleDeleteCar(item.id)}>
+                        Supprimer
+                      </Button>
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={`${item.marque} ${item.modele}`}
+                      description={`Année: ${item.annee}`}
+                    />
+                  </List.Item>
+                )}
+              />
             </Card>
           )}
         </Content>
@@ -130,4 +224,3 @@ const GestionnaireDashboard = () => {
 };
 
 export default GestionnaireDashboard;
-
