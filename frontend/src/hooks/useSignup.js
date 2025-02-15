@@ -14,10 +14,10 @@ const useSignup = () => {
     }
 
     // Vérification du rôle
-    const validRoles = ['admin', 'gestionnaire', 'technicien'];
+    const validRoles = ['technicien'];
     if (!validRoles.includes(values.role.toLowerCase().trim())) {
-      setError('Invalid role. Please choose a valid role: admin, gestionnaire, or technicien.');
-      return { success: false, error: 'Invalid role. Please choose a valid role: admin, gestionnaire, or technicien.' };
+      setError('Invalid role. Please choose a valid role:  technicien.');
+      return { success: false, error: 'Invalid role. Please choose a valid role: technicien.' };
     }
 
     try {

@@ -1,3 +1,4 @@
+//frontend/src/pages/Technic
 import React from 'react';
 import { Button, Card } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
