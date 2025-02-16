@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db'); // Import the database connection function
 const authRouter =require('./routes/authRoute');
+const taskRouter = require('./routes/tasksRoutes');
+const voitureRouter = require('./routes/voitureRoutes');
 
 // Create the Express app
 const app = express();
@@ -14,8 +16,11 @@ app.use(express.json());
 // Connect to the database
 connectDB();
 
-// route
+// routes
 app.use('/api/auth', authRouter) ;
+app.use('/api/tasks', taskRouter);
+app.use('/api/vehicules',voitureRouter);
+
 
 // global error handler
 app.use((err, req, res, next) => {
@@ -38,3 +43,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
