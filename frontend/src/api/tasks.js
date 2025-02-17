@@ -15,7 +15,7 @@ export default {
   createTask: (data) => api.post('/tasks', data),
   updateTask: (id, data) => api.put(`/tasks/${id}`, data),
   deleteTask: (id) => api.delete(`/tasks/${id}`),
-  getTechniciens: () => api.get('/techniciens?populate=user'), // Correction de la virgule manquante
+  getTechniciens: () => api.get('/techniciens'), // Correction de la virgule manquante
 
   // Endpoints complémentaires
   getTasksByTechnicien: (technicienId) => 

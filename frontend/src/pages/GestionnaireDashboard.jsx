@@ -85,7 +85,7 @@ const GestionnaireDashboard = () => {
       try {
         const [tasksRes, techRes, vehRes] = await Promise.all([
           tasksApi.getAllTasks(),
-          tasksApi.getTechniciens(),
+          techniciensApi.getAllTechniciens(),
           vehiculesApi.getAllVehicules()
         ]);
 

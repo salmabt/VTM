@@ -11,7 +11,7 @@ const api = axios.create({
 
 export default {
   // Récupérer tous les techniciens
-  getAllTechniciens: () => api.get('/techniciens'),
+  getAllTechniciens: () => api.get('/techniciens', { timeout: 3000 }),
 
   // Mettre à jour les compétences d'un technicien
   updateSkills: (technicienId, skills) => 

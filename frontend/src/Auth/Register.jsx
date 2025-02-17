@@ -9,12 +9,12 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleRegister = async (values) => {
-    const validRoles = ['admin', 'gestionnaire', 'technicien']; // Liste des rôles valides
+    const validRoles = ['technicien'];// Liste des rôles valides
     const { role, password, passwordConfirm } = values;
 
     // Vérification du rôle
     if (!validRoles.includes(role.toLowerCase().trim())) {
-      alert('Invalid role. Please choose a valid role: admin, gestionnaire, or technicien.');
+      alert('Invalid role. Please choose a valid role: technicien.');
       return;
     }
 
