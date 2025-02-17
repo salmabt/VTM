@@ -1,46 +1,197 @@
-import React, { useState } from 'react';
-
-import { Layout, Menu, Input, Badge, Avatar, Typography, Button, Card, Popover, List } from 'antd';
+import React, { useState, useEffect } from 'react';
 import { 
-  UserOutlined, 
-  CalendarOutlined, 
-  FileTextOutlined, 
-  UnorderedListOutlined, 
-  BellOutlined, 
-  SearchOutlined,
-  CarOutlined 
+  Layout, Menu, Input, DatePicker, Typography, Button, Card, List, 
+  Select, message, Spin, Tag 
+} from 'antd';
+import { 
+  CalendarOutlined, FileTextOutlined, 
+  UnorderedListOutlined, LogoutOutlined, CarOutlined 
 } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { useAuth } from '../contexts/AuthContext';
+import vehiculesApi from '../api/vehicules';
+import techniciensApi from '../api/techniciens';
+import tasksApi from '../api/tasks';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
-const { Search } = Input;
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 const localizer = momentLocalizer(moment);
+
+moment.locale('fr');
 
 const GestionnaireDashboard = () => {
   const { userData, logout } = useAuth();
   const [selectedMenu, setSelectedMenu] = useState('1');
-  const [notifications] = useState([
-    { id: 1, title: 'Nouveau rapport disponible', date: '2024-03-15' },
-    { id: 2, title: 'Tâche échéance demain', date: '2024-03-16' },
-  ]);
+  const [loading, setLoading] = useState(false);
+  const [techniciens, setTechniciens] = useState([]);
+  const [vehiculesList, setVehiculesList] = useState([]);
+
+  // États pour les véhicules
+  const [vehicules, setVehicules] = useState([]);
+  const [newVehicule, setNewVehicule] = useState({
+    registration: '',
+    model: '',
+    status: 'disponible'
+  });
   
-  // État pour la gestion des voitures
-  const [cars, setCars] = useState([]);
-  const [newCar, setNewCar] = useState({ marque: '', modele: '', annee: '' });
+  // États pour les tâches
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    client: '',
+    location: '',
+    startDate: null,
+    endDate: null,
+    technicien: '',
+    vehicule: '',
+    status: 'planifié'
+  });
+  const TechnicienList = () => {
+    const [techniciens, setTechniciens] = useState([]);
   
-  // État pour la gestion du calendrier
-  const [events, setEvents] = useState([]);
+    useEffect(() => {
+      const loadData = async () => {
+        try {
+          const response = await techniciensApi.getAllTechniciens();
+          setTechniciens(response.data);
+        } catch (error) {
+          console.error('Erreur de chargement:', error);
+        }
+      };
+      loadData();
+    }, []);
+  
+    return (
+      <div>
+        {techniciens.map(tech => (
+          <div key={tech._id}>
+            <h3>{tech.user.name}</h3>
+            <p>Compétences: {tech.skills.join(', ')}</p>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
-  const handleLogout = () => logout();
-//---------------------------
+  // Chargement des données initiales
+  useEffect(() => {
+    const loadAllData = async () => {
+      setLoading(true);
+      try {
+        const [tasksRes, techRes, vehRes] = await Promise.all([
+          tasksApi.getAllTasks(),
+          tasksApi.getTechniciens(),
+          vehiculesApi.getAllVehicules()
+        ]);
 
+        setTasks(tasksRes.data);
+        setTechniciens(techRes.data);
+        setVehiculesList(vehRes.data);
+        setVehicules(vehRes.data);
+      } catch (error) {
+        console.error('Erreur initiale:', error);
+        message.error(error.response?.data?.message || 'Erreur de chargement');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAllData();
+  }, []);
 
+  // Chargement des données selon le menu
+  useEffect(() => {
+    const loadMenuData = async () => {
+      if (selectedMenu === '3' || selectedMenu === '4') {
+        setLoading(true);
+        try {
+          if (selectedMenu === '3') {
+            const { data } = await tasksApi.getAllTasks();
+            setTasks(data);
+          }
+          if (selectedMenu === '4') {
+            const { data } = await vehiculesApi.getAllVehicules();
+            setVehicules(data);
+          }
+        } catch (error) {
+          message.error(error.response?.data?.message || 'Erreur de chargement');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    loadMenuData();
+  }, [selectedMenu]);
 
-  // Configuration du menu
+  // Gestion véhicules
+  const handleAddVehicule = async () => {
+    try {
+      const { data } = await vehiculesApi.createVehicule(newVehicule);
+      setVehicules([...vehicules, data]);
+      setNewVehicule({ registration: '', model: '', status: 'disponible' });
+      message.success('Véhicule ajouté avec succès');
+    } catch (error) {
+      message.error(error.response?.data?.message || "Erreur lors de l'ajout");
+    }
+  };
+
+  const handleDeleteVehicule = async (id) => {
+    try {
+      await vehiculesApi.deleteVehicule(id);
+      setVehicules(vehicules.filter(v => v._id !== id));
+      message.success('Véhicule supprimé avec succès');
+    } catch (error) {
+      message.error(error.response?.data?.message || 'Erreur de suppression');
+    }
+  };
+
+  // Gestion tâches
+  const handleCreateTask = async () => {
+    try {
+      if (!newTask.startDate || !newTask.endDate) {
+        return message.error('Sélectionnez une plage horaire');
+      }
+
+      const taskData = {
+        ...newTask,
+        startDate: moment(newTask.startDate).toISOString(),
+        endDate: moment(newTask.endDate).toISOString()
+      };
+      
+      const { data } = await tasksApi.createTask(taskData);
+      setTasks([...tasks, data]);
+      setNewTask({
+        title: '',
+        description: '',
+        client: '',
+        location: '',
+        startDate: null,
+        endDate: null,
+        technicien: '',
+        vehicule: '',
+        status: 'planifié'
+      });
+      message.success('Tâche créée avec succès');
+    } catch (error) {
+      console.error('Erreur création:', error.response?.data);
+      message.error(error.response?.data?.message || "Erreur de création");
+    }
+  };
+
+  const handleDeleteTask = async (id) => {
+    try {
+      await tasksApi.deleteTask(id);
+      setTasks(tasks.filter(t => t._id !== id));
+      message.success('Tâche supprimée avec succès');
+    } catch (error) {
+      message.error(error.response?.data?.message || 'Erreur de suppression');
+    }
+  };
+
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
     { key: '2', icon: <FileTextOutlined />, label: 'Rapports' },
@@ -48,53 +199,12 @@ const GestionnaireDashboard = () => {
     { key: '4', icon: <CarOutlined />, label: 'Voitures' },
   ];
 
-  // Gestion des voitures
-  const handleAddCar = () => {
-    if (newCar.marque && newCar.modele && newCar.annee) {
-      setCars([...cars, { ...newCar, id: Date.now() }]);
-      setNewCar({ marque: '', modele: '', annee: '' });
-    }
-  };
-
-  const handleDeleteCar = (id) => {
-    setCars(cars.filter(car => car.id !== id));
-  };
-
-  // Gestion du calendrier
-  const handleSelectSlot = ({ start, end }) => {
-    const title = prompt('Entrez le titre de l\'événement:');
-    if (title) {
-      const newEvent = {
-        title,
-        start,
-        end,
-        id: Date.now()
-      };
-      setEvents([...events, newEvent]);
-    }
-  };
-
-  const notificationsContent = (
-    <List
-      dataSource={notifications}
-      renderItem={item => (
-        <List.Item>
-          <List.Item.Meta
-            title={item.title}
-            description={item.date}
-          />
-        </List.Item>
-      )}
-    />
-  );
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible theme="light">
-        <div className="logo" style={{ padding: '16px', textAlign: 'center' }}>
-          <Title level={4}>Tableau de Bord</Title>
+        <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
+          <Title level={4} style={{ margin: 0 }}>VTM Dashboard</Title>
         </div>
-        
         <Menu
           theme="light"
           mode="inline"
@@ -105,117 +215,233 @@ const GestionnaireDashboard = () => {
       </Sider>
 
       <Layout>
-        <Header style={{ 
-          background: '#fff', 
-          padding: '0 24px', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center'
-        }}>
-          <Search
-            placeholder="Rechercher..."
-            prefix={<SearchOutlined />}
-            style={{ width: 300 }}
-          />
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Popover content={notificationsContent} trigger="click">
-              <Badge count={notifications.length}>
-                <Avatar 
-                  icon={<BellOutlined />} 
-                  style={{ cursor: 'pointer' }}
-                />
-              </Badge>
-            </Popover>
-            
-            <Button type="primary" onClick={handleLogout}>
-              Déconnexion
-            </Button>
+        <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Text strong>Connecté en tant que : {userData?.name}</Text>
           </div>
+          <Button icon={<LogoutOutlined />} onClick={logout}>Déconnexion</Button>
         </Header>
 
         <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
-          {selectedMenu === '1' && (
-            <Calendar
-              localizer={localizer}
-              events={events}
-              startAccessor="start"
-              endAccessor="end"
-              style={{ height: 500 }}
-              culture="fr"
-              selectable
-              onSelectSlot={handleSelectSlot}
-              messages={{
-                today: "Aujourd'hui",
-                previous: 'Précédent',
-                next: 'Suivant',
-                month: 'Mois',
-                week: 'Semaine',
-                day: 'Jour',
-                agenda: 'Agenda',
-                date: 'Date',
-                time: 'Heure',
-                event: 'Événement',
-              }}
-            />
-          )}
+          {loading ? (
+            <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
+          ) : (
+            <>
+              {selectedMenu === '1' && (
+                <Card title="Calendrier des interventions" bordered={false}>
+                  <Calendar
+                    localizer={localizer}
+                    events={tasks.map(task => ({
+                      title: task.title,
+                      start: new Date(task.startDate),
+                      end: new Date(task.endDate),
+                      allDay: false,
+                      resource: task
+                    }))}
+                    startAccessor="start"
+                    endAccessor="end"
+                    style={{ height: 600 }}
+                    messages={{
+                      today: "Aujourd'hui",
+                      previous: 'Précédent',
+                      next: 'Suivant'
+                    }}
+                  />
+                </Card>
+              )}
 
-          {selectedMenu === '2' && (
-            <Card title="Rapports">
-              <p>Contenu des rapports...</p>
-            </Card>
-          )}
+              {selectedMenu === '2' && (
+                <Card title="Rapports d'intervention" bordered={false}>
+                  <List
+                    dataSource={tasks.filter(t => t.report)}
+                    renderItem={task => (
+                      <List.Item>
+                        <List.Item.Meta
+                          title={task.title}
+                          description={
+                            <div>
+                              <Text strong>Technicien: </Text>
+                              <Text>{task.technicien?.user?.name || 'Non assigné'}</Text><br />
+                              <Text strong>Durée: </Text>
+                              <Text>{task.report?.timeSpent}h</Text><br />
+                              <Text strong>Résolution: </Text>
+                              <Text>{task.report?.resolution}</Text>
+                            </div>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              )}
 
-          {selectedMenu === '3' && (
-            <Card title="Gestion des Tâches">
-              <p>Liste des tâches...</p>
-            </Card>
-          )}
-
-          {selectedMenu === '4' && (
-            <Card title="Gestion des Voitures">
-              <div style={{ marginBottom: 16 }}>
-                <Input
-                  placeholder="Marque"
-                  value={newCar.marque}
-                  onChange={(e) => setNewCar({ ...newCar, marque: e.target.value })}
-                  style={{ width: 200, marginRight: 8 }}
-                />
-                <Input
-                  placeholder="Modèle"
-                  value={newCar.modele}
-                  onChange={(e) => setNewCar({ ...newCar, modele: e.target.value })}
-                  style={{ width: 200, marginRight: 8 }}
-                />
-                <Input
-                  placeholder="Année"
-                  type="number"
-                  value={newCar.annee}
-                  onChange={(e) => setNewCar({ ...newCar, annee: e.target.value })}
-                  style={{ width: 100, marginRight: 8 }}
-                />
-                <Button type="primary" onClick={handleAddCar}>
-                  Ajouter Voiture
-                </Button>
-              </div>
-              <List
-                dataSource={cars}
-                renderItem={item => (
-                  <List.Item
-                    actions={[
-                      <Button danger onClick={() => handleDeleteCar(item.id)}>
-                        Supprimer
-                      </Button>
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={`${item.marque} ${item.modele}`}
-                      description={`Année: ${item.annee}`}
+              {selectedMenu === '3' && (
+                <Card title="Gestion des tâches" bordered={false}>
+                  <div style={{ marginBottom: 16, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
+                    <Input
+                      placeholder="Titre *"
+                      value={newTask.title}
+                      onChange={(e) => setNewTask({...newTask, title: e.target.value})}
                     />
-                  </List.Item>
-                )}
-              />
-            </Card>
+                    <Input.TextArea
+                      placeholder="Description détaillée *"
+                      value={newTask.description}
+                      onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                      rows={3}
+                    />
+                    <Input
+                      placeholder="Client *"
+                      value={newTask.client}
+                      onChange={(e) => setNewTask({...newTask, client: e.target.value})}
+                    />
+                    <Input
+                      placeholder="Localisation"
+                      value={newTask.location}
+                      onChange={(e) => setNewTask({...newTask, location: e.target.value})}
+                    />
+                    <RangePicker
+                      showTime
+                      format="DD/MM/YYYY HH:mm"
+                      onChange={(dates) => setNewTask({
+                        ...newTask,
+                        startDate: dates?.[0],
+                        endDate: dates?.[1]
+                      })}
+                    />
+      
+                    <Select
+                      placeholder="Sélectionner un technicien *"
+                      loading={!techniciens.length}
+                      options={techniciens.map(t => ({
+                        label: t.user 
+                          ? `${t.user.name}${t.skills?.length ? ` (${t.skills.join(', ')})` : ''}` 
+                          : 'Technicien sans profil',
+                        value: t._id
+                      }))}
+                      onChange={value => setNewTask({...newTask, technicien: value})}
+                    />
+                    <Select
+                      placeholder="Sélectionner un véhicule *"
+                      onChange={(value) => setNewTask({...newTask, vehicule: value})}
+                    >
+                      {vehiculesList.map(veh => (
+                        <Option key={veh._id} value={veh._id}>
+                          {veh.model} ({veh.registration})
+                        </Option>
+                      ))}
+                    </Select>
+                    <Button 
+                      type="primary" 
+                      onClick={handleCreateTask}
+                      disabled={!newTask.title || !newTask.description || !newTask.technicien}
+                    >
+                      Créer Tâche
+                    </Button>
+                  </div>
+
+                  <List
+                    dataSource={tasks}
+                    renderItem={task => (
+                      <List.Item
+                        actions={[
+                          <Button danger onClick={() => handleDeleteTask(task._id)}>
+                            Supprimer
+                          </Button>
+                        ]}
+                      >
+                        <List.Item.Meta
+                          title={<Text strong>{task.title}</Text>}
+                          description={
+                            <div>
+                              <Text>Client: {task.client}</Text><br />
+                              <Text>Localisation: {task.location}</Text><br />
+                              <Text>Statut: <Tag color={
+                                task.status === 'planifié' ? 'blue' : 
+                                task.status === 'en cours' ? 'orange' : 'green'
+                              }>{task.status}</Tag></Text><br />
+                              <Text>Période: {moment(task.startDate).format('DD/MM HH:mm')} - {moment(task.endDate).format('DD/MM HH:mm')}</Text><br />
+                              <Text>Technicien: {task.technicien?.user?.name || 'Non assigné'}</Text><br />
+                              <Text>Véhicule: {task.vehicule?.model} ({task.vehicule?.registration})</Text>
+                              {task.report && (
+                                <div style={{ marginTop: 10, padding: 10, background: '#f6f6f6', borderRadius: 4 }}>
+                                  <Text strong>Rapport d'intervention:</Text><br />
+                                  <Text>Temps passé: {task.report.timeSpent}h</Text><br />
+                                  <Text>Problèmes: {task.report.issues}</Text><br />
+                                  <Text>Résolution: {task.report.resolution}</Text>
+                                </div>
+                              )}
+                            </div>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              )}
+
+              {selectedMenu === '4' && (
+                <Card title="Gestion des véhicules" bordered={false}>
+                  <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <Input
+                      placeholder="Immatriculation *"
+                      value={newVehicule.registration}
+                      onChange={(e) => setNewVehicule({...newVehicule, registration: e.target.value})}
+                      style={{ width: 200 }}
+                    />
+                    <Input
+                      placeholder="Modèle *"
+                      value={newVehicule.model}
+                      onChange={(e) => setNewVehicule({...newVehicule, model: e.target.value})}
+                      style={{ width: 200 }}
+                    />
+                    <Select
+                      value={newVehicule.status}
+                      onChange={(value) => setNewVehicule({...newVehicule, status: value})}
+                      style={{ width: 150 }}
+                    >
+                      <Option value="disponible">Disponible</Option>
+                      <Option value="en entretien">En entretien</Option>
+                      <Option value="réservé">Réservé</Option>
+                    </Select>
+                    <Button 
+                      type="primary" 
+                      onClick={handleAddVehicule}
+                      disabled={!newVehicule.registration || !newVehicule.model}
+                      style={{ minWidth: 150 }}
+                    >
+                      Ajouter Véhicule
+                    </Button>
+                  </div>
+                  <List
+                    dataSource={vehicules}
+                    renderItem={vehicule => (
+                      <List.Item
+                        actions={[
+                          <Button danger onClick={() => handleDeleteVehicule(vehicule._id)}>
+                            Supprimer
+                          </Button>
+                        ]}
+                      >
+                        <List.Item.Meta
+                          title={
+                            <Text strong>
+                              {vehicule.model} ({vehicule.registration})
+                            </Text>
+                          }
+                          description={
+                            <Text 
+                              type={vehicule.status === 'disponible' ? 'success' : 'warning'}
+                            >
+                              Statut: {vehicule.status}
+                            </Text>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              )}
+            </>
           )}
         </Content>
       </Layout>
