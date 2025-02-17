@@ -1,9 +1,12 @@
+//models/Voiture
 const mongoose = require('mongoose');
 
-const vehiculeSchema = new mongoose.Schema({
-  registration: String,
-  model: String,
-  status: String, //disponible, en entretien, réservé
+const voitureSchema = new mongoose.Schema({
+  registration: { type: String, required: true },
+  model: { type: String, required: true },
+  status: { type: String, required: true },  // Exemple : 'disponible', 'en entretien', etc.
 });
 
-module.exports = mongoose.model('Vehicule', vehiculeSchema);
+module.exports = mongoose.model('Voiture', voitureSchema); // Le nom du modèle est "Voiture"
+
+

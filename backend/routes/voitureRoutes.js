@@ -1,21 +1,21 @@
-//backend /routes/voituresRoutes
+// routes/voitureRoutes.js
 const express = require('express');
 const router = express.Router();
-const vehiculeController = require('../controllers/voiturecontroller');
+const voitureController = require('../controllers/voiturecontroller'); // Assure-toi que le chemin est correct
 
-// ➜ Ajouter un véhicule
-router.post('/', vehiculeController.createVehicule);
+// ➜ Ajouter une voiture
+router.post('/', voitureController.createVehicule);
 
-// ➜ Récupérer tous les véhicules
-router.get('/', vehiculeController.getAllVehicules);
+// ➜ Récupérer toutes les voitures
+router.get('/', voitureController.getAllVehicules); // Utilise 'getAllVehicules' comme dans le contrôleur
 
-// ➜ Récupérer un véhicule par ID
-router.get('/:id', vehiculeController.getVehiculeById);
+// ➜ Récupérer une voiture par ID
+router.get('/:id', voitureController.getVehiculeById); // Utilise 'getVehiculeById' comme dans le contrôleur
 
-// ➜ Mettre à jour un véhicule
-router.put('/:id', vehiculeController.updateVehicule);
+// ➜ Mettre à jour une voiture
+router.put('/:id', voitureController.updateVehicule); // Utilise 'updateVehicule' comme dans le contrôleur
 
-// ➜ Supprimer un véhicule
-router.delete('/:id', vehiculeController.deleteVehicule);
+// ➜ Supprimer une voiture
+router.delete('/:id', voitureController.deleteVehicule); // Utilise 'deleteVehicule' comme dans le contrôleur
 
 module.exports = router;

@@ -17,8 +17,8 @@ const technicianSchema = new mongoose.Schema({
   skills: [String],
   availability: [{
     day: {
-      type: String,
-      enum: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+      type: [String], // Modifié pour accepter un tableau de chaînes
+      enum: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'] // Liste des jours autorisés
     },
     timeSlots: [{
       start: String,
@@ -26,4 +26,5 @@ const technicianSchema = new mongoose.Schema({
     }]
   }]
 }, { timestamps: true });
+
 module.exports = mongoose.model('Technicien', technicianSchema);

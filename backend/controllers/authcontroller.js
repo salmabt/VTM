@@ -23,29 +23,32 @@ exports.signup = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Vérifier si l'utilisateur existe déjà
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      // Si l'utilisateur existe déjà, le supprimer de la base de données
-      await User.deleteOne({ email });
-
-      // Ou, si vous voulez supprimer un utilisateur de la collection 'pendingusers' :
-      await PendingUsers.deleteOne({ email });
+    // Vérifier si l'utilisateur existe déjà dans PendingUser
+    const existingPendingUser = await PendingUser.findOne({ email });
+    if (existingPendingUser) {
+      // Si l'utilisateur existe déjà dans PendingUser, le supprimer
+      await PendingUser.deleteOne({ email });
+      return res.status(400).json({
+        status: 'error',
+        message: 'User with this email already exists in pending approval!',
+      });
     }
 
     // Vérification du rôle
     const validRoles = ['technicien'];
-    if (!validRoles.includes(req.body.role)) {
+    if (!validRoles.includes(role)) {
       return next(new createError('Invalid role. Role must be just technicien.', 400));
     }
 
     // Hachage du mot de passe
-    const hashedPassword = await bcrypt.hash(req.body.password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // Créer un nouvel utilisateur dans PendingUser
     const newUser = await PendingUser.create({
-      ...req.body,
+      name,
+      email,
       password: hashedPassword,
+      role,
     });
 
     // Envoyer un e-mail à l'administrateur pour validation
@@ -132,9 +135,18 @@ exports.login = async (req, res, next) => {
 };
 
 // Route pour que l'administrateur valide l'utilisateur
+// Route pour que l'administrateur valide l'utilisateur
 exports.validateUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
+
+    // Extract technician details from the request body
+    const { phone, skills, availability } = req.body;
+
+    // Validate that the required technician fields are provided
+    if (!phone || !skills || !availability) {
+      return next(new createError('Technician details (phone, skills, and availability) are required!', 400));
+    }
 
     const pendingUser = await PendingUser.findById(userId);
     if (!pendingUser) {
@@ -150,17 +162,17 @@ exports.validateUser = async (req, res, next) => {
       isApproved: true,
     });
 
-    // Création du profil technicien lié
+    // Création du profil technicien avec les informations supplémentaires
     const newTechnicien = await Technicien.create({
       user: approvedUser._id, // Liaison avec l'utilisateur
       email: approvedUser.email, // Copie de l'email
       name: approvedUser.name, // Copie du nom
-      // Ajoutez ici les champs par défaut nécessaires
-      phone: 'Non spécifié',
-      skills: [],
-      availability: []
+      phone, // Ajout du téléphone
+      skills, // Ajout des compétences
+      availability, // Ajout de la disponibilité
     });
 
+    // Suppression de l'utilisateur en attente
     await PendingUser.findByIdAndDelete(userId);
 
     // Mise à jour de l'e-mail de confirmation
@@ -181,13 +193,14 @@ exports.validateUser = async (req, res, next) => {
       user: {
         _id: approvedUser._id,
         name: approvedUser.name,
-        email: approvedUser.email
+        email: approvedUser.email,
       },
       technicien: {
         _id: newTechnicien._id,
         phone: newTechnicien.phone,
-        skills: newTechnicien.skills
-      }
+        skills: newTechnicien.skills,
+        availability: newTechnicien.availability,
+      },
     });
   } catch (error) {
     next(error);

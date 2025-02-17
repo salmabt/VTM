@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const Technicien = require('../models/Technicien');
 const createError = require('../utils/appError');
 

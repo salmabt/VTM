@@ -1,12 +1,17 @@
+
+// controllers/voiturecontroller
 const Vehicule = require('../models/Voiture'); // Assure-toi du bon chemin vers le modèle
 
 // ➜ Créer un véhicule
 exports.createVehicule = async (req, res) => {
   try {
+    console.log('Données reçues :', req.body); // Vérifie les données reçues
     const vehicule = new Vehicule(req.body);
     await vehicule.save();
+    console.log('Véhicule créé :', vehicule); // Log de la voiture enregistrée
     res.status(201).json(vehicule);
   } catch (err) {
+    console.error('Erreur lors de l\'enregistrement du véhicule:', err);
     res.status(400).json({ error: err.message });
   }
 };
@@ -14,9 +19,12 @@ exports.createVehicule = async (req, res) => {
 // ➜ Obtenir tous les véhicules
 exports.getAllVehicules = async (req, res) => {
   try {
+    console.log('Récupération de tous les véhicules');
     const vehicules = await Vehicule.find();
+    console.log('Véhicules récupérés:', vehicules);
     res.json(vehicules);
   } catch (err) {
+    console.error('Erreur lors de la récupération des véhicules:', err);
     res.status(500).json({ error: err.message });
   }
 };

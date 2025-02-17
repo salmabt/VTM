@@ -10,16 +10,18 @@ router.get('/', async (req, res) => {
     const techniciens = await Technicien.find()
       .populate({
         path: 'user',
-        select: 'name email'
+        select: 'name email -_id' // Exclure l'ID utilisateur
       })
-      .populate('assignedTasks');
+      .lean(); // Convertir en objet JSON
 
-    res.json(techniciens);
+    res.json(techniciens.map(t => ({
+      ...t,
+      userName: t.user?.name || 'Non assigné'
+    })));
+    
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Erreur de chargement',
-      error: error.message 
-    });
+    console.error('Erreur techniciens:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 
