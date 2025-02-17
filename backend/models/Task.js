@@ -1,3 +1,4 @@
+// backend/models/Task.js
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
@@ -7,16 +8,26 @@ const taskSchema = new mongoose.Schema({
   location: { type: String, required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  technicien: { type: mongoose.Schema.Types.ObjectId, ref: 'Technicien', required: true },
-  vehicule: { type: mongoose.Schema.Types.ObjectId, ref: 'Voiture', required: true },
-  status: { type: String, enum: ['planifié', 'en cours', 'terminé'], default: 'planifié' },
+  technicien: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Technicien', 
+    required: true 
+  },
+  vehicule: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Voiture', 
+    required: true 
+  },
+  status: { 
+    type: String, 
+    enum: ['planifié', 'en cours', 'terminé'], 
+    default: 'planifié' 
+  },
   report: {
-    description: { type: String },
-    timeSpent: { type: Number }, // heures
-    issues: { type: String },
-    resolution: { type: String },
-    finalStatus: { type: String }
+    timeSpent: Number,
+    issues: String,
+    resolution: String
   }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Task', taskSchema);

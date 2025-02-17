@@ -1,63 +1,163 @@
 const Task = require('../models/Task');
+const Technicien = require('../models/Technicien');
+const Voiture = require('../models/Voiture');
 
-// Ajouter une tâche
 exports.createTask = async (req, res) => {
-    const { title, description, client, location, startDate, endDate, technicien, vehicule, status, report } = req.body;
-  
-    try {
-      const newTask = new Task({ title, description, client, location, startDate, endDate, technicien, vehicule, status, report });
-      await newTask.save();
-      res.status(201).json(newTask);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  };
-
-// Récupérer toutes les tâches
-exports.getAllTasks = async (req, res) => {
   try {
-    const tasks = await Task.find().populate('technicien').populate('vehicule');
-    res.json(tasks);
+    // Log de débogage pour les références
+    console.log('Validation des références:', {
+      technicien: req.body.technicien,
+      vehicule: req.body.vehicule
+    });
+
+    // Validation approfondie des références
+    const [technicien, vehicule] = await Promise.all([
+      Technicien.findById(req.body.technicien),
+      Voiture.findById(req.body.vehicule)
+    ]);
+
+    if (!technicien || !vehicule) {
+      console.error('Références manquantes:', { 
+        technicienExists: !!technicien, 
+        vehiculeExists: !!vehicule 
+      });
+      return res.status(400).json({
+        message: "Références invalides",
+        details: {
+          technicien: !!technicien,
+          vehicule: !!vehicule
+        }
+      });
+    }
+
+    // Création avec double vérification
+    const newTask = await Task.create(req.body);
+    const populated = await Task.findById(newTask._id)
+      .populate('technicien')
+      .populate('vehicule');
+
+    console.log('Tâche créée:', populated._id);
+    res.status(201).json(populated);
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Erreur critique création:', error);
+    res.status(400).json({
+      message: 'Échec de la création',
+      error: error.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    });
   }
 };
 
-// Récupérer une tâche par ID
+exports.getAllTasks = async (req, res) => {
+  try {
+    const tasks = await Task.find()
+      .populate({
+        path: 'technicien',
+        populate: { path: 'user' } // Peuplement imbriqué si nécessaire
+      })
+      .populate('vehicule');
+
+    console.log(`Tâches chargées: ${tasks.length} éléments`);
+    res.json(tasks);
+
+  } catch (error) {
+    console.error('Erreur de requête getAll:', error);
+    res.status(500).json({
+      message: 'Échec du chargement',
+      error: error.message,
+      requestId: req.requestId // Si utilisation de middleware de tracking
+    });
+  }
+};
+
 exports.getTaskById = async (req, res) => {
-    try {
-      const task = await Task.findById(req.params.id).populate('technicien').populate('vehicule');
-      if (!task) {
-        return res.status(404).json({ message: 'Tâche non trouvée' });
-      }
-      res.status(200).json(task);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
+  try {
+    const task = await Task.findById(req.params.id)
+      .populate('technicien')
+      .populate('vehicule');
 
-// Mettre à jour une tâche
+    if (!task) {
+      console.warn('Tâche introuvable ID:', req.params.id);
+      return res.status(404).json({ message: 'Ressource non trouvée' });
+    }
+
+    res.json(task);
+
+  } catch (error) {
+    console.error(`Erreur recherche tâche ${req.params.id}:`, error);
+    res.status(500).json({
+      message: 'Échec de la récupération',
+      error: error.message,
+      invalidId: mongoose.Types.ObjectId.isValid(req.params.id)
+    });
+  }
+};
+
 exports.updateTask = async (req, res) => {
-    try {
-      const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-      if (!task) {
-        return res.status(404).json({ message: 'Tâche non trouvée' });
-      }
-      res.status(200).json(task);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+  try {
+    // Vérification préalable des nouvelles références
+    if (req.body.technicien) {
+      const techExists = await Technicien.exists({ _id: req.body.technicien });
+      if (!techExists) throw new Error('Technicien référence invalide');
     }
-  };
 
-// Supprimer une tâche
-exports.deleteTask = async (req, res) => {
-    try {
-      const task = await Task.findByIdAndDelete(req.params.id);
-      if (!task) {
-        return res.status(404).json({ message: 'Tâche non trouvée' });
-      }
-      res.status(200).json({ message: 'Tâche supprimée avec succès' });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+    if (req.body.vehicule) {
+      const vehExists = await Voiture.exists({ _id: req.body.vehicule });
+      if (!vehExists) throw new Error('Véhicule référence invalide');
     }
-  };
+
+    const task = await Task.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { 
+        new: true, 
+        runValidators: true,
+        context: 'query' // Correction pour les validateurs Mongoose
+      }
+    )
+    .populate('technicien')
+    .populate('vehicule');
+
+    if (!task) {
+      console.warn('Tentative mise à jour ID inexistant:', req.params.id);
+      return res.status(404).json({ message: 'Tâche introuvable' });
+    }
+
+    console.log('Tâche mise à jour:', task._id);
+    res.json(task);
+
+  } catch (error) {
+    console.error('Erreur mise à jour:', error.message);
+    res.status(400).json({
+      message: 'Échec de la mise à jour',
+      error: error.message,
+      type: error.name // Ex: ValidationError
+    });
+  }
+};
+
+exports.deleteTask = async (req, res) => {
+  try {
+    const task = await Task.findByIdAndDelete(req.params.id);
+    
+    if (!task) {
+      console.warn('Tentative suppression ID inexistant:', req.params.id);
+      return res.status(404).json({ message: 'Tâche introuvable' });
+    }
+
+    console.log('Tâche supprimée:', task._id);
+    res.json({ 
+      message: 'Suppression réussie',
+      deletedId: task._id 
+    });
+
+  } catch (error) {
+    console.error('Erreur suppression:', error);
+    res.status(500).json({
+      message: 'Échec de la suppression',
+      error: error.message,
+      systemMessage: error.syscall // Détails système si disponible
+    });
+  }
+};

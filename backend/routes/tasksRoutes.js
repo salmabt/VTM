@@ -1,19 +1,18 @@
+// backend/routes/tasksRoutes.js
 const express = require('express');
 const router = express.Router();
-const tasksController = require('../controllers/taskscontroller');
+const {
+  createTask,
+  getAllTasks,
+  getTaskById,
+  updateTask,
+  deleteTask
+} = require('../controllers/taskscontroller');
 
-// Ajouter une tâche
-router.post('/', tasksController.createTask);
-
-// Récupérer toutes les tâches
-router.get('/', tasksController.getAllTasks);
-
-// Récupérer une tâche par ID
-router.get('/:id', tasksController.getTaskById);
-// Mettre à jour une tâche
-router.put('/:id', tasksController.updateTask);
-
-// Supprimer une tâche
-router.delete('/:id', tasksController.deleteTask);
+router.post('/', createTask);
+router.get('/', getAllTasks);
+router.get('/:id', getTaskById);
+router.put('/:id', updateTask);
+router.delete('/:id', deleteTask);
 
 module.exports = router;

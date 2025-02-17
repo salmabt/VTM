@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
+const Technicien = require('../models/Technicien');
 const PendingUser = require('../models/pendingUsers'); // Correction ici
 const createError = require('../utils/appError');
 const nodemailer = require('nodemailer');
@@ -135,30 +136,40 @@ exports.validateUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
 
-    // Trouver l'utilisateur en attente
     const pendingUser = await PendingUser.findById(userId);
     if (!pendingUser) {
       return next(new createError('Pending user not found!', 404));
     }
 
-    // Créer l'utilisateur dans la collection User
+    // Création de l'utilisateur validé
     const approvedUser = await User.create({
       name: pendingUser.name,
       email: pendingUser.email,
       password: pendingUser.password,
       role: pendingUser.role,
-      isApproved: true, // Marquer l'utilisateur comme approuvé
+      isApproved: true,
     });
 
-    // Supprimer l'utilisateur de PendingUser
+    // Création du profil technicien lié
+    const newTechnicien = await Technicien.create({
+      user: approvedUser._id, // Liaison avec l'utilisateur
+      email: approvedUser.email, // Copie de l'email
+      name: approvedUser.name, // Copie du nom
+      // Ajoutez ici les champs par défaut nécessaires
+      phone: 'Non spécifié',
+      skills: [],
+      availability: []
+    });
+
     await PendingUser.findByIdAndDelete(userId);
 
-    // Envoyer un e-mail de confirmation à l'utilisateur
+    // Mise à jour de l'e-mail de confirmation
     const userMailOptions = {
       from: process.env.GMAIL_USER,
       to: approvedUser.email,
       subject: 'Votre inscription a été approuvée',
-      html: `<p>Félicitations ! Vous pouvez maintenant vous connecter :</p>
+      html: `<p>Félicitations ! Votre profil technicien est maintenant actif :</p>
+             <p>Identifiant technicien : ${newTechnicien._id}</p>
              <a href="http://localhost:5173/login">Se connecter</a>`,
     };
 
@@ -166,7 +177,17 @@ exports.validateUser = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      message: 'User approved successfully.',
+      message: 'User approved and technician profile created',
+      user: {
+        _id: approvedUser._id,
+        name: approvedUser.name,
+        email: approvedUser.email
+      },
+      technicien: {
+        _id: newTechnicien._id,
+        phone: newTechnicien.phone,
+        skills: newTechnicien.skills
+      }
     });
   } catch (error) {
     next(error);
