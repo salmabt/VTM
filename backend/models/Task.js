@@ -10,7 +10,7 @@ const taskSchema = new mongoose.Schema({
   endDate: { type: Date, required: true },
   technicien: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Technicien', 
+    ref: 'User', 
     required: true 
   },
   vehicule: { 

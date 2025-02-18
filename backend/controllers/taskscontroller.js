@@ -1,5 +1,5 @@
 const Task = require('../models/Task');
-const Technicien = require('../models/Technicien');
+const Technicien = require('../models/users');
 const Voiture = require('../models/Voiture');
 
 exports.createTask = async (req, res) => {
@@ -52,10 +52,7 @@ exports.createTask = async (req, res) => {
 exports.getAllTasks = async (req, res) => {
   try {
     const tasks = await Task.find()
-      .populate({
-        path: 'technicien',
-        populate: { path: 'user' } // Peuplement imbriqué si nécessaire
-      })
+      .populate('technicien')
       .populate('vehicule');
 
     console.log(`Tâches chargées: ${tasks.length} éléments`);
