@@ -9,7 +9,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleRegister = async (values) => {
-    const validRoles = ['technicien'];// Liste des rôles valides
+    const validRoles = ['technicien']; // Liste des rôles valides
     const { role, password, passwordConfirm } = values;
 
     // Vérification du rôle
@@ -93,6 +93,33 @@ const Register = () => {
             >
               <Input size="large" placeholder="Enter your role" />
             </Form.Item>
+
+            <Form.Item
+              label="Phone"
+              name="phone"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your phone number!',
+                },
+              ]}
+            >
+              <Input size="large" placeholder="Enter your phone number" />
+            </Form.Item>
+
+            <Form.Item
+              label="Skills"
+              name="skills"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your skills!',
+                },
+              ]}
+            >
+              <Input size="large" placeholder="Enter your skills (comma-separated)" />
+            </Form.Item>
+
 
             <Form.Item
               label="Password"

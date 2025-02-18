@@ -25,8 +25,8 @@ body {
   width: 100%;
 }
 .auth-image{
-  width: 100%;
-  border-radius: 8px;
+  width: 10%;
+  border-radius: 2px;
 }
 .alert{
   margin-bottom:1.5rem;

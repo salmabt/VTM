@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { message } from 'antd';
-import { useAuth } from '../contexts/AuthContext';
 
 const useSignup = () => {
   const [error, setError] = useState(null); // État pour gérer les erreurs
@@ -16,7 +15,7 @@ const useSignup = () => {
     // Vérification du rôle
     const validRoles = ['technicien'];
     if (!validRoles.includes(values.role.toLowerCase().trim())) {
-      setError('Invalid role. Please choose a valid role:  technicien.');
+      setError('Invalid role. Please choose a valid role: technicien.');
       return { success: false, error: 'Invalid role. Please choose a valid role: technicien.' };
     }
 
@@ -30,7 +29,7 @@ const useSignup = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(values), // Envoyer toutes les valeurs, y compris phone, skills, availability
       });
 
       const data = await res.json();
