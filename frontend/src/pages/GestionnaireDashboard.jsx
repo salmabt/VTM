@@ -70,8 +70,8 @@ const GestionnaireDashboard = () => {
       <div>
         {techniciens.map(tech => (
           <div key={tech._id}>
-            <h3>{tech.user.name}</h3>
-            <p>Compétences: {tech.skills.join(', ')}</p>
+            <h3>{tech.name}</h3>
+            <p>Compétences: {tech.skills?.join(', ') || 'Aucune'}</p>
           </div>
         ))}
       </div>
@@ -299,23 +299,28 @@ const GestionnaireDashboard = () => {
                       value={newTask.location}
                       onChange={(e) => setNewTask({...newTask, location: e.target.value})}
                     />
-                    <RangePicker
-                      showTime
-                      format="DD/MM/YYYY HH:mm"
-                      onChange={(dates) => setNewTask({
-                        ...newTask,
-                        startDate: dates?.[0],
-                        endDate: dates?.[1]
-                      })}
-                    />
+                                      <RangePicker
+                            showTime
+                            format="DD/MM/YYYY HH:mm"
+                            onChange={(dates) => setNewTask({
+                              ...newTask,
+                              startDate: dates?.[0]?.toISOString(),
+                              endDate: dates?.[1]?.toISOString()
+                            })}
+                            disabledDate={(current) => {
+                              // Interdit les dates avant le 1er janvier 2025 et après le 30 décembre 2025
+                              return current && (current < moment('2025-01-01', 'YYYY-MM-DD') || current > moment('2025-12-30', 'YYYY-MM-DD'));
+                            }}
+                          />
+
+
       
                     <Select
                       placeholder="Sélectionner un technicien *"
                       loading={!techniciens.length}
+                      // Modifiez les options des techniciens :
                       options={techniciens.map(t => ({
-                        label: t.user 
-                          ? `${t.user.name}${t.skills?.length ? ` (${t.skills.join(', ')})` : ''}` 
-                          : 'Technicien sans profil',
+                        label: `${t.name}${t.skills?.length ? ` (${t.skills.join(', ')})` : ''}`,
                         value: t._id
                       }))}
                       onChange={value => setNewTask({...newTask, technicien: value})}
@@ -360,7 +365,7 @@ const GestionnaireDashboard = () => {
                                 task.status === 'en cours' ? 'orange' : 'green'
                               }>{task.status}</Tag></Text><br />
                               <Text>Période: {moment(task.startDate).format('DD/MM HH:mm')} - {moment(task.endDate).format('DD/MM HH:mm')}</Text><br />
-                              <Text>Technicien: {task.technicien?.user?.name || 'Non assigné'}</Text><br />
+                              <Text>Technicien: {task.technicien?.name || 'Non assigné'}</Text><br />
                               <Text>Véhicule: {task.vehicule?.model} ({task.vehicule?.registration})</Text>
                               {task.report && (
                                 <div style={{ marginTop: 10, padding: 10, background: '#f6f6f6', borderRadius: 4 }}>
