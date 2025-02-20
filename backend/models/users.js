@@ -36,6 +36,11 @@ const UserSchema = new mongoose.Schema({
     type: [String], // Tableau de chaînes pour stocker plusieurs compétences
     required: false // Défini ici
   },
+  status: {
+    type: String,
+    enum: ['actif', 'inactif'],
+    default: 'actif',
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 

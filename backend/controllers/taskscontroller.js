@@ -52,7 +52,7 @@ exports.createTask = async (req, res) => {
 exports.getAllTasks = async (req, res) => {
   try {
     const tasks = await Task.find()
-      .populate('technicien')
+      .populate('technicien', 'name role')
       .populate('vehicule');
 
     console.log(`Tâches chargées: ${tasks.length} éléments`);
