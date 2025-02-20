@@ -228,26 +228,38 @@ const GestionnaireDashboard = () => {
           ) : (
             <>
               {selectedMenu === '1' && (
-                <Card title="Calendrier des interventions" bordered={false}>
-                  <Calendar
-                    localizer={localizer}
-                    events={tasks.map(task => ({
-                      title: task.title,
-                      start: new Date(task.startDate),
-                      end: new Date(task.endDate),
-                      allDay: false,
-                      resource: task
-                    }))}
-                    startAccessor="start"
-                    endAccessor="end"
-                    style={{ height: 600 }}
-                    messages={{
-                      today: "Aujourd'hui",
-                      previous: 'Précédent',
-                      next: 'Suivant'
-                    }}
-                  />
-                </Card>
+            <Card title="Calendrier des interventions" bordered={false}>
+          <Calendar
+  localizer={localizer}
+  events={tasks.map(task => ({
+    title: task.title,
+    start: new Date(task.startDate),
+    end: new Date(task.endDate),
+    allDay: false,
+    resource: task
+  }))}
+  startAccessor="start"
+  endAccessor="end"
+  style={{ height: 600 }}
+  views={['month', 'week', 'day', 'agenda']}
+  messages={{
+    today: "Aujourd'hui",
+    previous: 'Précédent',
+    next: 'Suivant',
+    month: 'Mois',
+    week: 'Semaine',
+    day: 'Jour',
+    agenda: 'Agenda',
+  }}
+  formats={{
+    agendaHeaderFormat: ({ start, end }) =>
+      `${moment(start).format("DD/MM/YYYY")} – ${moment(end).format("DD/MM/YYYY")}`
+  }}
+  
+/>
+
+          </Card>
+          
               )}
 
               {selectedMenu === '2' && (
@@ -309,7 +321,7 @@ const GestionnaireDashboard = () => {
                             })}
                             disabledDate={(current) => {
                               // Interdit les dates avant le 1er janvier 2025 et après le 30 décembre 2025
-                              return current && (current < moment('2025-01-01', 'YYYY-MM-DD') || current > moment('2025-12-30', 'YYYY-MM-DD'));
+                              //return current && (current < moment('2025-01-01', 'YYYY-MM-DD') || current > moment('2025-12-30', 'YYYY-MM-DD'));
                             }}
                           />
 

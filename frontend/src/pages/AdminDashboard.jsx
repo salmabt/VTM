@@ -47,6 +47,7 @@ const AdminDashboard = () => {
       setLoading(true);
       try {
         const response = await fetch('/api/users');
+        if (!response.ok) throw new Error(`Erreur: ${response.status}`);
         const data = await response.json();
         setUsers(data);
         setFilteredUsers(data);
@@ -84,6 +85,7 @@ const AdminDashboard = () => {
   };
 
   const handleEditTechnicien = (technicien) => {
+    console.log("Modification du technicien :", technicien);
     setEditTechnicien(technicien);
     setNewTechnicien({
       name: technicien.name,
@@ -94,22 +96,33 @@ const AdminDashboard = () => {
   };
 
   const handleUpdateTechnicien = async () => {
+    console.log('Technicien en cours de mise à jour :', editTechnicien);
+    console.log('Données envoyées :', newTechnicien);
+  
+    if (!editTechnicien || !editTechnicien._id) {
+      message.error('Impossible de mettre à jour : Technicien non valide.');
+      return;
+    }
+  
     try {
       setLoading(true);
-      const { data } = await techniciensApi.updateTechnicien(editTechnicien.id, newTechnicien);
-      setTechniciens(techniciens.map(tech => tech.id === editTechnicien.id ? data : tech));
+      const { data } = await techniciensApi.updateTechnicien(editTechnicien._id, newTechnicien);
+      setTechniciens(techniciens.map(tech => tech._id === editTechnicien._id ? data : tech));
       setEditTechnicien(null);
       setNewTechnicien({ name: '', skills: '', status: 'actif' });
       setIsModalVisible(false);
       message.success('Technicien mis à jour avec succès');
     } catch (error) {
+      console.error('Erreur API :', error);
       message.error('Erreur lors de la mise à jour du technicien');
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleArchiveTechnicien = async (technicienId) => {
+    console.log("Archivage du technicien ID :", technicienId);
     try {
       setLoading(true);
       await techniciensApi.archiveTechnicien(technicienId);
@@ -121,6 +134,7 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+  
   const handleViewTechnicien = (technicien) => {
     const userDetails = users.find(user => user.name === technicien.name);
     setSelectedTechnicienDetails({ ...technicien, email: userDetails?.email });
@@ -183,10 +197,10 @@ const AdminDashboard = () => {
         </Button>
       </div>
       <List
-        dataSource={techniciens.filter(tech =>
+        dataSource={techniciens.length ? techniciens.filter(tech =>
           tech.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           tech.skills.toLowerCase().includes(searchTerm.toLowerCase())
-        )}
+        ) : []}
         renderItem={tech => (
           <List.Item
             actions={[
@@ -194,7 +208,7 @@ const AdminDashboard = () => {
               <Button icon={<EditOutlined />} onClick={() => handleEditTechnicien(tech)} />,
               <Popconfirm
                 title="Êtes-vous sûr de vouloir archiver ce technicien ?"
-                onConfirm={() => handleArchiveTechnicien(tech.id)}
+                onConfirm={() => handleArchiveTechnicien(tech._id)}
                 okText="Oui"
                 cancelText="Non"
               >

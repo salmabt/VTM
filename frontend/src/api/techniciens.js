@@ -1,4 +1,3 @@
-// src/api/techniciens.js
 import axios from 'axios';
 
 const api = axios.create({
@@ -10,18 +9,19 @@ const api = axios.create({
 });
 
 export default {
-  // Récupérer tous les techniciens
   getAllTechniciens: () => api.get('/techniciens', { timeout: 3000 }),
-
-  // Mettre à jour les compétences d'un technicien
   updateSkills: (technicienId, skills) => 
     api.patch(`/techniciens/${technicienId}/skills`, { skills }),
-
-  // Récupérer les tâches assignées à un technicien
   getAssignedTasks: (technicienId) => 
     api.get(`/techniciens/${technicienId}/tasks`),
-
-  // Ajouter/Supprimer disponibilité
   updateAvailability: (technicienId, availability) =>
-    api.put(`/techniciens/${technicienId}/availability`, { availability })
+    api.put(`/techniciens/${technicienId}/availability`, { availability }),
+
+  // ✅ Ajout de la mise à jour d'un technicien
+  updateTechnicien: (technicienId, technicienData) => 
+    api.put(`/techniciens/${technicienId}`, technicienData),
+
+  archiveTechnicien: (technicienId) => 
+    api.put(`/techniciens/${technicienId}/archive`),
+
 };
