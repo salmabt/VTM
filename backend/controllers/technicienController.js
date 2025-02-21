@@ -47,7 +47,7 @@ exports.createTechnicien = async (req, res, next) => {
 exports.archiveTechnicien = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Mettre à jour le technicien pour le marquer comme archivé
     const archivedTechnicien = await Technicien.findByIdAndUpdate(id, { archived: true }, { new: true });
 
@@ -58,6 +58,6 @@ exports.archiveTechnicien = async (req, res) => {
     res.json(archivedTechnicien);
   } catch (error) {
     console.error("Erreur lors de l'archivage :", error);
-    res.status(500).json({ message: "Erreur serveur", error });
-  }
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
 };

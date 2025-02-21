@@ -36,11 +36,15 @@ const UserSchema = new mongoose.Schema({
     type: [String], // Tableau de chaînes pour stocker plusieurs compétences
     required: false // Défini ici
   },
-  status: {
+  /*status: {
     type: String,
     enum: ['actif', 'inactif'],
     default: 'actif',
-  },
+  },*/
+  archived: {
+    type: Boolean,
+    default: false, // Par défaut, le technicien n'est pas archivé
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 
