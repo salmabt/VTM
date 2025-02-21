@@ -7,7 +7,6 @@ import techniciensApi from '../api/techniciens';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
-const { Option } = Select;
 
 const AdminDashboard = () => {
   const { userData, logout } = useAuth();
@@ -19,7 +18,7 @@ const AdminDashboard = () => {
   const [newTechnicien, setNewTechnicien] = useState({
     name: '',
     skills: '',
-    status: 'actif',
+    
   });
   const [editTechnicien, setEditTechnicien] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -32,6 +31,7 @@ const AdminDashboard = () => {
       try {
         const response = await techniciensApi.getAllTechniciens();
         setTechniciens(response.data);
+        setFilteredUsers(response.data);
       } catch (error) {
         console.error('Erreur de chargement des techniciens', error);
         message.error('Erreur de chargement des techniciens');
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     const loadUsers = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/users');
+        const response = await fetch('/api/techniciens');
         if (!response.ok) throw new Error(`Erreur: ${response.status}`);
         const data = await response.json();
         setUsers(data);
@@ -62,11 +62,15 @@ const AdminDashboard = () => {
   }, []);
 
   const handleSearchUsers = (value) => {
-    const filtered = users.filter(user =>
-      user.name.toLowerCase().includes(value.toLowerCase()) ||
-      user.email.toLowerCase().includes(value.toLowerCase())
-    );
+    const searchValue = value.trim().toLowerCase();
+    if (!searchValue) {
+      setFilteredUsers(techniciens); // Si l'entrée est vide, afficher tous les utilisateurs
+    } else {
+      const filtered = techniciens.filter(user =>
+        user.name.toLowerCase().startsWith(searchValue) // Rechercher par début du nom
+      );
     setFilteredUsers(filtered);
+    }
   };
 
   const handleAddTechnicien = async () => {
@@ -74,7 +78,7 @@ const AdminDashboard = () => {
       setLoading(true);
       const { data } = await techniciensApi.createTechnicien(newTechnicien);
       setTechniciens([...techniciens, data]);
-      setNewTechnicien({ name: '', skills: '', status: 'actif' });
+      setNewTechnicien({ name: '', skills: '' });
       setIsModalVisible(false);
       message.success('Technicien ajouté avec succès');
     } catch (error) {
@@ -89,8 +93,10 @@ const AdminDashboard = () => {
     setEditTechnicien(technicien);
     setNewTechnicien({
       name: technicien.name,
+      phone: technicien.phone,
+      email: technicien.email,
       skills: technicien.skills,
-      status: technicien.status,
+      
     });
     setIsModalVisible(true);
   };
@@ -109,7 +115,6 @@ const AdminDashboard = () => {
       const { data } = await techniciensApi.updateTechnicien(editTechnicien._id, newTechnicien);
       setTechniciens(techniciens.map(tech => tech._id === editTechnicien._id ? data : tech));
       setEditTechnicien(null);
-      setNewTechnicien({ name: '', skills: '', status: 'actif' });
       setIsModalVisible(false);
       message.success('Technicien mis à jour avec succès');
     } catch (error) {
@@ -189,18 +194,16 @@ const AdminDashboard = () => {
         <Input
           placeholder="Rechercher un technicien"
           prefix={<SearchOutlined />}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            handleSearchUsers(e.target.value);
+          }}
           style={{ flex: 1 }}
         />
-        <Button type="primary" onClick={() => setIsModalVisible(true)}>
-          Ajouter un Technicien
-        </Button>
+        
       </div>
       <List
-        dataSource={techniciens.length ? techniciens.filter(tech =>
-          tech.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tech.skills.toLowerCase().includes(searchTerm.toLowerCase())
-        ) : []}
+        dataSource={filteredUsers} // Utilise filteredUsers pour l'affichage
         renderItem={tech => (
           <List.Item
             actions={[
@@ -218,7 +221,7 @@ const AdminDashboard = () => {
           >
             <List.Item.Meta
               title={tech.name}
-              description={`Compétences: ${tech.skills} | Statut: ${tech.status}`}
+              description={`Compétences: ${tech.skills} `}
             />
           </List.Item>
         )}
@@ -242,7 +245,7 @@ const AdminDashboard = () => {
         onCancel={() => {
           setIsModalVisible(false);
           setEditTechnicien(null);
-          setNewTechnicien({ name: '', skills: '', status: 'actif' });
+          setNewTechnicien({ name: '', skills: '',phone: '',email:'' });
         }}
         onOk={editTechnicien ? handleUpdateTechnicien : handleAddTechnicien}
       >
@@ -252,18 +255,21 @@ const AdminDashboard = () => {
           onChange={(e) => setNewTechnicien({ ...newTechnicien, name: e.target.value })}
         />
         <Input
+          placeholder="Telephone"
+          value={newTechnicien.phone}
+          onChange={(e) => setNewTechnicien({ ...newTechnicien, phone: e.target.value })}
+        />
+        <Input
+          placeholder="Email"
+          value={newTechnicien.email}
+          onChange={(e) => setNewTechnicien({ ...newTechnicien, email: e.target.value })}
+        />
+        <Input
           placeholder="Compétences"
           value={newTechnicien.skills}
           onChange={(e) => setNewTechnicien({ ...newTechnicien, skills: e.target.value })}
         />
-        <Select
-          value={newTechnicien.status}
-          onChange={(value) => setNewTechnicien({ ...newTechnicien, status: value })}
-          style={{ width: '100%', marginTop: 16 }}
-        >
-          <Option value="actif">Actif</Option>
-          <Option value="inactif">Inactif</Option>
-        </Select>
+       
       </Modal>
       <Modal
     title="Détails du Technicien"
@@ -274,9 +280,9 @@ const AdminDashboard = () => {
     {selectedTechnicienDetails && (
       <div>
         <p><strong>Nom:</strong> {selectedTechnicienDetails.name}</p>
-        <p><strong>Email:</strong> {selectedTechnicienDetails.email || 'Non disponible'}</p>
+        <p><strong>Email:</strong> {selectedTechnicienDetails.email}</p>
         <p><strong>Compétences:</strong> {selectedTechnicienDetails.skills}</p>
-        <p><strong>Statut:</strong> {selectedTechnicienDetails.status}</p>
+        <p><strong>Telephone:</strong> {selectedTechnicienDetails.phone}</p>
       </div>
     )}
   </Modal>

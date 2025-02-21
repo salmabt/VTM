@@ -15,6 +15,8 @@ import vehiculesApi from '../api/vehicules';
 import techniciensApi from '../api/techniciens';
 import tasksApi from '../api/tasks';
 
+import TaskModal from '../components/TaskModal';
+
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -51,6 +53,12 @@ const GestionnaireDashboard = () => {
     vehicule: '',
     status: 'planifié'
   });
+
+  // Ajoute ces états pour le modal et la date sélectionnée
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+
+
   const TechnicienList = () => {
     const [techniciens, setTechniciens] = useState([]);
   
@@ -230,37 +238,52 @@ const GestionnaireDashboard = () => {
               {selectedMenu === '1' && (
             <Card title="Calendrier des interventions" bordered={false}>
           <Calendar
-  localizer={localizer}
-  events={tasks.map(task => ({
-    title: task.title,
-    start: new Date(task.startDate),
-    end: new Date(task.endDate),
-    allDay: false,
-    resource: task
-  }))}
-  startAccessor="start"
-  endAccessor="end"
-  style={{ height: 600 }}
-  views={['month', 'week', 'day', 'agenda']}
-  messages={{
-    today: "Aujourd'hui",
-    previous: 'Précédent',
-    next: 'Suivant',
-    month: 'Mois',
-    week: 'Semaine',
-    day: 'Jour',
-    agenda: 'Agenda',
-  }}
-  formats={{
-    agendaHeaderFormat: ({ start, end }) =>
-      `${moment(start).format("DD/MM/YYYY")} – ${moment(end).format("DD/MM/YYYY")}`
-  }}
-  
-/>
-
+            localizer={localizer}
+            events={tasks.map(task => ({
+              title: task.title,
+              start: new Date(task.startDate),
+              end: new Date(task.endDate),
+              allDay: false,
+              resource: task
+            }))}
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: 600 }}
+            views={['month', 'week', 'day', 'agenda']}
+            messages={{
+              today: "Aujourd'hui",
+              previous: 'Précédent',
+              next: 'Suivant',
+              month: 'Mois',
+              week: 'Semaine',
+              day: 'Jour',
+              agenda: 'Agenda',
+            }}
+            formats={{
+              agendaHeaderFormat: ({ start, end }) =>
+                `${moment(start).format("DD/MM/YYYY")} – ${moment(end).format("DD/MM/YYYY")}`
+            }}
+            selectable
+             onSelectSlot={(slotInfo) => {
+                setSelectedDate(slotInfo.start);
+                setNewTask({ ...newTask, startDate: slotInfo.start }); 
+                setIsModalVisible(true);
+            }}
+          />
           </Card>
           
-              )}
+          )}
+
+          {/* Affichage du modal pour ajouter une tâche */}
+            <TaskModal 
+              isModalVisible={isModalVisible}
+              setIsModalVisible={setIsModalVisible}
+              newTask={newTask}
+              setNewTask={setNewTask}
+              handleCreateTask={handleCreateTask}
+              techniciens={techniciens}
+              vehiculesList={vehiculesList}
+            />
 
               {selectedMenu === '2' && (
                 <Card title="Rapports d'intervention" bordered={false}>
