@@ -1,11 +1,12 @@
+//frontend/pages//gestionnairedasboard
 import React, { useState, useEffect } from 'react';
-import { 
-  Layout, Menu, Input, DatePicker, Typography, Button, Card, List, 
-  Select, message, Spin, Tag 
+import {
+  Layout, Menu, Input, DatePicker, Typography, Button, Card, List,
+  Select, message, Spin, Tag
 } from 'antd';
-import { 
-  CalendarOutlined, FileTextOutlined, 
-  UnorderedListOutlined, LogoutOutlined, CarOutlined 
+import {
+  CalendarOutlined, FileTextOutlined,
+  UnorderedListOutlined, LogoutOutlined, CarOutlined
 } from '@ant-design/icons';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -14,24 +15,20 @@ import { useAuth } from '../contexts/AuthContext';
 import vehiculesApi from '../api/vehicules';
 import techniciensApi from '../api/techniciens';
 import tasksApi from '../api/tasks';
-
 import TaskModal from '../components/TaskModal';
-
+import TechniciensSection from '../components/TechniciensSection';
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 const localizer = momentLocalizer(moment);
-
 moment.locale('fr');
-
 const GestionnaireDashboard = () => {
   const { userData, logout } = useAuth();
   const [selectedMenu, setSelectedMenu] = useState('1');
   const [loading, setLoading] = useState(false);
   const [techniciens, setTechniciens] = useState([]);
   const [vehiculesList, setVehiculesList] = useState([]);
-
   // États pour les véhicules
   const [vehicules, setVehicules] = useState([]);
   const [newVehicule, setNewVehicule] = useState({
@@ -39,7 +36,6 @@ const GestionnaireDashboard = () => {
     model: '',
     status: 'disponible'
   });
-  
   // États pour les tâches
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({
@@ -53,15 +49,11 @@ const GestionnaireDashboard = () => {
     vehicule: '',
     status: 'planifié'
   });
-
   // Ajoute ces états pour le modal et la date sélectionnée
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
-
-
   const TechnicienList = () => {
     const [techniciens, setTechniciens] = useState([]);
-  
     useEffect(() => {
       const loadData = async () => {
         try {
@@ -73,7 +65,6 @@ const GestionnaireDashboard = () => {
       };
       loadData();
     }, []);
-  
     return (
       <div>
         {techniciens.map(tech => (
@@ -85,7 +76,6 @@ const GestionnaireDashboard = () => {
       </div>
     );
   };
-
   // Chargement des données initiales
   useEffect(() => {
     const loadAllData = async () => {
@@ -96,7 +86,6 @@ const GestionnaireDashboard = () => {
           techniciensApi.getAllTechniciens(),
           vehiculesApi.getAllVehicules()
         ]);
-
         setTasks(tasksRes.data);
         setTechniciens(techRes.data);
         setVehiculesList(vehRes.data);
@@ -110,7 +99,6 @@ const GestionnaireDashboard = () => {
     };
     loadAllData();
   }, []);
-
   // Chargement des données selon le menu
   useEffect(() => {
     const loadMenuData = async () => {
@@ -134,7 +122,6 @@ const GestionnaireDashboard = () => {
     };
     loadMenuData();
   }, [selectedMenu]);
-
   // Gestion véhicules
   const handleAddVehicule = async () => {
     try {
@@ -146,7 +133,6 @@ const GestionnaireDashboard = () => {
       message.error(error.response?.data?.message || "Erreur lors de l'ajout");
     }
   };
-
   const handleDeleteVehicule = async (id) => {
     try {
       await vehiculesApi.deleteVehicule(id);
@@ -156,20 +142,17 @@ const GestionnaireDashboard = () => {
       message.error(error.response?.data?.message || 'Erreur de suppression');
     }
   };
-
   // Gestion tâches
   const handleCreateTask = async () => {
     try {
       if (!newTask.startDate || !newTask.endDate) {
         return message.error('Sélectionnez une plage horaire');
       }
-
       const taskData = {
         ...newTask,
         startDate: moment(newTask.startDate).toISOString(),
         endDate: moment(newTask.endDate).toISOString()
       };
-      
       const { data } = await tasksApi.createTask(taskData);
       setTasks([...tasks, data]);
       setNewTask({
@@ -189,7 +172,6 @@ const GestionnaireDashboard = () => {
       message.error(error.response?.data?.message || "Erreur de création");
     }
   };
-
   const handleDeleteTask = async (id) => {
     try {
       await tasksApi.deleteTask(id);
@@ -199,118 +181,137 @@ const GestionnaireDashboard = () => {
       message.error(error.response?.data?.message || 'Erreur de suppression');
     }
   };
-
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
     { key: '2', icon: <FileTextOutlined />, label: 'Rapports' },
     { key: '3', icon: <UnorderedListOutlined />, label: 'Tâches' },
     { key: '4', icon: <CarOutlined />, label: 'Voitures' },
   ];
-
-  return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible theme="light">
-        <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-          <Title level={4} style={{ margin: 0 }}>VTM Dashboard</Title>
-        </div>
-        <Menu
-          theme="light"
-          mode="inline"
-          selectedKeys={[selectedMenu]}
-          items={menuItems}
-          onSelect={({ key }) => setSelectedMenu(key)}
-        />
-      </Sider>
-
-      <Layout>
-        <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Text strong>Connecté en tant que : {userData?.name}</Text>
+  const eventStyleGetter = (event) => {
+    return {
+      style: {
+        backgroundColor: '#f0f0f', // Couleur de fond
+        border: '1px solid #ccc', // Bordure
+        borderRadius: '4px', // Coins arrondis
+        padding: '4px', // Espacement interne
+      },
+    };
+  };
+  // Composant personnalisé pour afficher les événements
+  const CustomEvent = ({ event }) => (
+    <div>
+      <strong>{event.title}</strong>
+      <div>{event.resource.technicien?.name || 'Non assigné'}</div>
+    </div>
+    );
+    return (
+      <Layout style={{ minHeight: '100vh' }}>
+        <Sider collapsible theme="light">
+          <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
+            <Title level={4} style={{ margin: 0 }}>VTM Dashboard</Title>
           </div>
-          <Button icon={<LogoutOutlined />} onClick={logout}>Déconnexion</Button>
-        </Header>
-
-        <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
-          {loading ? (
-            <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
-          ) : (
-            <>
-              {selectedMenu === '1' && (
-            <Card title="Calendrier des interventions" bordered={false}>
-          <Calendar
-            localizer={localizer}
-            events={tasks.map(task => ({
-              title: task.title,
-              start: new Date(task.startDate),
-              end: new Date(task.endDate),
-              allDay: false,
-              resource: task
-            }))}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: 600 }}
-            views={['month', 'week', 'day', 'agenda']}
-            messages={{
-              today: "Aujourd'hui",
-              previous: 'Précédent',
-              next: 'Suivant',
-              month: 'Mois',
-              week: 'Semaine',
-              day: 'Jour',
-              agenda: 'Agenda',
-            }}
-            formats={{
-              agendaHeaderFormat: ({ start, end }) =>
-                `${moment(start).format("DD/MM/YYYY")} – ${moment(end).format("DD/MM/YYYY")}`
-            }}
-            selectable
-             onSelectSlot={(slotInfo) => {
-                setSelectedDate(slotInfo.start);
-                setNewTask({ ...newTask, startDate: slotInfo.start }); 
-                setIsModalVisible(true);
-            }}
+          <Menu
+            theme="light"
+            mode="inline"
+            selectedKeys={[selectedMenu]}
+            items={menuItems}
+            onSelect={({ key }) => setSelectedMenu(key)}
           />
-          </Card>
-          
-          )}
-
-          {/* Affichage du modal pour ajouter une tâche */}
-            <TaskModal 
-              isModalVisible={isModalVisible}
-              setIsModalVisible={setIsModalVisible}
-              newTask={newTask}
-              setNewTask={setNewTask}
-              handleCreateTask={handleCreateTask}
-              techniciens={techniciens}
-              vehiculesList={vehiculesList}
+        </Sider>
+        <Layout>
+          <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <Text strong>Connecté en tant que : {userData?.name}</Text>
+            </div>
+            <Button icon={<LogoutOutlined />} onClick={logout}>Déconnexion</Button>
+          </Header>
+          <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
+            {loading ? (
+              <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
+            ) : (
+              <>
+                {selectedMenu === '1' && (
+  <Card title="Calendrier des interventions" bordered={false}>
+    <TechniciensSection 
+      techniciens={techniciens}
+      tasks={tasks}
+      vehicules={vehiculesList}
+    />
+    
+    <Calendar
+      localizer={localizer}
+      events={tasks.map(task => ({
+        title: `${task.title} - ${task.technicien?.name || 'Non assigné'}`,
+        start: new Date(task.startDate),
+        end: new Date(task.endDate),
+        allDay: false,
+        resource: task
+      }))}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: 600 }}
+              views={['month', 'week', 'day', 'agenda']}
+              messages={{
+                today: "Aujourd'hui",
+                previous: 'Précédent',
+                next: 'Suivant',
+                month: 'Mois',
+                week: 'Semaine',
+                day: 'Jour',
+                agenda: 'Agenda',
+              }}
+              formats={{
+                agendaHeaderFormat: ({ start, end }) =>
+                  `${moment(start).format("DD/MM/YYYY")} – ${moment(end).format("DD/MM/YYYY")}`
+              }}
+              selectable
+               onSelectSlot={(slotInfo) => {
+                  setSelectedDate(slotInfo.start);
+                  setNewTask({ ...newTask, startDate: slotInfo.start });
+                  setIsModalVisible(true);
+              }}
+              eventPropGetter={eventStyleGetter} // Appliquer le style personnalisé
+              components={{
+                event: CustomEvent // Utiliser le composant personnalisé pour les événements
+              }}
             />
-
-              {selectedMenu === '2' && (
-                <Card title="Rapports d'intervention" bordered={false}>
-                  <List
-                    dataSource={tasks.filter(t => t.report)}
-                    renderItem={task => (
-                      <List.Item>
-                        <List.Item.Meta
-                          title={task.title}
-                          description={
-                            <div>
-                              <Text strong>Technicien: </Text>
-                              <Text>{task.technicien?.user?.name || 'Non assigné'}</Text><br />
-                              <Text strong>Durée: </Text>
-                              <Text>{task.report?.timeSpent}h</Text><br />
-                              <Text strong>Résolution: </Text>
-                              <Text>{task.report?.resolution}</Text>
-                            </div>
-                          }
-                        />
-                      </List.Item>
-                    )}
-                  />
-                </Card>
-              )}
-
-              {selectedMenu === '3' && (
+            </Card>
+            )}
+            {/* Affichage du modal pour ajouter une tâche */}
+              <TaskModal
+                isModalVisible={isModalVisible}
+                setIsModalVisible={setIsModalVisible}
+                newTask={newTask}
+                setNewTask={setNewTask}
+                handleCreateTask={handleCreateTask}
+                techniciens={techniciens}
+                vehiculesList={vehiculesList}
+              />
+                {selectedMenu === '2' && (
+                  <Card title="Rapports d'intervention" bordered={false}>
+                    <List
+                      dataSource={tasks.filter(t => t.report)}
+                      renderItem={task => (
+                        <List.Item>
+                          <List.Item.Meta
+                            title={task.title}
+                            description={
+                              <div>
+                                <Text strong>Technicien: </Text>
+                                <Text>{task.technicien?.user?.name || 'Non assigné'}</Text><br />
+                                <Text strong>Durée: </Text>
+                                <Text>{task.report?.timeSpent}h</Text><br />
+                                <Text strong>Résolution: </Text>
+                                <Text>{task.report?.resolution}</Text>
+                              </div>
+                            }
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  </Card>
+                )}
+                {selectedMenu === '3' && (
                 <Card title="Gestion des tâches" bordered={false}>
                   <div style={{ marginBottom: 16, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
                     <Input
@@ -347,9 +348,6 @@ const GestionnaireDashboard = () => {
                               //return current && (current < moment('2025-01-01', 'YYYY-MM-DD') || current > moment('2025-12-30', 'YYYY-MM-DD'));
                             }}
                           />
-
-
-      
                     <Select
                       placeholder="Sélectionner un technicien *"
                       loading={!techniciens.length}
@@ -370,15 +368,14 @@ const GestionnaireDashboard = () => {
                         </Option>
                       ))}
                     </Select>
-                    <Button 
-                      type="primary" 
+                    <Button
+                      type="primary"
                       onClick={handleCreateTask}
                       disabled={!newTask.title || !newTask.description || !newTask.technicien}
                     >
                       Créer Tâche
                     </Button>
                   </div>
-
                   <List
                     dataSource={tasks}
                     renderItem={task => (
@@ -396,14 +393,14 @@ const GestionnaireDashboard = () => {
                               <Text>Client: {task.client}</Text><br />
                               <Text>Localisation: {task.location}</Text><br />
                               <Text>Statut: <Tag color={
-                                task.status === 'planifié' ? 'blue' : 
+                                task.status === 'planifié' ? 'blue' :
                                 task.status === 'en cours' ? 'orange' : 'green'
                               }>{task.status}</Tag></Text><br />
                               <Text>Période: {moment(task.startDate).format('DD/MM HH:mm')} - {moment(task.endDate).format('DD/MM HH:mm')}</Text><br />
                               <Text>Technicien: {task.technicien?.name || 'Non assigné'}</Text><br />
                               <Text>Véhicule: {task.vehicule?.model} ({task.vehicule?.registration})</Text>
                               {task.report && (
-                                <div style={{ marginTop: 10, padding: 10, background: '#f6f6f6', borderRadius: 4 }}>
+                                <div style={{ marginTop: 10, padding: 10, background: '#F6F6F6', borderRadius: 4 }}>
                                   <Text strong>Rapport d'intervention:</Text><br />
                                   <Text>Temps passé: {task.report.timeSpent}h</Text><br />
                                   <Text>Problèmes: {task.report.issues}</Text><br />
@@ -418,7 +415,6 @@ const GestionnaireDashboard = () => {
                   />
                 </Card>
               )}
-
               {selectedMenu === '4' && (
                 <Card title="Gestion des véhicules" bordered={false}>
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -443,8 +439,8 @@ const GestionnaireDashboard = () => {
                       <Option value="en entretien">En entretien</Option>
                       <Option value="réservé">Réservé</Option>
                     </Select>
-                    <Button 
-                      type="primary" 
+                    <Button
+                      type="primary"
                       onClick={handleAddVehicule}
                       disabled={!newVehicule.registration || !newVehicule.model}
                       style={{ minWidth: 150 }}
@@ -469,7 +465,7 @@ const GestionnaireDashboard = () => {
                             </Text>
                           }
                           description={
-                            <Text 
+                            <Text
                               type={vehicule.status === 'disponible' ? 'success' : 'warning'}
                             >
                               Statut: {vehicule.status}
@@ -488,5 +484,4 @@ const GestionnaireDashboard = () => {
     </Layout>
   );
 };
-
 export default GestionnaireDashboard;

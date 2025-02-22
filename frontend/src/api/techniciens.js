@@ -1,3 +1,4 @@
+//frontend/src/api/technicien
 import axios from 'axios';
 // Création d'une instance d'axios avec la baseURL et les headers
 const api = axios.create({
@@ -26,4 +27,7 @@ export default {
   // Archiver un technicien en mettant à jour son statut
   archiveTechnicien: (technicienId) =>
     api.put(`/techniciens/${technicienId}/archive`), // Appel à l'API pour archiver un technicien
+  getArchivedTechniciens: () => api.get('/techniciens/archived'),
+  restoreTechnicien: (technicienId) => 
+    api.put(`/techniciens/${technicienId}/restore`),
 };
