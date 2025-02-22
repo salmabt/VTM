@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Technicien = require('../models/users');
 const { createTechnicien } = require('../controllers/technicienController');
-const { archiveTechnicien } = require('../controllers/technicienController');
+const { archiveTechnicien,restoreTechnicien,getArchivedTechniciens } = require('../controllers/technicienController');
 // Créer un technicien
 router.post('/', createTechnicien);
 
@@ -40,5 +40,10 @@ router.put('/:id', async (req, res) => {
 });
 
 router.put('/:id/archive', archiveTechnicien);
+// Restaurer un technicien
+router.put('/:id/restore', restoreTechnicien);
+// Récupérer les techniciens archivés
+router.get('/archived', getArchivedTechniciens);
+
 
 module.exports = router;

@@ -1,3 +1,4 @@
+//backend/techniciencontroller
 const mongoose = require('mongoose');
 const Technicien = require('../models/users');
 const createError = require('../utils/appError');
@@ -44,20 +45,84 @@ exports.createTechnicien = async (req, res, next) => {
 };
 
 
+exports.getAllTechniciens = async (req, res) => {
+  try {
+    const techniciens = await Technicien.find({ 
+      role: 'technicien',
+      archived: false // Ajout du filtre
+    });
+    res.json(techniciens);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getArchivedTechniciens = async (req, res) => {
+  try {
+    const techniciens = await Technicien.find({ 
+      role: 'technicien',
+      archived: true // Ajout du filtre
+    });
+    res.json(techniciens);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.archiveTechnicien = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Vérifier l'existence du technicien
+    const tech = await Technicien.findById(id);
+    if (!tech) return res.status(404).json({ message: "Technicien non trouvé" });
 
-    // Mettre à jour le technicien pour le marquer comme archivé
-    const archivedTechnicien = await Technicien.findByIdAndUpdate(id, { archived: true }, { new: true });
+    // Archiver avec validation
+    const archivedTechnicien = await Technicien.findByIdAndUpdate(
+      id,
+      { archived: true },
+      { new: true, runValidators: true }
+    );
 
-    if (!archivedTechnicien) {
-      return res.status(404).json({ message: "Technicien non trouvé" });
-    }
-
-    res.json(archivedTechnicien);
+    res.json({
+      status: 'success',
+      data: archivedTechnicien
+    });
   } catch (error) {
-    console.error("Erreur lors de l'archivage :", error);
-    res.status(500).json({ message: "Erreur serveur", error });
-  }
+    console.error("Erreur d'archivage :", error);
+    res.status(500).json({ 
+      status: 'error',
+      message: 'Erreur serveur',
+      error: error.message 
+    });
+  }
+};
+
+exports.restoreTechnicien = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Vérifier l'existence du technicien
+    const tech = await Technicien.findById(id);
+    if (!tech) return res.status(404).json({ message: "Technicien non trouvé" });
+
+    // Restaurer avec validation
+    const restoredTechnicien = await Technicien.findByIdAndUpdate(
+      id,
+      { archived: false },
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      status: 'success',
+      data: restoredTechnicien
+    });
+  } catch (error) {
+    console.error("Erreur de restauration :", error);
+    res.status(500).json({ 
+      status: 'error',
+      message: 'Erreur serveur',
+      error: error.message 
+    });
+  }
 };
