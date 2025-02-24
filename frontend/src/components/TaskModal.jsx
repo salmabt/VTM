@@ -1,5 +1,5 @@
 //frontend/components/taskmodal
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import { Modal, Input, Select, DatePicker, Button } from "antd";
 
 const { RangePicker } = DatePicker;

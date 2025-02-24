@@ -1,108 +1,205 @@
-import React, { useState } from 'react';
-import { Avatar, Card, List, Tag, Typography, Divider } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Avatar, Card, List, Tag, Typography, Divider, Button, Spin } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
+import moment from 'moment';
 
 const { Title, Text } = Typography;
 
-const TechniciensSection = ({ techniciens, tasks, vehicules }) => {
-  const [selectedTech, setSelectedTech] = useState(null);
-
-  const getAssignedTasks = (techId) => 
-    tasks.filter(task => task.technicien === techId);
-
-  const getAssignedVehicles = (techId) => {
-    const techTasks = getAssignedTasks(techId);
-    return vehicules.filter(veh => 
-      techTasks.some(task => task.vehicule === veh._id)
+const TechniciensSection = ({ 
+    techniciens, 
+    tasks, 
+    vehicules,
+    selectedTech,
+    onTechSelect,
+    techTasks,
+    onTasksUpdate,
+    assignedVehicles,
+    onVehiclesUpdate 
+  }) => {
+    const [loadingTasks, setLoadingTasks] = useState(false);
+  
+    // Détermine si un véhicule existe pour un ID donné
+    const vehiculeExists = (vehiculeId) => 
+      vehicules.some(v => v._id === vehiculeId);
+  
+    // Met à jour les données quand les dépendances changent
+    useEffect(() => {
+      const updateData = () => {
+        if (!selectedTech) return;
+        
+        const filteredTasks = tasks.filter(task => 
+          task.technicien === selectedTech._id && 
+          vehiculeExists(task.vehicule)
+        );
+  
+        onTasksUpdate(filteredTasks);
+        onVehiclesUpdate(
+          vehicules.filter(v => 
+            filteredTasks.some(task => task.vehicule === v._id)
+          )
+        );
+      };
+  
+      setLoadingTasks(true);
+      updateData();
+      setLoadingTasks(false);
+    }, [selectedTech, tasks, vehicules]); // Déclenché par ces changements
+  
+    // Gère le clic sur un technicien
+    const handleTechClick = (tech) => {
+      onTechSelect(tech === selectedTech ? null : tech); // Bascule la sélection
+    };
+  
+    return (
+      <div style={{ marginBottom: 24 }}>
+        {/* Liste des techniciens */}
+        <div style={{ 
+          display: 'flex',
+          gap: 16,
+          overflowX: 'auto',
+          padding: '8px 0',
+          minHeight: 120
+        }}>
+          {techniciens.map(tech => (
+            <div
+              key={tech._id}
+              onClick={() => handleTechClick(tech)}
+              style={{
+                cursor: 'pointer',
+                textAlign: 'center',
+                padding: 8,
+                border: selectedTech?._id === tech._id 
+                  ? '2px solid #1890ff' 
+                  : '1px solid #f0f0f0',
+                borderRadius: '50%',
+                minWidth: 100,
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <Avatar 
+                size={64} 
+                icon={<UserOutlined />} 
+                style={{ backgroundColor: '#87d068' }}
+              />
+              <div style={{ marginTop: 8, fontWeight: 500 }}>{tech.name}</div>
+            </div>
+          ))}
+        </div>
+  
+        {/* Détails du technicien sélectionné */}
+        {selectedTech && (
+          <Card 
+            title={`Détails de ${selectedTech.name}`}
+            style={{ marginTop: 16 }}
+            extra={<Button onClick={() => onTechSelect(null)}>Fermer</Button>}
+          >
+            {loadingTasks ? (
+              <Spin tip="Chargement..." style={{ display: 'block', margin: '20px 0' }} />
+            ) : (
+              <>
+                {/* Sections des informations */}
+                <UserInfoSection selectedTech={selectedTech} />
+                <SkillsSection selectedTech={selectedTech} />
+                <TasksSection tasks={techTasks} vehicules={vehicules} />
+                <VehiclesSection vehicles={assignedVehicles} />
+              </>
+            )}
+          </Card>
+        )}
+      </div>
     );
   };
-
-  return (
-    <div style={{ marginBottom: 24 }}>
-      <div style={{ 
-        display: 'flex', 
-        gap: 16, 
-        overflowX: 'auto',
-        padding: '8px 0'
-      }}>
-        {techniciens.map(tech => (
-          <div
-            key={tech._id}
-            onClick={() => setSelectedTech(tech)}
-            style={{
-              cursor: 'pointer',
-              textAlign: 'center',
-              padding: 8,
-              border: selectedTech?._id === tech._id 
-                ? '2px solid #1890ff' 
-                : '1px solid #f0f0f0',
-              borderRadius: '50%'
-            }}
-          >
-            <Avatar 
-              size={64} 
-              icon={<UserOutlined />} 
-              style={{ backgroundColor: '#87d068' }}
-            />
-            <div style={{ marginTop: 8 }}>{tech.name}</div>
-          </div>
-        ))}
+  
+  // Sous-composants pour améliorer la lisibilité
+  const UserInfoSection = ({ selectedTech }) => (
+    <div>
+      <Title level={5} style={{ color: '#1890ff' }}>Informations personnelles</Title>
+      <div style={{ lineHeight: 1.6 }}>
+        <Text strong>Email: </Text>{selectedTech.email || 'Non renseigné'}<br/>
+        <Text strong>Téléphone: </Text>{selectedTech.phone || 'Non renseigné'}
       </div>
-
-      {selectedTech && (
-        <Card 
-          title={`Détails de ${selectedTech.name}`} 
-          style={{ marginTop: 16 }}
-          extra={<Button onClick={() => setSelectedTech(null)}>Fermer</Button>}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
-            <div>
-              <Title level={5}>Informations de base</Title>
-              <Text strong>Email: </Text>{selectedTech.email}<br/>
-              <Text strong>Téléphone: </Text>{selectedTech.phone || 'Non renseigné'}<br/>
-              
-              <Divider />
-              
-              <Title level={5}>Compétences</Title>
-              {selectedTech.skills?.map(skill => (
-                <Tag key={skill} color="blue" style={{ margin: 4 }}>{skill}</Tag>
-              ))}
-            </div>
-
-            <div>
-              <Title level={5}>Tâches assignées</Title>
-              <List
-                size="small"
-                dataSource={getAssignedTasks(selectedTech._id)}
-                renderItem={task => (
-                  <List.Item>
-                    <Text>{task.title}</Text>
-                    <div>
-                      {moment(task.startDate).format('DD/MM HH:mm')} -{' '}
-                      {moment(task.endDate).format('DD/MM HH:mm')}
-                    </div>
-                  </List.Item>
-                )}
-              />
-
-              <Divider />
-
-              <Title level={5}>Véhicules utilisés</Title>
-              <List
-                size="small"
-                dataSource={getAssignedVehicles(selectedTech._id)}
-                renderItem={veh => (
-                  <List.Item>
-                    {veh.model} ({veh.registration})
-                  </List.Item>
-                )}
-              />
-            </div>
-          </div>
-        </Card>
-      )}
     </div>
   );
-};
-
-export default TechniciensSection;
+  
+  const SkillsSection = ({ selectedTech }) => (
+    <>
+      <Divider />
+      <div>
+        <Title level={5} style={{ color: '#1890ff' }}>Compétences techniques</Title>
+        <div style={{ marginTop: 8 }}>
+          {selectedTech.skills?.length > 0 ? (
+            selectedTech.skills.map((skill, index) => (
+              <Tag key={index} color="blue" style={{ margin: 4, borderRadius: 12 }}>
+                {skill}
+              </Tag>
+            ))
+          ) : (
+            <Text type="secondary">Aucune compétence enregistrée</Text>
+          )}
+        </div>
+      </div>
+    </>
+  );
+  
+  const TasksSection = ({ tasks, vehicules }) => (
+    <>
+      <Divider />
+      <div>
+        <Title level={5} style={{ color: '#1890ff' }}>Interventions planifiées</Title>
+        <List
+          size="small"
+          dataSource={tasks}
+          renderItem={task => (
+            <TaskListItem task={task} vehicules={vehicules} />
+          )}
+        />
+      </div>
+    </>
+  );
+  
+  const TaskListItem = ({ task, vehicules }) => (
+    <List.Item style={{ padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+      <div style={{ flex: 1 }}>
+        <Text strong style={{ display: 'block' }}>{task.title}</Text>
+        <Text type="secondary">
+          {moment(task.startDate).format('DD/MM HH:mm')} -{' '}
+          {moment(task.endDate).format('DD/MM HH:mm')}
+        </Text>
+      </div>
+      <div>
+        <Text type="secondary">
+          {vehicules.find(v => v._id === task.vehicule)?.model || 'Véhicule non spécifié'}
+        </Text>
+      </div>
+    </List.Item>
+  );
+  
+  const VehiclesSection = ({ vehicles }) => (
+    <>
+      <Divider />
+      <div>
+        <Title level={5} style={{ color: '#1890ff' }}>Véhicules attribués</Title>
+        <List
+          size="small"
+          dataSource={vehicles}
+          renderItem={veh => (
+            <VehicleListItem vehicle={veh} />
+          )}
+        />
+      </div>
+    </>
+  );
+  
+  const VehicleListItem = ({ vehicle }) => (
+    <List.Item>
+      <div style={{ flex: 1 }}>
+        <Text strong>{vehicle.model}</Text>
+        <Text type="secondary">{vehicle.registration}</Text>
+      </div>
+      <Tag color={vehicle.status === 'disponible' ? 'green' : 'orange'}>
+        {vehicle.status}
+      </Tag>
+    </List.Item>
+  );
+  
+  export default TechniciensSection;
