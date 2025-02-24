@@ -61,7 +61,7 @@ const AdminDashboard = () => {
       user.name.toLowerCase().includes(searchValue)
     );
     
-    setFilteredUsers(filtered.length > 0 ? filtered : []);
+    setFilteredUsers(filtered);
   };
 
   const handleAddTechnicien = async () => {
@@ -118,18 +118,17 @@ const handleArchiveTechnicien = async (technicienId) => {
 
     // Appel API pour archiver
     await techniciensApi.archiveTechnicien(technicienId);
-
-    // Mettre à jour la liste des techniciens
-    setTechniciens(prevTechniciens => prevTechniciens.filter(t => t._id !== technicienId));
     
-    // Trouver et déplacer le technicien archivé
+    // Trouver le technicien archivé
     const archivedTech = techniciens.find(t => t._id === technicienId);
-    if (archivedTech) {
-      setArchivedTechniciens(prevArchived => [...prevArchived, archivedTech]);
+    if (!archivedTech) {
+      message.error("Technicien introuvable !");
+      return;
     }
 
-    console.log("Techniciens actifs après archivage :", techniciens);
-    console.log("Techniciens archivés après archivage :", archivedTechniciens);
+    // Mettre à jour les états
+    setTechniciens(prev => prev.filter(t => t._id !== technicienId)); // Supprime des actifs
+    setArchivedTechniciens(prev => [...prev, archivedTech]); // Ajoute aux archivés
 
     message.success('Technicien archivé avec succès');
   } catch (error) {
@@ -157,8 +156,8 @@ const handleRestoreTechnicien = async (technicienId) => {
     }
 
     // Mise à jour instantanée de la liste
-    setArchivedTechniciens(archivedTechniciens.filter(t => t._id !== technicienId));  // Supprime des archivés
-    setTechniciens([...techniciens, restoredTech]);   // Ajoute aux actifs
+    setArchivedTechniciens(prev => prev.filter(t => t._id !== technicienId));  // Supprime des archivés
+    setTechniciens(prev => [...prev, restoredTech]); // Ajoute aux actifs
 
     message.success('Technicien restauré avec succès');
   } catch (error) {
@@ -241,7 +240,7 @@ const handleRestoreTechnicien = async (technicienId) => {
                     </Button>
                   </div>
                   <List
-                    dataSource={showArchived ? archivedTechniciens : filteredUsers}
+                    dataSource={showArchived ? archivedTechniciens : techniciens}
                     renderItem={tech => (
                       <List.Item
                         actions={showArchived ? [
