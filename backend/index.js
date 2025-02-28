@@ -7,6 +7,8 @@ const authRouter = require('./routes/authRoute');
 const taskRouter = require('./routes/tasksRoutes');
 const voitureRouter = require('./routes/voitureRoutes');
 const technicienRouter = require('./routes/technicienRoutes'); // Ajouté
+const notesRouter = require('./routes/notesRoute'); 
+const gestionnairesRoutes = require('./routes/gestionnaireRoute');
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/tasks', taskRouter);
 app.use('/api/vehicules', voitureRouter);
 app.use('/api/techniciens', technicienRouter); // Ajouté
+app.use('/api/notes', notesRouter);
+app.use('/api/gestionnaires', gestionnairesRoutes);
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {

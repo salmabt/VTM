@@ -98,20 +98,25 @@ exports.login = async (req, res, next) => {
 
     const user = await User.findOne({ email });
 
-    if (!user) return next(new createError('User not found!', 404));
+    if (!user) {
+      console.log(`Tentative de connexion avec un e-mail inconnu : ${email}`);
+      return next(new createError('User not found!', 404));
+    }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
+      console.log(`Tentative de connexion avec un mot de passe incorrect pour l'utilisateur : ${email}`);
       return next(new createError('Invalid email or password', 401));
     }
 
     if (!user.isApproved) {
+      console.log(`Tentative de connexion avec un compte non approuvé : ${email}`);
       return next(new createError('Your account is pending approval by the admin.', 403));
     }
 
-    const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '300d' });
-
+    const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '7d' });
+    console.log(`Connexion réussie pour l'utilisateur : ${email}`);
     res.status(200).json({
       status: 'success',
       token,
@@ -180,3 +185,4 @@ exports.validateUser = async (req, res, next) => {
       next(error);
   }
 };
+

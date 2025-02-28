@@ -158,3 +158,26 @@ exports.deleteTask = async (req, res) => {
     });
   }
 };
+//récupérer les tâches d'un technicien spécifique
+exports.getTasksByTechnicien = async (req, res) => {
+  try {
+    // Recherche des tâches associées au technicien spécifique
+    const tasks = await Task.find({ technicien: req.params.technicienId })
+      .populate('technicien', 'name role')
+      .populate('vehicule');
+
+    if (tasks.length === 0) {
+      console.warn('Aucune tâche trouvée pour le technicien:', req.params.technicienId);
+      return res.status(404).json({ message: 'Aucune tâche trouvée pour ce technicien' });
+    }
+
+    res.json(tasks);
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des tâches par technicien:', error);
+    res.status(500).json({
+      message: 'Échec de la récupération des tâches',
+      error: error.message,
+    });
+  }
+};

@@ -9,4 +9,5 @@ router.get('/validate/:userId', authController.validateUser);// Route pour valid
 router.post('/validate/:userId', authController.validateUser);
 
 
+
 module.exports = router;
