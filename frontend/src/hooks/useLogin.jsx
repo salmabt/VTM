@@ -12,6 +12,7 @@ const useLogin = () => {
         try{
             setError(null);
             setLoading(true);
+            console.log("Données envoyées au serveur:", values);
             const res = await fetch('http://localhost:3000/api/auth/login',{
                 method: 'POST',
                 headers: {
@@ -21,6 +22,7 @@ const useLogin = () => {
             });
 
             const data = await res.json();
+            console.log("Réponse serveur:", data); // <-- Ajoute ceci
 
             if ( res.status === 200) {
                 message.success(data.message);
@@ -34,6 +36,7 @@ const useLogin = () => {
                 message.error('Login failed');
             }
         } catch (error) {
+            console.error("Erreur lors de la connexion:", error);
             message.error('error');
         }finally{
             setLoading(false);
