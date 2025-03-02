@@ -2,15 +2,14 @@ const Task = require('../models/Task');
 const Technicien = require('../models/users');
 const Voiture = require('../models/Voiture');
 
+// Créer une nouvelle tâche
 exports.createTask = async (req, res) => {
   try {
-    // Log de débogage pour les références
     console.log('Validation des références:', {
       technicien: req.body.technicien,
       vehicule: req.body.vehicule
     });
 
-    // Validation approfondie des références
     const [technicien, vehicule] = await Promise.all([
       Technicien.findById(req.body.technicien),
       Voiture.findById(req.body.vehicule)
@@ -30,7 +29,6 @@ exports.createTask = async (req, res) => {
       });
     }
 
-    // Création avec double vérification
     const newTask = await Task.create(req.body);
     const populated = await Task.findById(newTask._id)
       .populate('technicien')
@@ -49,6 +47,7 @@ exports.createTask = async (req, res) => {
   }
 };
 
+// Récupérer toutes les tâches
 exports.getAllTasks = async (req, res) => {
   try {
     const tasks = await Task.find()
@@ -63,11 +62,12 @@ exports.getAllTasks = async (req, res) => {
     res.status(500).json({
       message: 'Échec du chargement',
       error: error.message,
-      requestId: req.requestId // Si utilisation de middleware de tracking
+      requestId: req.requestId
     });
   }
 };
 
+// Récupérer une tâche par son ID
 exports.getTaskById = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
@@ -91,9 +91,9 @@ exports.getTaskById = async (req, res) => {
   }
 };
 
+// Mettre à jour une tâche
 exports.updateTask = async (req, res) => {
   try {
-    // Vérification préalable des nouvelles références
     if (req.body.technicien) {
       const techExists = await Technicien.exists({ _id: req.body.technicien });
       if (!techExists) throw new Error('Technicien référence invalide');
@@ -110,7 +110,7 @@ exports.updateTask = async (req, res) => {
       { 
         new: true, 
         runValidators: true,
-        context: 'query' // Correction pour les validateurs Mongoose
+        context: 'query'
       }
     )
     .populate('technicien')
@@ -129,11 +129,12 @@ exports.updateTask = async (req, res) => {
     res.status(400).json({
       message: 'Échec de la mise à jour',
       error: error.message,
-      type: error.name // Ex: ValidationError
+      type: error.name
     });
   }
 };
 
+// Supprimer une tâche
 exports.deleteTask = async (req, res) => {
   try {
     const task = await Task.findByIdAndDelete(req.params.id);
@@ -154,20 +155,25 @@ exports.deleteTask = async (req, res) => {
     res.status(500).json({
       message: 'Échec de la suppression',
       error: error.message,
-      systemMessage: error.syscall // Détails système si disponible
+      systemMessage: error.syscall
     });
   }
 };
-//récupérer les tâches d'un technicien spécifique
+
+// Récupérer les tâches d'un technicien spécifique
 exports.getTasksByTechnicien = async (req, res) => {
   try {
-    // Recherche des tâches associées au technicien spécifique
-    const tasks = await Task.find({ technicien: req.params.technicienId })
+    const technicienId = req.params.technicienId;
+    console.log('Technicien ID:', technicienId);
+
+    const tasks = await Task.find({ technicien: technicienId })
       .populate('technicien', 'name role')
       .populate('vehicule');
 
+    console.log('Tâches trouvées:', tasks);
+
     if (tasks.length === 0) {
-      console.warn('Aucune tâche trouvée pour le technicien:', req.params.technicienId);
+      console.warn('Aucune tâche trouvée pour le technicien:', technicienId);
       return res.status(404).json({ message: 'Aucune tâche trouvée pour ce technicien' });
     }
 
@@ -177,6 +183,37 @@ exports.getTasksByTechnicien = async (req, res) => {
     console.error('Erreur lors de la récupération des tâches par technicien:', error);
     res.status(500).json({
       message: 'Échec de la récupération des tâches',
+      error: error.message,
+    });
+  }
+};
+
+// Mettre à jour le statut d'une tâche
+exports.updateTaskStatus = async (req, res) => {
+  try {
+    const taskId = req.params.taskId;
+    const { status } = req.body;
+
+    console.log('Requête reçue:', { taskId, status }); // Log pour vérifier la requête
+
+    const task = await Task.findByIdAndUpdate(
+      taskId,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!task) {
+      console.warn('Tâche introuvable ID:', taskId);
+      return res.status(404).json({ message: 'Tâche introuvable' });
+    }
+
+    console.log('Statut de la tâche mis à jour:', task._id);
+    res.json(task); // Renvoyer la tâche mise à jour
+
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du statut:', error);
+    res.status(500).json({
+      message: 'Échec de la mise à jour du statut',
       error: error.message,
     });
   }
