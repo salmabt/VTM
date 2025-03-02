@@ -35,29 +35,36 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [archivedTechniciens, setArchivedTechniciens] = useState([]);
+  const [editGestionnaire, setEditGestionnaire] = useState(null);
+  const [filteredGestionnaires, setFilteredGestionnaires] = useState([]);
 
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      try {
-        const [activeTechs, archivedTechs, gestionnairesData] = await Promise.all([
-          techniciensApi.getAllTechniciens(),
-          techniciensApi.getArchivedTechniciens(),
-          gestionnairesApi.getAllGestionnaires(), // Charger les gestionnaires
-        ]);
+const [isEditGestionnaireModalVisible, setIsEditGestionnaireModalVisible] = useState(false);
+// Dans les useState du composant
+const [showArchivedGestionnaires, setShowArchivedGestionnaires] = useState(false);
+const [archivedGestionnaires, setArchivedGestionnaires] = useState([]);
+useEffect(() => {
+  const loadInitialData = async () => {
+    setLoading(true);
+    try {
+      const [activeTechs, archivedTechs, gestionnairesData, archivedGestionnairesData] = await Promise.all([ // Corriger le nombre d'éléments
+        techniciensApi.getAllTechniciens(),
+        techniciensApi.getArchivedTechniciens(),
+        gestionnairesApi.getAllGestionnaires(),
+        gestionnairesApi.getArchivedGestionnaires()
+      ]);
 
-        setTechniciens(activeTechs.data);
-        setArchivedTechniciens(archivedTechs.data);
-        setGestionnaires(gestionnairesData.data); // Initialiser les gestionnaires
-        setFilteredUsers(activeTechs.data); // Initialiser avec les actifs
-      } catch (error) {
-        message.error('Erreur de chargement initial');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadInitialData();
-  }, []);
+      setTechniciens(activeTechs.data);
+      setArchivedTechniciens(archivedTechs.data);
+      setGestionnaires(gestionnairesData.data.filter(g => !g.archived)); // Filtrer côté front
+      setArchivedGestionnaires(archivedGestionnairesData);
+    } catch (error) {
+      message.error('Erreur de chargement initial');
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadInitialData();
+}, []);
 
   const handleSearchUsers = (value) => {
     const searchValue = value.trim().toLowerCase();
@@ -86,20 +93,26 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleAddGestionnaire = async () => {
-    try {
-      setLoading(true);
-      const { data } = await gestionnairesApi.createGestionnaire(newGestionnaire);
-      setGestionnaires([...gestionnaires, [data]]);
-      setNewGestionnaire({ name: '', email: '', password: '', role: 'gestionnaire' });
-      setIsGestionnaireModalVisible(false);
+ // Modifier la fonction handleAddGestionnaire :
+ const handleAddGestionnaire = async () => {
+  try {
+    setLoading(true);
+    const response = await gestionnairesApi.createGestionnaire(newGestionnaire);
+    
+    // Vérifier la réponse formatée
+    if (response && response.status === 'success') {
+      setGestionnaires([...gestionnaires, response.data]);
       message.success('Gestionnaire ajouté avec succès');
-    } catch (error) {
-      message.error('Erreur lors de l\'ajout du gestionnaire');
-    } finally {
-      setLoading(false);
+      setIsGestionnaireModalVisible(false);
+      setNewGestionnaire({ name: '', email: '', password: '', role: 'gestionnaire' });
     }
-  };
+  } catch (error) {
+    // Afficher le message d'erreur spécifique
+    message.error(error.message || 'Erreur lors de la création');
+  } finally {
+    setLoading(false);
+  }
+};
   
 
   const handleEditTechnicien = (technicien) => {
@@ -134,24 +147,25 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleArchiveTechnicien = async (technicienId) => {
-    try {
-      setLoading(true);
-      await techniciensApi.archiveTechnicien(technicienId);
-      const archivedTech = techniciens.find((t) => t._id === technicienId);
-      if (!archivedTech) {
-        message.error('Technicien introuvable !');
-        return;
-      }
-      setTechniciens((prev) => prev.filter((t) => t._id !== technicienId));
-      setArchivedTechniciens((prev) => [...prev, archivedTech]);
-      message.success('Technicien archivé avec succès');
-    } catch (error) {
-      message.error('Erreur lors de l\'archivage du technicien');
-    } finally {
-      setLoading(false);
+ // Dans AdminDashboard.jsx
+ const handleArchiveTechnicien = async (technicienId) => {
+  try {
+    setLoading(true);
+    await techniciensApi.archiveTechnicien(technicienId);
+    const archivedTech = techniciens.find((t) => t._id === technicienId);
+    if (!archivedTech) {
+      message.error('Technicien introuvable !');
+      return;
     }
-  };
+    setTechniciens((prev) => prev.filter((t) => t._id !== technicienId));
+    setArchivedTechniciens((prev) => [...prev, archivedTech]);
+    message.success('Technicien archivé avec succès');
+  } catch (error) {
+    message.error('Erreur lors de l\'archivage du technicien');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleRestoreTechnicien = async (technicienId) => {
     try {
@@ -174,9 +188,81 @@ const AdminDashboard = () => {
 
   const handleViewTechnicien = (technicien) => {
     const userDetails = gestionnaires.find((user) => user.name === technicien.name);
-    setSelectedTechnicienDetails({ ...technicien, email: userDetails?.email });
+    setSelectedTechnicienDetails({ ...technicien, email: technicien.email });
     setViewModalVisible(true);
   };
+  // Ajouter ces fonctions
+const handleEditGestionnaire = (gestionnaire) => {
+  setEditGestionnaire(gestionnaire);
+  setNewGestionnaire({
+    name: gestionnaire.name,
+    email: gestionnaire.email,
+    password: '', // Laisser vide pour la sécurité
+    role: gestionnaire.role
+  });
+  setIsEditGestionnaireModalVisible(true);
+};
+
+const handleUpdateGestionnaire = async () => {
+  try {
+    setLoading(true);
+    
+    // Filtrer les champs vides
+    const cleanData = Object.fromEntries(
+      Object.entries(newGestionnaire).filter(([_, v]) => v !== '')
+    );
+
+    const response = await gestionnairesApi.updateGestionnaire(
+      editGestionnaire._id, 
+      cleanData
+    );
+
+    setGestionnaires(gestionnaires.map(g => 
+      g._id === editGestionnaire._id ? { ...g, ...response.data } : g
+    ));
+    
+    message.success('Mise à jour réussie');
+    setIsEditGestionnaireModalVisible(false);
+    
+  } catch (error) {
+    console.error('Erreur détaillée:', error);
+    message.error(error.message || 'Échec de la mise à jour');
+  } finally {
+    setLoading(false);
+  }
+};
+const handleArchiveGestionnaire = async (id) => {
+  try {
+    const archived = await gestionnairesApi.archiveGestionnaire(id);
+    
+    setGestionnaires(prev => prev.filter(g => g._id !== id));
+    setArchivedGestionnaires(prev => [...prev, archived]); // Utiliser directement la réponse
+    
+    message.success('Gestionnaire archivé');
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+const handleRestoreGestionnaire = async (id) => {
+  try {
+    const response = await gestionnairesApi.restoreGestionnaire(id);
+    
+    // Mettre à jour les deux états
+    setArchivedGestionnaires(prev => prev.filter(g => g._id !== id));
+    setGestionnaires(prev => [...prev, response]); // 👈 Ajouter le gestionnaire restauré
+    
+    message.success('Gestionnaire restauré');
+  } catch (error) {
+    message.error('Erreur de restauration');
+  }
+};
+const handleSearchGestionnaires = (value) => {
+  const searchValue = value.trim().toLowerCase();
+  const filtered = gestionnaires.filter(g => 
+    g.name.toLowerCase().includes(searchValue)
+  );
+  setFilteredGestionnaires(filtered);
+};
 
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
@@ -214,13 +300,13 @@ const AdminDashboard = () => {
           ) : (
             <>
               {selectedMenu === '1' && (
-                <Card title="Calendrier" bordered={false}>
+                <Card title="Calendrier" variant="borderless">
                   <Text>Calendrier et gestion des événements à venir.</Text>
                 </Card>
               )}
 
               {selectedMenu === '2' && (
-                <Card title="Gestion des Techniciens" bordered={false}>
+                <Card title="Gestion des Techniciens" variant="borderless">
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
                     <Input
                       placeholder="Rechercher un technicien"
@@ -277,34 +363,73 @@ const AdminDashboard = () => {
               )}
 
               {selectedMenu === '3' && (
-                <Card title="Rapports" bordered={false}>
+                <Card title="Rapports" variant="borderless">
                   <Button type="primary" onClick={() => alert('Générer rapport')}>Générer Rapport</Button>
                 </Card>
               )}
 
-              {selectedMenu === '4' && (
-                <Card title="Gestion des Gestionnaires" bordered={false}>
-                  <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => setIsGestionnaireModalVisible(true)}
-                    style={{ marginBottom: 16 }}
+{selectedMenu === '4' && (
+  <Card title="Gestion des Gestionnaires" variant="borderless">
+    <Button
+      type="primary"
+      icon={<PlusOutlined />}
+      onClick={() => setIsGestionnaireModalVisible(true)}
+      style={{ marginBottom: 16 }}
+    >
+      Ajouter un Gestionnaire
+    </Button>
+
+    <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
+      <Input
+        placeholder="Rechercher un gestionnaire"
+        prefix={<SearchOutlined />}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          handleSearchGestionnaires(e.target.value);
+        }}
+        style={{ flex: 1 }}
+      />
+      <Button
+        type={showArchivedGestionnaires ? 'default' : 'primary'}
+        onClick={() => {
+          setShowArchivedGestionnaires(!showArchivedGestionnaires);
+          handleSearchGestionnaires(searchTerm);
+        }}
+      >
+        {showArchivedGestionnaires ? 'Voir Actifs' : 'Voir Archivés'}
+      </Button>
+    </div>
+    <List
+      dataSource={showArchivedGestionnaires ? archivedGestionnaires : filteredGestionnaires.length > 0 ? filteredGestionnaires : gestionnaires}
+      renderItem={(gestionnaire) => (
+        <List.Item
+          actions={
+            showArchivedGestionnaires
+              ? [
+                  <Button icon={<UndoOutlined />} onClick={() => handleRestoreGestionnaire(gestionnaire._id)} />,
+                ]
+              : [
+                  <Button icon={<EditOutlined />} onClick={() => handleEditGestionnaire(gestionnaire)} />,
+                  <Popconfirm
+                    title="Êtes-vous sûr de vouloir archiver ce gestionnaire ?"
+                    onConfirm={() => handleArchiveGestionnaire(gestionnaire._id)}
+                    okText="Oui"
+                    cancelText="Non"
                   >
-                    Ajouter un Gestionnaire
-                  </Button>
-                  <List
-                     dataSource={Array.isArray(gestionnaires) ? gestionnaires : []}_
-                    renderItem={(gestionnaire) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          title={gestionnaire.name}
-                          description={`Email: ${gestionnaire.email}`}
-                        />
-                      </List.Item>
-                    )}
-                  />
-                </Card>
-              )}
+                    <Button icon={<DeleteOutlined />} danger />
+                  </Popconfirm>
+                ]
+          }
+        >
+          <List.Item.Meta
+            title={<>{gestionnaire.name} {showArchivedGestionnaires && <Text type="secondary">(Archivé)</Text>}</>}
+            description={`Email: ${gestionnaire.email}`}
+          />
+        </List.Item>
+      )}
+    />
+  </Card>
+)}
             </>
           )}
         </Content>
@@ -347,35 +472,43 @@ const AdminDashboard = () => {
       </Modal>
 
       {/* Modal pour ajouter un gestionnaire */}
-      <Modal
-        title="Ajouter un Gestionnaire"
-        visible={isGestionnaireModalVisible}
-        onCancel={() => {
-          setIsGestionnaireModalVisible(false);
-          setNewGestionnaire({ name: '', email: '', password: '', role: 'gestionnaire' });
-        }}
-        onOk={handleAddGestionnaire}
-      >
-        <Input
-          placeholder="Nom"
-          value={newGestionnaire.name}
-          onChange={(e) => setNewGestionnaire({ ...newGestionnaire, name: e.target.value })}
-          style={{ marginBottom: 16 }}
-        />
-        <Input
-          placeholder="Email"
-          value={newGestionnaire.email}
-          onChange={(e) => setNewGestionnaire({ ...newGestionnaire, email: e.target.value })}
-          style={{ marginBottom: 16 }}
-        />
-        <Input
-          placeholder="Mot de passe"
-          type="password"
-          value={newGestionnaire.password}
-          onChange={(e) => setNewGestionnaire({ ...newGestionnaire, password: e.target.value })}
-        />
-      </Modal>
-
+     
+<Modal
+  title="Ajouter un Gestionnaire"
+  visible={isGestionnaireModalVisible}
+  onCancel={() => setIsGestionnaireModalVisible(false)}
+  footer={[
+    <Button key="back" onClick={() => setIsGestionnaireModalVisible(false)}>
+      Annuler
+    </Button>,
+    <Button key="submit" type="primary" onClick={handleAddGestionnaire}>
+      Créer
+    </Button>,
+  ]}
+>
+  <form onSubmit={(e) => { e.preventDefault(); handleAddGestionnaire(); }}>
+    <Input
+      placeholder="Nom"
+      required
+      value={newGestionnaire.name}
+      onChange={(e) => setNewGestionnaire({ ...newGestionnaire, name: e.target.value })}
+    />
+    <Input
+      placeholder="Email"
+      type="email"
+      required
+      value={newGestionnaire.email}
+      onChange={(e) => setNewGestionnaire({ ...newGestionnaire, email: e.target.value })}
+    />
+    <Input.Password
+  placeholder="Mot de passe"
+  autoComplete="new-password"
+  required
+  value={newGestionnaire.password}
+  onChange={(e) => setNewGestionnaire({ ...newGestionnaire, password: e.target.value })}
+/>
+  </form>
+</Modal>
       {/* Modal pour voir les détails du technicien */}
       <Modal
         title="Détails du Technicien"
@@ -392,6 +525,29 @@ const AdminDashboard = () => {
           </div>
         )}
       </Modal>
+<Modal
+  title="Modifier Gestionnaire"
+  visible={isEditGestionnaireModalVisible}
+  onCancel={() => setIsEditGestionnaireModalVisible(false)}
+  onOk={handleUpdateGestionnaire}
+  confirmLoading={loading} 
+>
+  <Input
+    placeholder="Nom"
+    value={newGestionnaire.name}
+    onChange={(e) => setNewGestionnaire({ ...newGestionnaire, name: e.target.value })}
+  />
+  <Input
+    placeholder="Email"
+    type="email"
+    value={newGestionnaire.email}
+    onChange={(e) => setNewGestionnaire({ ...newGestionnaire, email: e.target.value })}
+  />
+  <Input.Password
+    placeholder="Nouveau mot de passe (laisser vide pour ne pas changer)"
+    onChange={(e) => setNewGestionnaire({ ...newGestionnaire, password: e.target.value })}
+  />
+</Modal>
     </Layout>
   );
 };

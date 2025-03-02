@@ -25,8 +25,8 @@ export default {
   updateTechnicien: (technicienId, technicienData) =>
     api.put(`/techniciens/${technicienId}`, technicienData),
   // Archiver un technicien en mettant à jour son statut
-  archiveTechnicien: (technicienId) =>
-    api.put(`/techniciens/${technicienId}/archive`), // Appel à l'API pour archiver un technicien
+  archiveTechnicien: (technicienId) => 
+    api.put(`/techniciens/${technicienId}/archive`).then(res => res.data), // Appel à l'API pour archiver un technicien
   getArchivedTechniciens: () => api.get('/techniciens/archived'),
   restoreTechnicien: (technicienId) => 
     api.put(`/techniciens/${technicienId}/restore`),
