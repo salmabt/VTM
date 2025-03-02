@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Card, List, Tag, Typography, Divider, Button, Spin } from 'antd';
+import { Avatar, Card, List, Tag, Typography, Divider, Button, Spin, Modal } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
@@ -17,12 +17,11 @@ const TechniciensSection = ({
     onVehiclesUpdate 
   }) => {
     const [loadingTasks, setLoadingTasks] = useState(false);
-  
-    // Détermine si un véhicule existe pour un ID donné
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
     const vehiculeExists = (vehiculeId) => 
       vehicules.some(v => v._id === vehiculeId);
-  
-    // Met à jour les données quand les dépendances changent
+
     useEffect(() => {
       const updateData = () => {
         if (!selectedTech) return;
@@ -31,7 +30,7 @@ const TechniciensSection = ({
           task.technicien === selectedTech._id && 
           vehiculeExists(task.vehicule)
         );
-  
+
         onTasksUpdate(filteredTasks);
         onVehiclesUpdate(
           vehicules.filter(v => 
@@ -39,20 +38,24 @@ const TechniciensSection = ({
           )
         );
       };
-  
+
       setLoadingTasks(true);
       updateData();
       setLoadingTasks(false);
-    }, [selectedTech, tasks, vehicules]); // Déclenché par ces changements
-  
-    // Gère le clic sur un technicien
+    }, [selectedTech, tasks, vehicules]);
+
     const handleTechClick = (tech) => {
-      onTechSelect(tech === selectedTech ? null : tech); // Bascule la sélection
+      onTechSelect(tech === selectedTech ? null : tech);
+      setIsModalVisible(true);
     };
-  
+
+    const handleCloseModal = () => {
+      setIsModalVisible(false);
+      onTechSelect(null);
+    };
+
     return (
       <div style={{ marginBottom: 24 }}>
-        {/* Liste des techniciens */}
         <div style={{ 
           display: 'flex',
           gap: 16,
@@ -85,32 +88,37 @@ const TechniciensSection = ({
             </div>
           ))}
         </div>
-  
-        {/* Détails du technicien sélectionné */}
-        {selectedTech && (
-          <Card 
-            title={`Détails de ${selectedTech.name}`}
-            style={{ marginTop: 16 }}
-            extra={<Button onClick={() => onTechSelect(null)}>Fermer</Button>}
-          >
-            {loadingTasks ? (
-              <Spin tip="Chargement..." style={{ display: 'block', margin: '20px 0' }} />
-            ) : (
-              <>
-                {/* Sections des informations */}
-                <UserInfoSection selectedTech={selectedTech} />
-                <SkillsSection selectedTech={selectedTech} />
-                <TasksSection tasks={techTasks} vehicules={vehicules} />
-                <VehiclesSection vehicles={assignedVehicles} />
-              </>
-            )}
-          </Card>
-        )}
+
+        <Modal 
+          title={`Détails de ${selectedTech?.name}`}
+          visible={isModalVisible}
+          onCancel={handleCloseModal}
+          footer={[
+            <Button key="back" onClick={handleCloseModal}>
+              Fermer
+            </Button>
+          ]}
+        >
+          {selectedTech && (
+            <>
+              {loadingTasks ? (
+                <Spin tip="Chargement..." style={{ display: 'block', margin: '20px 0' }} />
+              ) : (
+                <>
+                  <UserInfoSection selectedTech={selectedTech} />
+                  <SkillsSection selectedTech={selectedTech} />
+                  <TasksSection tasks={techTasks} vehicules={vehicules} />
+                  <VehiclesSection vehicles={assignedVehicles} />
+                </>
+              )}
+            </>
+          )}
+        </Modal>
       </div>
     );
   };
-  
-  // Sous-composants pour améliorer la lisibilité
+
+  // Les sous-composants restent inchangés
   const UserInfoSection = ({ selectedTech }) => (
     <div>
       <Title level={5} style={{ color: '#1890ff' }}>Informations personnelles</Title>
@@ -120,7 +128,7 @@ const TechniciensSection = ({
       </div>
     </div>
   );
-  
+
   const SkillsSection = ({ selectedTech }) => (
     <>
       <Divider />
@@ -140,7 +148,7 @@ const TechniciensSection = ({
       </div>
     </>
   );
-  
+
   const TasksSection = ({ tasks, vehicules }) => (
     <>
       <Divider />
@@ -156,7 +164,7 @@ const TechniciensSection = ({
       </div>
     </>
   );
-  
+
   const TaskListItem = ({ task, vehicules }) => (
     <List.Item style={{ padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
       <div style={{ flex: 1 }}>
@@ -173,7 +181,7 @@ const TechniciensSection = ({
       </div>
     </List.Item>
   );
-  
+
   const VehiclesSection = ({ vehicles }) => (
     <>
       <Divider />
@@ -189,7 +197,7 @@ const TechniciensSection = ({
       </div>
     </>
   );
-  
+
   const VehicleListItem = ({ vehicle }) => (
     <List.Item>
       <div style={{ flex: 1 }}>
@@ -201,5 +209,5 @@ const TechniciensSection = ({
       </Tag>
     </List.Item>
   );
-  
+
   export default TechniciensSection;

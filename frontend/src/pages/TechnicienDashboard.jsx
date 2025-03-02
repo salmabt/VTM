@@ -1,12 +1,12 @@
-// frontend/pages/techniciendashboard.js
 import React, { useState, useEffect } from 'react';
-import { Layout, List, Card, Typography, Spin, message, Menu, Button } from 'antd';
+import { Layout, List, Card, Typography, Spin, message, Menu, Button, Select } from 'antd';
 import { CalendarOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import tasksApi from '../api/tasks';
 
 const { Content, Sider, Header } = Layout;
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 const TechnicienDashboard = () => {
   const { userData, logout } = useAuth();
@@ -16,21 +16,52 @@ const TechnicienDashboard = () => {
 
   useEffect(() => {
     const loadTasks = async () => {
+      if (!userData?._id) {
+        console.error('ID du technicien non défini');
+        return;
+      }
+
       setLoading(true);
       try {
-        // Appel à l'API pour récupérer les tâches du technicien connecté
-        const response = await tasksApi.getTasksByTechnicien(userData.id);
-        setTasks(response.data); // Pas besoin de filtrer, l'API le fait déjà
-      }  catch (error) {
+        console.log('Technicien ID:', userData._id);
+        const response = await tasksApi.getTasksByTechnicien(userData._id);
+        console.log('Réponse de l\'API:', response.data);
+        setTasks(response.data);
+      } catch (error) {
         console.error('Erreur de chargement des tâches:', error);
         message.error(`Erreur de chargement des tâches: ${error.message || 'Veuillez réessayer plus tard.'}`);
       } finally {
         setLoading(false);
       }
     };
-    loadTasks();
-  }, [userData.id]);
 
+    loadTasks();
+  }, [userData?._id]);
+
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      console.log('Mise à jour du statut:', { taskId, newStatus }); // Log pour vérifier la requête
+  
+      // Appel à l'API pour mettre à jour le statut de la tâche
+      const response = await tasksApi.updateTaskStatus(taskId, { status: newStatus });
+  
+      console.log('Réponse de l\'API:', response.data); // Log pour vérifier la réponse
+  
+      // Mettre à jour l'état local des tâches
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === taskId ? { ...task, status: newStatus } : task
+        )
+      );
+  
+      message.success('Statut de la tâche mis à jour avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+      message.error(`Erreur lors de la mise à jour du statut: ${error.message || 'Veuillez réessayer plus tard.'}`);
+    }
+  };
+
+  
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Mes tâches' },
   ];
@@ -49,7 +80,7 @@ const TechnicienDashboard = () => {
           onSelect={({ key }) => setSelectedMenu(key)}
         />
         <div style={{ padding: 16, textAlign: 'center', position: 'absolute', bottom: 0, width: '100%' }}>
-          <Text strong>{userData?.name}</Text> {/* Affiche le nom du technicien */}
+          <Text strong>{userData?.name}</Text>
         </div>
       </Sider>
       
@@ -69,12 +100,22 @@ const TechnicienDashboard = () => {
               <List
                 dataSource={tasks}
                 renderItem={task => (
-                  <List.Item key={task.id}>
+                  <List.Item key={task._id}>
                     <List.Item.Meta
                       title={task.title}
                       description={
                         <>
-                          <Text>Statut: {task.status}</Text><br />
+                          <Text>Statut: </Text>
+                          <Select
+                            defaultValue={task.status}
+                            style={{ width: 120, marginBottom: 8 }}
+                            onChange={(value) => handleStatusChange(task._id, value)}
+                          >
+                            <Option value="planifié">Planifié</Option>
+                            <Option value="en cours">En cours</Option>
+                            <Option value="terminé">Terminé</Option>
+                          </Select>
+                          <br />
                           <Text>Description: {task.description}</Text><br />
                           <Text>Client: {task.client}</Text><br />
                           <Text>Localisation: {task.location}</Text><br />
