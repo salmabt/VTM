@@ -4,38 +4,40 @@ const createError = require('../utils/appError');
 
 exports.createGestionnaire = async (req, res, next) => {
   try {
-    // 1. Vérifier si la personne est un admin
-    //    -> Soit vous avez un middleware, soit vous faites la vérification ici
-    // const adminUser = await User.findById(req.user.id);
-    // if (!adminUser || adminUser.role !== 'admin') {
-    //   return next(new createError('You must be admin to create a gestionnaire', 403));
-    // }
+    const { name, email, password, phone } = req.body;
 
-    // 2. Récupérer les champs du body
-    const { name, email, password, role, phone } = req.body;
+    // Vérifier les champs obligatoires
+    if (!name || !email || !password) {
+      return next(createError(400, 'Tous les champs sont obligatoires'));
+    }
 
-    // 3. Créer l'utilisateur dans la collection "users" avec le rôle gestionnaire
     const newUser = await User.create({
       name,
       email,
-      password, // sera haché si vous utilisez un pre('save') dans le schéma
-      role: role || 'gestionnaire',
-      phone,    // si vous le gérez
+      password,
+      role: 'gestionnaire',
+      phone,
       isApproved: true,
     });
 
-    // 4. Répondre avec un code 201 + infos
-    return res.status(201).json({
+    res.status(201).json({
       status: 'success',
       data: {
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
-      },
+      }
     });
   } catch (error) {
-    next(error);
+    // Gestion des erreurs spécifiques
+    let errMsg = 'Erreur serveur';
+    if (error.code === 11000) {
+      errMsg = 'Cet email est déjà utilisé';
+    } else if (error.name === 'ValidationError') {
+      errMsg = error.message;
+    }
+    next(createError(400, errMsg));
   }
 };
 
@@ -51,4 +53,111 @@ exports.getAllGestionnaires = async (req, res, next) => {
       next(error);
     }
   };
+  // controllers/gestionnaireController.js
+
+// Mettre à jour un gestionnaire
+exports.updateGestionnaire = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone } = req.body; // Ne pas inclure le mot de passe ici
+
+    // Vérifier les champs obligatoires
+    if (!name || !email) {
+      return next(createError(400, 'Nom et email sont obligatoires'));
+    }
+
+    // Mise à jour sélective
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { name, email, phone },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) return next(createError(404, 'Gestionnaire non trouvé'));
+
+    res.status(200).json({
+      status: 'success',
+      data: updatedUser
+    });
+  } catch (error) {
+    next(createError(400, error.message));
+  }
+};
+
+// Archiver un gestionnaire (mettre isApproved à false)
+// controllers/gestionnaireController.js
+exports.archiveGestionnaire = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const archivedUser = await User.findByIdAndUpdate(
+      id,
+      { archived: true },
+      { new: true }
+    );
+
+    if (!archivedUser) return next(createError(404, 'Gestionnaire non trouvé'));
+
+    res.status(200).json(archivedUser); // Retourner directement l'objet
+  } catch (error) {
+    next(error);
+  }
+};
+// controllers/gestionnaireController.js
+// controllers/gestionnaireController.js
+exports.getArchivedGestionnaires = async (req, res, next) => {
+  try {
+    const gestionnaires = await User.find({ 
+      role: "gestionnaire",
+      archived: true
+    });
+
+    res.status(200).json(gestionnaires); // Envoyer directement le tableau
+  } catch (error) {
+    next(error);
+  }
+};
+// Restaurer un gestionnaire (mettre isApproved à true)
+exports.restoreGestionnaire = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const restoredUser = await User.findByIdAndUpdate(
+      id,
+      { archived: false }, // 👈 Utiliser le champ dédié
+      { new: true }
+    );
+
+    if (!restoredUser) return next(createError(404, 'Gestionnaire non trouvé'));
+
+    res.status(200).json({
+      status: 'success',
+      data: restoredUser
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Supprimer un gestionnaire
+exports.deleteGestionnaire = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Trouver et supprimer le gestionnaire
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      return next(createError(404, 'Gestionnaire non trouvé'));
+    }
+
+    return res.status(204).json({
+      status: 'success',
+      message: 'Gestionnaire supprimé',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
   

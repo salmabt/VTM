@@ -57,6 +57,7 @@ exports.getAllTechniciens = async (req, res) => {
   }
 };
 
+
 exports.getArchivedTechniciens = async (req, res) => {
   try {
     const techniciens = await Technicien.find({ 
@@ -69,31 +70,26 @@ exports.getArchivedTechniciens = async (req, res) => {
   }
 };
 
+// Dans backend/controllers/technicienController.js
 exports.archiveTechnicien = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Vérifier l'existence du technicien
-    const tech = await Technicien.findById(id);
-    if (!tech) return res.status(404).json({ message: "Technicien non trouvé" });
-
-    // Archiver avec validation
     const archivedTechnicien = await Technicien.findByIdAndUpdate(
       id,
       { archived: true },
-      { new: true, runValidators: true }
+      { new: true ,runValidators: true} // Retourne le document modifié
     );
 
-    res.json({
+    res.status(200).json({
       status: 'success',
-      data: archivedTechnicien
+      data: archivedTechnicien // Structure de réponse standardisée
     });
+    
   } catch (error) {
-    console.error("Erreur d'archivage :", error);
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Erreur serveur',
-      error: error.message 
+      message: error.message
     });
   }
 };

@@ -45,6 +45,9 @@ exports.signup = async (req, res, next) => {
 
     // Hachage du mot de passe
     const hashedPassword = await bcrypt.hash(password, 12);
+    console.log("Mot de passe original:", password);
+    console.log("Mot de passe haché:", hashedPassword);
+
 
     // Créer un nouvel utilisateur dans PendingUser
     const newUser = await PendingUser.create({ name, email, password: hashedPassword, role, phone, skills, isApproved: false });
@@ -102,9 +105,11 @@ exports.login = async (req, res, next) => {
       console.log(`Tentative de connexion avec un e-mail inconnu : ${email}`);
       return next(new createError('User not found!', 404));
     }
+    console.log("Mot de passe en clair saisi:", password);
+console.log("Mot de passe stocké en base:", user.password);
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
+    console.log("Résultat de la comparaison:", isPasswordValid);
     if (!isPasswordValid) {
       console.log(`Tentative de connexion avec un mot de passe incorrect pour l'utilisateur : ${email}`);
       return next(new createError('Invalid email or password', 401));
