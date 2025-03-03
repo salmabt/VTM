@@ -88,7 +88,6 @@ export const deleteGestionnaire = async (id) => {
 
 
 // Récupérer les gestionnaires archivés
-// api/gestionnaires.js
 export const getArchivedGestionnaires = async () => {
   try {
     const response = await fetch(`${API_URL}/archived`);
@@ -114,7 +113,6 @@ export const archiveGestionnaire = async (id) => {
 };
 
 // Restaurer un gestionnaire
-// api/gestionnaires.js
 export const restoreGestionnaire = async (id) => {
   try {
     const response = await fetch(`${API_URL}/${id}/restore`, {
@@ -128,7 +126,6 @@ export const restoreGestionnaire = async (id) => {
     return null;
   }
 };
-// Ajouter à la fin du fichier :
 export default {
   loginGestionnaire,
   getAllGestionnaires,

@@ -3,7 +3,7 @@ import { Layout, Menu, Input, Button, List, Card, Typography, message, Spin, Mod
 import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import techniciensApi from '../api/techniciens';
-import gestionnairesApi from '../api/gestionnaires'; // API pour les gestionnaires
+import gestionnairesApi from '../api/gestionnaires';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -13,7 +13,6 @@ const AdminDashboard = () => {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     return regex.test(email);
   };
-  // Fonction de validation pour le numéro de téléphone
 const isValidPhoneNumber = (phoneNumber) => {
   const regex = /^[0-9]{8}$/;
   return regex.test(phoneNumber);
@@ -22,7 +21,7 @@ const isValidPhoneNumber = (phoneNumber) => {
   const [selectedMenu, setSelectedMenu] = useState('1');
   const [loading, setLoading] = useState(false);
   const [techniciens, setTechniciens] = useState([]);
-  const [gestionnaires, setGestionnaires] = useState([]); // État pour les gestionnaires
+  const [gestionnaires, setGestionnaires] = useState([]); 
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [newTechnicien, setNewTechnicien] = useState({
     name: '',
@@ -46,16 +45,14 @@ const isValidPhoneNumber = (phoneNumber) => {
   const [archivedTechniciens, setArchivedTechniciens] = useState([]);
   const [editGestionnaire, setEditGestionnaire] = useState(null);
   const [filteredGestionnaires, setFilteredGestionnaires] = useState([]);
-
-const [isEditGestionnaireModalVisible, setIsEditGestionnaireModalVisible] = useState(false);
-// Dans les useState du composant
+ const [isEditGestionnaireModalVisible, setIsEditGestionnaireModalVisible] = useState(false);
 const [showArchivedGestionnaires, setShowArchivedGestionnaires] = useState(false);
 const [archivedGestionnaires, setArchivedGestionnaires] = useState([]);
 useEffect(() => {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      const [activeTechs, archivedTechs, gestionnairesData, archivedGestionnairesData] = await Promise.all([ // Corriger le nombre d'éléments
+      const [activeTechs, archivedTechs, gestionnairesData, archivedGestionnairesData] = await Promise.all([ 
         techniciensApi.getAllTechniciens(),
         techniciensApi.getArchivedTechniciens(),
         gestionnairesApi.getAllGestionnaires(),
@@ -64,7 +61,7 @@ useEffect(() => {
 
       setTechniciens(activeTechs.data);
       setArchivedTechniciens(archivedTechs.data);
-      setGestionnaires(gestionnairesData.data.filter(g => !g.archived)); // Filtrer côté front
+      setGestionnaires(gestionnairesData.data.filter(g => !g.archived)); 
       setArchivedGestionnaires(archivedGestionnairesData);
     } catch (error) {
       message.error('Erreur de chargement initial');
@@ -102,28 +99,6 @@ useEffect(() => {
     }
   };
 
- // Modifier la fonction handleAddGestionnaire :
- const handleAddGestionnaire = async () => {
-  try {
-    setLoading(true);
-    const response = await gestionnairesApi.createGestionnaire(newGestionnaire);
-    
-    // Vérifier la réponse formatée
-    if (response && response.status === 'success') {
-      setGestionnaires([...gestionnaires, response.data]);
-      message.success('Gestionnaire ajouté avec succès');
-      setIsGestionnaireModalVisible(false);
-      setNewGestionnaire({ name: '', email: '', password: '', role: 'gestionnaire' });
-    }
-  } catch (error) {
-    // Afficher le message d'erreur spécifique
-    message.error(error.message || 'Erreur lors de la création');
-  } finally {
-    setLoading(false);
-  }
-};
-  
-
   const handleEditTechnicien = (technicien) => {
     setEditTechnicien(technicien);
     setNewTechnicien({
@@ -140,22 +115,15 @@ useEffect(() => {
       message.error('Impossible de mettre à jour : Technicien non valide.');
       return;
     }
-  
     const { email, phone, name } = newTechnicien;
-  
-    // Vérification des champs vides
     if (!name?.trim() || !email?.trim() || !phone?.trim()) {
       message.error("Tous les champs doivent être remplis.");
       return;
     }
-  
-    // Validation de l'email
     if (!isValidEmail(email)) {
       message.error("L'email n'est pas valide.");
       return;
     }
-  
-    // Validation du numéro de téléphone
     if (!isValidPhoneNumber(phone)) {
       message.error('Le numéro de téléphone doit être composé de 8 chiffres.');
       return;
@@ -175,8 +143,6 @@ useEffect(() => {
       setLoading(false);
     }
   };
-
- // Dans AdminDashboard.jsx
  const handleArchiveTechnicien = async (technicienId) => {
   try {
     setLoading(true);
@@ -220,7 +186,24 @@ useEffect(() => {
     setSelectedTechnicienDetails({ ...technicien, email: technicien.email });
     setViewModalVisible(true);
   };
-  // Ajouter ces fonctions
+  ///////////////////////////GESTIONNAIRES/////////////////////////////////////
+  const handleAddGestionnaire = async () => {
+    try {
+      setLoading(true);
+      const response = await gestionnairesApi.createGestionnaire(newGestionnaire);
+      if (response && response.status === 'success') {
+        setGestionnaires([...gestionnaires, response.data]);
+        message.success('Gestionnaire ajouté avec succès');
+        setIsGestionnaireModalVisible(false);
+        setNewGestionnaire({ name: '', email: '', password: '', role: 'gestionnaire' });
+      }
+    } catch (error) {
+      message.error(error.message || 'Erreur lors de la création');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 const handleEditGestionnaire = (gestionnaire) => {
   setEditGestionnaire(gestionnaire);
   setNewGestionnaire({
@@ -235,26 +218,19 @@ const handleEditGestionnaire = (gestionnaire) => {
 const handleUpdateGestionnaire = async () => {
   try {
     setLoading(true);
-
-    // Vérification des champs vides
     if (!newGestionnaire.name?.trim() || !newGestionnaire.email?.trim()) {
       message.error("Le nom et l'email sont obligatoires.");
       return;
     }
-
-    // Validation de l'email
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(newGestionnaire.email)) {
       message.error("L'email n'est pas valide.");
       return;
     }
-
-    // Filtrer les champs vides (si la valeur n'est pas vide ou une chaîne vide)
     const cleanData = Object.fromEntries(
       Object.entries(newGestionnaire).filter(([_, v]) => v !== '')
     );
 
-    // Envoi de la mise à jour de gestionnaire
     const response = await gestionnairesApi.updateGestionnaire(
       editGestionnaire._id, 
       cleanData
@@ -280,7 +256,7 @@ const handleArchiveGestionnaire = async (id) => {
     const archived = await gestionnairesApi.archiveGestionnaire(id);
     
     setGestionnaires(prev => prev.filter(g => g._id !== id));
-    setArchivedGestionnaires(prev => [...prev, archived]); // Utiliser directement la réponse
+    setArchivedGestionnaires(prev => [...prev, archived]); 
     
     message.success('Gestionnaire archivé');
   } catch (error) {
@@ -291,7 +267,6 @@ const handleRestoreGestionnaire = async (id) => {
   try {
     const response = await gestionnairesApi.restoreGestionnaire(id);
     
-    // Mettre à jour les deux états
     setArchivedGestionnaires(prev => prev.filter(g => g._id !== id));
     setGestionnaires(prev => [...prev, response]); // 👈 Ajouter le gestionnaire restauré
     
