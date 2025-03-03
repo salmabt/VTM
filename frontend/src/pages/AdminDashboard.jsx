@@ -9,6 +9,15 @@ const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
 const AdminDashboard = () => {
+  const isValidEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return regex.test(email);
+  };
+  // Fonction de validation pour le numéro de téléphone
+const isValidPhoneNumber = (phoneNumber) => {
+  const regex = /^[0-9]{8}$/;
+  return regex.test(phoneNumber);
+};
   const { userData, logout } = useAuth();
   const [selectedMenu, setSelectedMenu] = useState('1');
   const [loading, setLoading] = useState(false);
@@ -131,7 +140,27 @@ useEffect(() => {
       message.error('Impossible de mettre à jour : Technicien non valide.');
       return;
     }
-
+  
+    const { email, phone, name } = newTechnicien;
+  
+    // Vérification des champs vides
+    if (!name?.trim() || !email?.trim() || !phone?.trim()) {
+      message.error("Tous les champs doivent être remplis.");
+      return;
+    }
+  
+    // Validation de l'email
+    if (!isValidEmail(email)) {
+      message.error("L'email n'est pas valide.");
+      return;
+    }
+  
+    // Validation du numéro de téléphone
+    if (!isValidPhoneNumber(phone)) {
+      message.error('Le numéro de téléphone doit être composé de 8 chiffres.');
+      return;
+    }
+  
     try {
       setLoading(true);
       const { data } = await techniciensApi.updateTechnicien(editTechnicien._id, newTechnicien);
@@ -206,12 +235,26 @@ const handleEditGestionnaire = (gestionnaire) => {
 const handleUpdateGestionnaire = async () => {
   try {
     setLoading(true);
-    
-    // Filtrer les champs vides
+
+    // Vérification des champs vides
+    if (!newGestionnaire.name?.trim() || !newGestionnaire.email?.trim()) {
+      message.error("Le nom et l'email sont obligatoires.");
+      return;
+    }
+
+    // Validation de l'email
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(newGestionnaire.email)) {
+      message.error("L'email n'est pas valide.");
+      return;
+    }
+
+    // Filtrer les champs vides (si la valeur n'est pas vide ou une chaîne vide)
     const cleanData = Object.fromEntries(
       Object.entries(newGestionnaire).filter(([_, v]) => v !== '')
     );
 
+    // Envoi de la mise à jour de gestionnaire
     const response = await gestionnairesApi.updateGestionnaire(
       editGestionnaire._id, 
       cleanData
@@ -220,10 +263,10 @@ const handleUpdateGestionnaire = async () => {
     setGestionnaires(gestionnaires.map(g => 
       g._id === editGestionnaire._id ? { ...g, ...response.data } : g
     ));
-    
+
     message.success('Mise à jour réussie');
     setIsEditGestionnaireModalVisible(false);
-    
+
   } catch (error) {
     console.error('Erreur détaillée:', error);
     message.error(error.message || 'Échec de la mise à jour');
@@ -231,6 +274,7 @@ const handleUpdateGestionnaire = async () => {
     setLoading(false);
   }
 };
+
 const handleArchiveGestionnaire = async (id) => {
   try {
     const archived = await gestionnairesApi.archiveGestionnaire(id);
