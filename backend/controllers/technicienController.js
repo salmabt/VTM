@@ -2,7 +2,9 @@
 const mongoose = require('mongoose');
 const Technicien = require('../models/users');
 const createError = require('../utils/appError');
-const bcrypt = require('bcryptjs'); // Ajout de bcrypt pour hacher les mots de passe
+const bcrypt = require('bcryptjs'); 
+const jwt = require('jsonwebtoken');
+
 
 exports.createTechnicien = async (req, res, next) => {
   try {
@@ -43,6 +45,46 @@ exports.createTechnicien = async (req, res, next) => {
     next(new createError(`Erreur de création: ${error.message}`, 500)); // 500 pour erreur serveur
   }
 };
+exports.loginTechnicien = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Vérifier si l'utilisateur existe
+    const technicien = await Technicien.findOne({ email });
+    if (!technicien) {
+      return next(createError(401, 'Email ou mot de passe incorrect.'));
+    }
+
+    // Comparer le mot de passe fourni avec celui haché dans la base de données
+    const isMatch = await bcrypt.compare(password, technicien.password);
+    if (!isMatch) {
+      return next(createError(401, 'Email ou mot de passe incorrect.'));
+    }
+
+    // Créer un JWT avec un secret et une expiration de 1 heure
+    const token = jwt.sign(
+      { id: technicien._id, role: technicien.role },
+      process.env.JWT_SECRET || 'ton_secret_key', // Assure-toi que tu as une clé secrète dans ton .env
+      { expiresIn: '1h' }
+    );
+
+    // Retourner le token dans la réponse
+    res.status(200).json({
+      status: 'success',
+      token, // Envoyer le token pour que le client l'utilise pour les requêtes suivantes
+      data: {
+        technicien: {
+          id: technicien._id,
+          name: technicien.name,
+          email: technicien.email,
+          role: technicien.role
+        }
+      }
+    });
+  } catch (error) {
+    next(createError(500, error.message));
+  }
+};
 
 
 exports.getAllTechniciens = async (req, res) => {
@@ -56,6 +98,38 @@ exports.getAllTechniciens = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+exports.updateTechnicien = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { email, password, phone, skills, archived } = req.body;
+
+    // Si un mot de passe est fourni, il faut le hacher
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 12); // Hachage du mot de passe
+      req.body.password = hashedPassword; // Remplace le mot de passe dans le body avec le haché
+    }
+
+    // Mise à jour du technicien avec les données reçues
+    const updatedTechnicien = await Technicien.findByIdAndUpdate(
+      id,
+      req.body,  // Ici, req.body contient tous les champs, y compris le mot de passe haché
+      { new: true, runValidators: true }
+    );
+    if (!updatedTechnicien) {
+      return next(createError(404, 'Technicien non trouvé'));
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: updatedTechnicien
+    });
+  } catch (error) {
+    next(createError(500, error.message));
+  }
+};
+
 
 
 exports.getArchivedTechniciens = async (req, res) => {

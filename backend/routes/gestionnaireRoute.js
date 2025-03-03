@@ -1,8 +1,10 @@
-//routesgestionnaires
 // routes/gestionnaires.js
 const express = require('express');
 const router = express.Router();
 const gestionnaireController = require('../controllers/gestionnaireController');
+
+
+router.post('/login', gestionnaireController.loginGestionnaire);
 
 // POST /api/gestionnaires -> Créer un gestionnaire
 router.post('/', gestionnaireController.createGestionnaire);

@@ -1,6 +1,54 @@
 // controllers/gestionnaireController.js
 const User = require('../models/users');
 const createError = require('../utils/appError');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+
+exports.loginGestionnaire = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Vérifier si l'email et le mot de passe sont fournis
+    if (!email || !password) {
+      return next(createError(400, 'Email et mot de passe requis'));
+    }
+
+    // Vérifier si l'utilisateur existe et a le rôle gestionnaire
+    const gestionnaire = await User.findOne({ email, role: 'gestionnaire' });
+
+    if (!gestionnaire) {
+      return next(createError(401, 'Email ou mot de passe incorrect'));
+    }
+
+    // Vérifier le mot de passe
+    const isMatch = await bcrypt.compare(password, gestionnaire.password);
+    if (!isMatch) {
+      return next(createError(401, 'Email ou mot de passe incorrect'));
+    }
+
+    // Générer un token JWT
+    const token = jwt.sign(
+      { id: gestionnaire._id, role: gestionnaire.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    // Envoyer la réponse avec le token
+    res.status(200).json({
+      status: 'success',
+      token,
+      data: {
+        _id: gestionnaire._id,
+        name: gestionnaire.name,
+        email: gestionnaire.email,
+        role: gestionnaire.role
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.createGestionnaire = async (req, res, next) => {
   try {
@@ -53,13 +101,12 @@ exports.getAllGestionnaires = async (req, res, next) => {
       next(error);
     }
   };
-  // controllers/gestionnaireController.js
 
 // Mettre à jour un gestionnaire
 exports.updateGestionnaire = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, email, phone } = req.body; // Ne pas inclure le mot de passe ici
+    const { name, email, phone ,archived } = req.body; // Ne pas inclure le mot de passe ici
 
     // Vérifier les champs obligatoires
     if (!name || !email) {
@@ -69,7 +116,7 @@ exports.updateGestionnaire = async (req, res, next) => {
     // Mise à jour sélective
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      { name, email, phone },
+      { name, email, phone ,archived },
       { new: true, runValidators: true }
     );
 
@@ -84,8 +131,8 @@ exports.updateGestionnaire = async (req, res, next) => {
   }
 };
 
-// Archiver un gestionnaire (mettre isApproved à false)
-// controllers/gestionnaireController.js
+// Archiver un gestionnaire 
+
 exports.archiveGestionnaire = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -103,8 +150,6 @@ exports.archiveGestionnaire = async (req, res, next) => {
     next(error);
   }
 };
-// controllers/gestionnaireController.js
-// controllers/gestionnaireController.js
 exports.getArchivedGestionnaires = async (req, res, next) => {
   try {
     const gestionnaires = await User.find({ 

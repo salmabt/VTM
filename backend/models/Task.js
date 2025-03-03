@@ -23,11 +23,6 @@ const taskSchema = new mongoose.Schema({
     enum: ['planifié', 'en cours', 'terminé'], 
     default: 'planifié' 
   },
-  report: {
-    timeSpent: Number,
-    issues: String,
-    resolution: String
-  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Task', taskSchema);

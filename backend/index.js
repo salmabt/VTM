@@ -26,7 +26,7 @@ connectDB();
 app.use('/api/auth', authRouter);
 app.use('/api/tasks', taskRouter);
 app.use('/api/vehicules', voitureRouter);
-app.use('/api/techniciens', technicienRouter); // Ajouté
+app.use('/api/techniciens', technicienRouter); 
 app.use('/api/notes', notesRouter);
 app.use('/api/gestionnaires', gestionnairesRoutes);
 

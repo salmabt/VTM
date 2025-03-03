@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Technicien = require('../models/users');
-const { createTechnicien } = require('../controllers/technicienController');
-const { archiveTechnicien,restoreTechnicien,getArchivedTechniciens } = require('../controllers/technicienController');
-// Créer un technicien
-router.post('/', createTechnicien);
+const {createTechnicien, archiveTechnicien,restoreTechnicien,getArchivedTechniciens,updateTechnicien,loginTechnicien } = require('../controllers/technicienController');
 
-// Récupérer tous les techniciens
+router.post('/', createTechnicien);
+router.post('/login', loginTechnicien);
+
 router.get('/', async (req, res) => {
   try {
     const techniciens = await Technicien.find({ role: 'technicien' })
@@ -20,7 +19,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Mettre à jour un technicien
+
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -38,11 +37,10 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error });
   }
 });
+ 
 
 router.put('/:id/archive', archiveTechnicien);
-// Restaurer un technicien
 router.put('/:id/restore', restoreTechnicien);
-// Récupérer les techniciens archivés
 router.get('/archived', getArchivedTechniciens);
 
 
