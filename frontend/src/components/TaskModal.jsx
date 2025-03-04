@@ -1,8 +1,8 @@
-//frontend/components/taskmodal
-import React, { useState, useEffect } from 'react';
+import React from "react";
 import { Modal, Input, Select, DatePicker, Button } from "antd";
 
 const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const TaskModal = ({ 
   isModalVisible, 
@@ -13,6 +13,12 @@ const TaskModal = ({
   techniciens,
   vehiculesList
 }) => {
+  
+  const handleAddTask = async () => {
+    await handleCreateTask(); // Attendre la création de la tâche
+    setIsModalVisible(false); // Fermer la modal après succès
+  };
+
   return (
     <Modal
       title="Ajouter une tâche"
@@ -20,7 +26,7 @@ const TaskModal = ({
       onCancel={() => setIsModalVisible(false)}
       footer={null}
     >
-      {/* Ajout du champ Title */}
+      {/* Champ Titre */}
       <Input
         placeholder="Titre *"
         value={newTask.title}
@@ -28,6 +34,7 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
       
+      {/* Champ Description */}
       <Input.TextArea
         placeholder="Description *"
         value={newTask.description}
@@ -36,7 +43,7 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
 
-      {/* Ajout des champs Client et Localisation */}
+      {/* Champ Client */}
       <Input
         placeholder="Client *"
         value={newTask.client}
@@ -44,6 +51,7 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
 
+      {/* Champ Localisation */}
       <Input
         placeholder="Localisation"
         value={newTask.location}
@@ -51,6 +59,7 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
 
+      {/* Sélection du technicien */}
       <Select
         placeholder="Sélectionner un technicien *"
         onChange={(value) => setNewTask({ ...newTask, technicien: value })}
@@ -61,16 +70,22 @@ const TaskModal = ({
         style={{ marginBottom: 8, width: "100%" }}
       />
 
+      {/* Sélection du véhicule */}
       <Select
         placeholder="Sélectionner un véhicule *"
         onChange={(value) => setNewTask({...newTask, vehicule: value})}
-        options={vehiculesList.map(veh => ({
-          label: `${veh.model} (${veh.registration})`,
-          value: veh._id
-        }))}
         style={{ marginBottom: 8, width: "100%" }}
-      />
+      >
+        {vehiculesList
+          .filter(veh => veh.status === 'disponible') // Seuls les véhicules disponibles
+          .map(veh => (
+            <Option key={veh._id} value={veh._id}>
+              {veh.model} ({veh.registration})
+            </Option>
+        ))}
+      </Select>
 
+      {/* Sélection de la plage de dates */}
       <RangePicker
         showTime
         format="DD/MM/YYYY HH:mm"
@@ -82,13 +97,11 @@ const TaskModal = ({
         style={{ marginBottom: 16, width: "100%" }}
       />
 
+      {/* Bouton Ajouter */}
       <Button 
         type="primary" 
-        onClick={() => {
-          handleCreateTask();
-          setIsModalVisible(false);
-        }}
-        disabled={!newTask.title || !newTask.description || !newTask.technicien}
+        onClick={handleAddTask}
+        disabled={!newTask.title || !newTask.description || !newTask.technicien || !newTask.vehicule || !newTask.startDate || !newTask.endDate}
         block
       >
         Ajouter
