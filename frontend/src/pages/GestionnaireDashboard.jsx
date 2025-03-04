@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Input, DatePicker, Typography, Button, Card, List,
-  Select, message, Spin, Tag
+  Select, message, Spin, Tag, Modal
 } from 'antd';
 import {
   CalendarOutlined, FileTextOutlined,
@@ -39,6 +39,7 @@ const GestionnaireDashboard = () => {
   });
   // États pour les tâches
   // Ajoutez ces états dans le composant parent
+const [selectedTask, setSelectedTask] = useState(null);
 const [selectedTech, setSelectedTech] = useState(null);
 const [techTasks, setTechTasks] = useState([]);
 const [assignedVehicles, setAssignedVehicles] = useState([]);
@@ -136,6 +137,19 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
       </div>
     );
   };
+  // Ajouter ce useEffect pour synchroniser périodiquement
+useEffect(() => {
+  const interval = setInterval(async () => {
+    try {
+      const { data } = await vehiculesApi.getAllVehicules();
+      setVehiculesList(data);
+    } catch (error) {
+      console.error('Sync error:', error);
+    }
+  }, 5000); // Toutes les 5 secondes
+
+  return () => clearInterval(interval);
+}, []);
 // Modification du chargement initial
 useEffect(() => {
   const loadAllData = async () => {
@@ -156,8 +170,8 @@ useEffect(() => {
 
       setTasks(normalizedTasks);
       setTechniciens(techRes.data);
-      setVehiculesList(vehRes.data);
       setVehicules(vehRes.data);
+      setVehiculesList(vehRes.data);
 
     } catch (error) {
       console.error('Erreur initiale:', error);
@@ -232,7 +246,8 @@ useEffect(() => {
   const handleAddVehicule = async () => {
     try {
       const { data } = await vehiculesApi.createVehicule(newVehicule);
-      setVehicules([...vehicules, data]);
+      setVehicules(prev => [...prev, data]);
+      setVehiculesList(prev => [...prev, data]);
       setNewVehicule({ registration: '', model: '', status: 'disponible' });
       message.success('Véhicule ajouté avec succès');
     } catch (error) {
@@ -250,115 +265,120 @@ useEffect(() => {
   };
   // Gestion tâches
   const handleCreateTask = async () => {
+    let normalizedTask; // Déclarer la variable en haut
+    let createdTask; // Déclarer la variable pour le rollback
+  
     try {
-        // Validation des champs obligatoires améliorée
-        const requiredFields = {
-            title: 'Titre',
-            description: 'Description',
-            technicien: 'Technicien',
-            vehicule: 'Véhicule',
-            startDate: 'Date de début',
-            endDate: 'Date de fin'
-        };
-
-        const missingFields = Object.entries(requiredFields)
-            .filter(([key]) => !newTask[key])
-            .map(([, value]) => value);
-
-        if (missingFields.length > 0) {
-            return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
+      // Validation des champs obligatoires
+      const requiredFields = {
+        title: 'Titre',
+        description: 'Description',
+        technicien: 'Technicien',
+        vehicule: 'Véhicule',
+        startDate: 'Date de début',
+        endDate: 'Date de fin'
+      };
+  
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key]) => !newTask[key])
+        .map(([, value]) => value);
+  
+      if (missingFields.length > 0) {
+        return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
+      }
+  
+      // Validation des dates
+      const start = moment(newTask.startDate);
+      const end = moment(newTask.endDate);
+  
+      if (!start.isValid() || !end.isValid()) {
+        return message.error('Format de date invalide');
+      }
+  
+      if (end.isBefore(start)) {
+        return message.error('La date de fin doit être après la date de début');
+      }
+  
+      // Création de l'objet normalisé
+      normalizedTask = {
+        ...newTask,
+        technicien: newTask.technicien,
+        vehicule: newTask.vehicule,
+        startDate: start.toISOString(),
+        endDate: end.toISOString()
+      };
+  
+      // Mise à jour optimiste IMMÉDIATE du statut du véhicule
+      setVehiculesList(prev => 
+        prev.map(veh => 
+          veh._id === normalizedTask.vehicule 
+            ? { ...veh, status: 'réservé' } 
+            : veh
+        )
+      );
+  
+      // Création de la tâche
+      const response = await tasksApi.createTask(normalizedTask);
+      createdTask = response.data;
+  
+      // Mise à jour optimiste des tâches
+      setTasks(prev => [
+        ...prev,
+        {
+          ...createdTask,
+          technicien: createdTask.technicien?._id || createdTask.technicien,
+          vehicule: createdTask.vehicule?._id || createdTask.vehicule
         }
-
-        // Validation temporelle avancée
-        const start = moment(newTask.startDate);
-        const end = moment(newTask.endDate);
-
-        if (!start.isValid() || !end.isValid()) {
-            return message.error('Format de date invalide');
-        }
-
-        if (end.isBefore(start)) {
-            return message.error('La date de fin doit être après la date de début');
-        }
-
-        // Normalisation garantie des références
-        const normalizedTask = {
-            ...newTask,
-            technicien: newTask.technicien, // ID déjà sélectionné
-            vehicule: newTask.vehicule,     // ID déjà sélectionné
-            startDate: start.toISOString(),
-            endDate: end.toISOString()
-        };
-
-        // Création avec gestion optimiste
-        const { data: createdTask } = await tasksApi.createTask(normalizedTask);
-
-        // Mise à jour optimiste sécurisée
-        setTasks(prev => [
-            ...prev,
-            {
-                ...createdTask,
-                technicien: createdTask.technicien?._id || createdTask.technicien,
-                vehicule: createdTask.vehicule?._id || createdTask.vehicule
-            }
-        ]);
-
-        // ✅ Mise à jour du véhicule après la création de la tâche
-        await vehiculesApi.updateVehicule(normalizedTask.vehicule, {
-            status: 'réservé'
-        });
-
-        // Réinitialisation contrôlée
-        setNewTask({
-            title: '',
-            description: '',
-            client: '',
-            location: '',
-            startDate: null,
-            endDate: null,
-            technicien: '',
-            vehicule: '',
-            status: 'planifié'
-        });
-
-        // Fermeture modale avec délai visuel
-        setTimeout(() => setIsModalVisible(false), 500);
-
-        // ✅ Recharger la liste des tâches et des véhicules après mise à jour
-        const [freshTasks, freshVehicules] = await Promise.all([
-            tasksApi.getAllTasks(),
-            vehiculesApi.getAllVehicules()
-        ]);
-
-        // Normalisation approfondie
-        const fullyNormalizedTasks = freshTasks.data.map(task => ({
-            ...task,
-            technicien: task.technicien?._id || task.technicien,
-            vehicule: task.vehicule?._id || task.vehicule
-        }));
-
-        setTasks(fullyNormalizedTasks);
-        setVehicules(freshVehicules.data);
-
-        message.success('Tâche créée avec succès !');
-
+      ]);
+  
+      // Mise à jour API du statut du véhicule
+      await vehiculesApi.updateVehicule(normalizedTask.vehicule, {
+        status: 'réservé'
+      });
+  
+      // Réinitialisation du formulaire
+      setNewTask({
+        title: '',
+        description: '',
+        client: '',
+        location: '',
+        startDate: null,
+        endDate: null,
+        technicien: '',
+        vehicule: '',
+        status: 'planifié'
+      });
+  
+      // Fermeture du modal
+      setTimeout(() => setIsModalVisible(false), 300);
+      message.success('Tâche créée avec succès !');
+  
     } catch (error) {
-        console.error('Échec de création:', error);
-
-        // Rollback intelligent
-        if (createdTask?._id) {
-            setTasks(prev => prev.filter(t => t._id !== createdTask._id));
-        }
-
-        // Gestion d'erreur contextuelle
-        const errorMessage = error.response?.data?.message ||
-            (error.code === 'ECONNABORTED' ?
-                'Timeout - Vérifiez votre connexion' :
-                'Erreur technique');
-
-        message.error(`Échec : ${errorMessage}`);
+      // Rollback en cas d'erreur
+      if (normalizedTask) {
+        setVehiculesList(prev => 
+          prev.map(veh => 
+            veh._id === normalizedTask.vehicule 
+              ? { ...veh, status: 'disponible' } 
+              : veh
+          )
+        );
+      }
+  
+      if (createdTask?._id) {
+        setTasks(prev => prev.filter(t => t._id !== createdTask._id));
+      }
+  
+      // Gestion des erreurs
+      const errorMessage = error.response?.data?.message ||
+        (error.code === 'ECONNABORTED' 
+          ? 'Timeout - Vérifiez votre connexion' 
+          : 'Erreur technique');
+  
+      console.error('Échec de création:', error);
+      message.error(`Échec : ${errorMessage}`);
     }
-};
+  };
   const handleDeleteTask = async (id) => {
     try {
       await tasksApi.deleteTask(id);
@@ -406,6 +426,53 @@ useEffect(() => {
             onSelect={({ key }) => setSelectedMenu(key)}
           />
         </Sider>
+        {selectedTask && (
+  <Modal
+    title="Détails de la tâche"
+    visible={!!selectedTask}
+    onCancel={() => setSelectedTask(null)}
+    footer={[
+      <Button key="close" onClick={() => setSelectedTask(null)}>
+        Fermer
+      </Button>
+    ]}
+  >
+    <div>
+      <Text strong>Titre : </Text>
+      <Text>{selectedTask.title}</Text><br/>
+      
+      <Text strong>Client : </Text>
+      <Text>{selectedTask.client}</Text><br/>
+      
+      <Text strong>Localisation : </Text>
+      <Text>{selectedTask.location}</Text><br/>
+      
+      <Text strong>Période : </Text>
+      <Text>
+        {moment(selectedTask.startDate).format('DD/MM HH:mm')} - 
+        {moment(selectedTask.endDate).format('DD/MM HH:mm')}
+      </Text><br/>
+      
+      <Text strong>Technicien : </Text>
+      <Text>
+        {selectedTask.technicien?.name || 'Non assigné'}
+      </Text><br/>
+      
+      <Text strong>Véhicule : </Text>
+      <Text>
+      {selectedTask.vehicule?.model || 'Non assigné'}
+      </Text><br/>
+      
+      <Text strong>Statut : </Text>
+      <Tag color={
+        selectedTask.status === 'planifié' ? 'blue' :
+        selectedTask.status === 'en cours' ? 'orange' : 'green'
+      }>
+        {selectedTask.status}
+      </Tag>
+    </div>
+  </Modal>
+)}
         <Layout>
           <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -434,18 +501,19 @@ useEffect(() => {
                     />
     
                     <Calendar
-                      localizer={localizer}
-                      events={tasks.map(task => {
-                        const tech = techniciens.find(t => t._id === task.technicien);
-                        const veh = vehicules.find(v => v._id === task.vehicule);
-                        return {
-                          title: `${task.title} - ${tech?.name || 'Non assigné'}`, 
-                          start: new Date(task.startDate),
-                          end: new Date(task.endDate),
-                          allDay: false,
-                          resource: { ...task, technicien: tech, vehicule: veh }
-                        };
-                      })}
+                     localizer={localizer}
+                     events={tasks.map(task => {
+                       const tech = techniciens.find(t => t._id === task.technicien);
+                       const veh = vehicules.find(v => v._id === task.vehicule);
+                       return {
+                         title: `${task.title} - ${tech?.name || 'Non assigné'}`,
+                         start: new Date(task.startDate),
+                         end: new Date(task.endDate),
+                         allDay: false,
+                         resource: { ...task, technicien: tech, vehicule: veh }
+                       };
+                     })}
+                     onSelectEvent={(event) => setSelectedTask(event.resource)}
                               startAccessor="start"
                               endAccessor="end"
                               style={{ height: 600 }}
@@ -553,18 +621,29 @@ useEffect(() => {
                       }))}
                       onChange={value => setNewTask({...newTask, technicien: value})}
                     />
-                   <Select
-                            placeholder="Sélectionner un véhicule *"
-                            onChange={(value) => setNewTask({...newTask, vehicule: value})}
-                          >
-                            {vehiculesList
-                              .filter(veh => veh.status === 'disponible') // Filtre ajouté ici
-                              .map(veh => (
-                                <Option key={veh._id} value={veh._id}>
-                                  {veh.model} ({veh.registration})
-                                </Option>
-                            ))}
-                          </Select>
+                 <Select
+  placeholder="Sélectionner un véhicule *"
+  onChange={(value) => setNewTask({...newTask, vehicule: value})}
+  value={newTask.vehicule}
+  showSearch
+  optionFilterProp="children"
+  filterOption={(input, option) => 
+    option.children.toLowerCase().includes(input.toLowerCase())
+  }
+  allowClear
+  style={{ width: '100%' }}
+>
+  {vehiculesList
+    .filter(veh => 
+      veh.status === 'disponible' || 
+      veh._id === newTask.vehicule // Garde le véhicule sélectionné visible
+    )
+    .map(veh => (
+      <Option key={veh._id} value={veh._id}>
+        {veh.model} ({veh.registration}) - {veh.status}
+      </Option>
+    ))}
+</Select>
                     <Button
                       type="primary"
                       onClick={handleCreateTask}
@@ -728,6 +807,7 @@ useEffect(() => {
           )}
              </>
                     )}
+                    
                   </Content>
                 </Layout>
               </Layout>
