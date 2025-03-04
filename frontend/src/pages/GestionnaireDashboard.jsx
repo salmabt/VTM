@@ -428,50 +428,55 @@ useEffect(() => {
         </Sider>
         {selectedTask && (
   <Modal
-    title="Détails de la tâche"
-    visible={!!selectedTask}
-    onCancel={() => setSelectedTask(null)}
-    footer={[
-      <Button key="close" onClick={() => setSelectedTask(null)}>
-        Fermer
-      </Button>
-    ]}
-  >
-    <div>
-      <Text strong>Titre : </Text>
-      <Text>{selectedTask.title}</Text><br/>
-      
-      <Text strong>Client : </Text>
-      <Text>{selectedTask.client}</Text><br/>
-      
-      <Text strong>Localisation : </Text>
-      <Text>{selectedTask.location}</Text><br/>
-      
-      <Text strong>Période : </Text>
-      <Text>
-        {moment(selectedTask.startDate).format('DD/MM HH:mm')} - 
-        {moment(selectedTask.endDate).format('DD/MM HH:mm')}
-      </Text><br/>
-      
-      <Text strong>Technicien : </Text>
-      <Text>
-        {selectedTask.technicien?.name || 'Non assigné'}
-      </Text><br/>
-      
-      <Text strong>Véhicule : </Text>
-      <Text>
-      {selectedTask.vehicule?.model || 'Non assigné'}
-      </Text><br/>
-      
-      <Text strong>Statut : </Text>
-      <Tag color={
-        selectedTask.status === 'planifié' ? 'blue' :
-        selectedTask.status === 'en cours' ? 'orange' : 'green'
-      }>
-        {selectedTask.status}
-      </Tag>
-    </div>
-  </Modal>
+  title="Détails de la tâche"
+  visible={!!selectedTask}
+  onCancel={() => setSelectedTask(null)}
+  footer={[
+    <Button key="close" onClick={() => setSelectedTask(null)}>
+      Fermer
+    </Button>
+  ]}
+>
+  <div>
+    <Text strong>Titre : </Text>
+    <Text>{selectedTask.title}</Text><br/>
+    
+    <Text strong>Client : </Text>
+    <Text>{selectedTask.client}</Text><br/>
+    
+    <Text strong>Localisation : </Text>
+    <Text>{selectedTask.location}</Text><br/>
+    
+    {/* Modification ici pour afficher seulement l'heure */}
+   {/* Modifier l'affichage de la période */}
+<Text strong>Période : </Text>
+<Text>
+  {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
+  {moment(selectedTask.endDate).format('DD/MM HH:mm')}
+</Text><br/>
+
+
+    
+    <Text strong>Technicien : </Text>
+    <Text>
+      {selectedTask.technicien?.name || 'Non assigné'}
+    </Text><br/>
+    
+    <Text strong>Véhicule : </Text>
+    <Text>
+    {selectedTask.vehicule?.model || 'Non assigné'}
+    </Text><br/>
+    
+    <Text strong>Statut : </Text>
+    <Tag color={
+      selectedTask.status === 'planifié' ? 'blue' :
+      selectedTask.status === 'en cours' ? 'orange' : 'green'
+    }>
+      {selectedTask.status}
+    </Tag>
+  </div>
+</Modal>
+
 )}
         <Layout>
           <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -532,15 +537,16 @@ useEffect(() => {
                                   `${moment(start).format("DD/MM/YYYY")} – ${moment(end).format("DD/MM/YYYY")}`
                               }}
                               selectable
+                            // Dans le composant Calendar
                               onSelectSlot={(slotInfo) => {
-                                  setSelectedDate(slotInfo.start);
-                                  setNewTask({ ...newTask, startDate: slotInfo.start });
-                                  setIsModalVisible(true);
+                                setNewTask({ 
+                                  ...newTask,
+                                  startDate: slotInfo.start.toISOString(),
+                                  endDate: slotInfo.end.toISOString() // Ajouter la date de fin
+                                });
+                                setIsModalVisible(true);
                               }}
-                              eventPropGetter={eventStyleGetter} // Appliquer le style personnalisé
-                              components={{
-                                event: CustomEvent // Utiliser le composant personnalisé pour les événements
-                              }}
+                              
                             />
                             </Card>
                             )}

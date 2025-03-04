@@ -1,7 +1,11 @@
+//TaskModel 
 import React from "react";
-import { Modal, Input, Select, DatePicker, Button } from "antd";
+import { Modal, Input, Select, Button, Typography,TimePicker  } from "antd";
+import moment from "moment";
 
-const { RangePicker } = DatePicker;
+const { Text } = Typography;
+
+//const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 const TaskModal = ({ 
@@ -84,24 +88,15 @@ const TaskModal = ({
             </Option>
         ))}
       </Select>
+      
 
-      {/* Sélection de la plage de dates */}
-      <RangePicker
-        showTime
-        format="DD/MM/YYYY HH:mm"
-        onChange={(dates) => setNewTask({
-          ...newTask,
-          startDate: dates?.[0]?.toISOString(),
-          endDate: dates?.[1]?.toISOString()
-        })}
-        style={{ marginBottom: 16, width: "100%" }}
-      />
+      
 
       {/* Bouton Ajouter */}
       <Button 
         type="primary" 
         onClick={handleAddTask}
-        disabled={!newTask.title || !newTask.description || !newTask.technicien || !newTask.vehicule || !newTask.startDate || !newTask.endDate}
+        disabled={!newTask.title || !newTask.description || !newTask.technicien || !newTask.vehicule }
         block
       >
         Ajouter

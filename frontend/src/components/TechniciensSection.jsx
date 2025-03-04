@@ -1,3 +1,4 @@
+//components/Techniciens.jsx
 import React, { useState, useEffect } from 'react';
 import { Avatar, Card, List, Tag, Typography, Divider, Button, Spin, Modal } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
@@ -169,15 +170,24 @@ const TechniciensSection = ({
     <List.Item style={{ padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
       <div style={{ flex: 1 }}>
         <Text strong style={{ display: 'block' }}>{task.title}</Text>
-        <Text type="secondary">
-          {moment(task.startDate).format('DD/MM HH:mm')} -{' '}
-          {moment(task.endDate).format('DD/MM HH:mm')}
-        </Text>
+       {/* Remplacer le format de date dans TaskListItem */}
+<Text type="secondary">
+  {moment(task.startDate).format('DD/MM HH:mm')} -{' '}
+  {moment(task.endDate).format('DD/MM HH:mm')}
+</Text>
+
       </div>
-      <div>
-        <Text type="secondary">
-          {vehicules.find(v => v._id === task.vehicule)?.model || 'Véhicule non spécifié'}
-        </Text>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        
+        <Tag 
+          color={
+            task.status === 'planifié' ? 'blue' :
+            task.status === 'en cours' ? 'orange' : 'green'
+          }
+          style={{ marginLeft: 8 }}
+        >
+          {task.status}
+        </Tag>
       </div>
     </List.Item>
   );
