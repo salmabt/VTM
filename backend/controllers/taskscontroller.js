@@ -238,3 +238,60 @@ exports.updateTaskStatus = async (req, res) => {
     });
   }
 };
+// Récupérer les pièces jointes d'une tâche spécifique
+exports.getTaskAttachments = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ message: 'Tâche introuvable' });
+    }
+
+    if (task.attachments && task.attachments.length > 0) {
+      res.json(task.attachments); // Retourne les informations sur les fichiers (nom, taille, type)
+    } else {
+      res.status(404).json({ message: 'Aucune pièce jointe trouvée' });
+    }
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des pièces jointes:', error);
+    res.status(500).json({
+      message: 'Échec de la récupération des pièces jointes',
+      error: error.message,
+    });
+  }
+};
+
+
+// Récupérer une pièce jointe spécifique d'une tâche
+exports.getAttachmentFile = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ message: 'Tâche introuvable' });
+    }
+
+    const attachment = task.attachments.find(file => file.filename === req.params.filename);
+
+    if (!attachment) {
+      return res.status(404).json({ message: 'Pièce jointe introuvable' });
+    }
+
+    const filePath = path.join(__dirname, '../uploads', attachment.filename);
+
+    // Vérifiez si le fichier existe
+    if (fs.existsSync(filePath)) {
+      res.download(filePath, attachment.originalName); // Envoie le fichier à l'utilisateur
+    } else {
+      res.status(404).json({ message: 'Fichier introuvable' });
+    }
+
+  } catch (error) {
+    console.error('Erreur lors du téléchargement de la pièce jointe:', error);
+    res.status(500).json({
+      message: 'Échec du téléchargement',
+      error: error.message,
+    });
+  }
+};

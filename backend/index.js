@@ -31,6 +31,7 @@ app.use('/api/techniciens', technicienRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/gestionnaires', gestionnairesRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Gestion des erreurs
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
