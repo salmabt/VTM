@@ -37,6 +37,27 @@ const TechnicienDashboard = () => {
 
     loadTasks();
   }, [userData?._id]);
+  const handleGetAttachments = async (taskId) => {
+    try {
+      const response = await tasksApi.getTaskAttachments(taskId); // Appel API pour récupérer les pièces jointes
+      console.log('Pièces jointes:', response.data);
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === taskId ? { ...task, attachments: response.data } : task
+        )
+      );
+    } catch (error) {
+      console.error('Erreur lors de la récupération des pièces jointes:', error);
+      message.error('Erreur lors de la récupération des pièces jointes');
+    }
+  };
+  
+  
+  const handleDownloadAttachment = (taskId, filename) => {
+    window.open(`/api/tasks/${taskId}/attachments/${filename}`, '_blank');
+  };
+  
+  
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
@@ -98,33 +119,53 @@ const TechnicienDashboard = () => {
           ) : (
             <Card title="Mes Tâches" bordered={false}>
               <List
-                dataSource={tasks}
-                renderItem={task => (
-                  <List.Item key={task._id}>
-                    <List.Item.Meta
-                      title={task.title}
-                      description={
-                        <>
-                          <Text>Statut: </Text>
-                          <Select
-                            defaultValue={task.status}
-                            style={{ width: 120, marginBottom: 8 }}
-                            onChange={(value) => handleStatusChange(task._id, value)}
-                          >
-                            <Option value="planifié">Planifié</Option>
-                            <Option value="en cours">En cours</Option>
-                            <Option value="terminé">Terminé</Option>
-                          </Select>
-                          <br />
-                          <Text>Description: {task.description}</Text><br />
-                          <Text>Client: {task.client}</Text><br />
-                          <Text>Localisation: {task.location}</Text><br />
-                        </>
-                      }
-                    />
-                  </List.Item>
-                )}
-              />
+  dataSource={tasks}
+  renderItem={task => (
+    <List.Item key={task._id}>
+      <List.Item.Meta
+        title={task.title}
+        description={
+          <>
+            <Text>Statut: </Text>
+            <Select
+              defaultValue={task.status}
+              style={{ width: 120, marginBottom: 8 }}
+              onChange={(value) => handleStatusChange(task._id, value)}
+            >
+              <Option value="planifié">Planifié</Option>
+              <Option value="en cours">En cours</Option>
+              <Option value="terminé">Terminé</Option>
+            </Select>
+            <br />
+            <Text>Description: {task.description}</Text><br />
+            <Text>Client: {task.client}</Text><br />
+            <Text>Localisation: {task.location}</Text><br />
+
+            {/* Affichage des pièces jointes */}
+            {task.attachments && task.attachments.length > 0 && (
+              <div>
+                <Text strong>Pièces jointes :</Text>
+                <ul>
+                  {task.attachments.map((attachment, index) => (
+                    <li key={index}>
+                      <a
+                        href="#"
+                        onClick={() => handleDownloadAttachment(task._id, attachment.filename)}
+                      >
+                        {attachment.originalName}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        }
+      />
+    </List.Item>
+  )}
+/>
+
             </Card>
           )}
         </Content>

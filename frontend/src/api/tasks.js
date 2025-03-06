@@ -19,7 +19,6 @@ const tasksApi = {
     });
   },
 
-
   // Gestion des tâches
   getAllTasks: () => api.get('/tasks'),
   getTaskById: (id) => api.get(`/tasks/${id}`),
@@ -41,6 +40,17 @@ const tasksApi = {
   getTaskReport: (taskId) => api.get(`/tasks/${taskId}/report`),
   updateTaskStatus: (taskId, statusData) => api.patch(`/tasks/${taskId}/status`, statusData),
   addTaskReport: (taskId, reportData) => api.post(`/tasks/${taskId}/report`, reportData),
+
+  // Récupérer les pièces jointes d'une tâche
+  getTaskAttachments: (taskId) => api.get(`/tasks/${taskId}/attachments`),
+
+  // Télécharger une pièce jointe spécifique d'une tâche
+  downloadAttachment: (taskId, filename) => {
+    // Envoie une requête pour télécharger le fichier
+    return api.get(`/tasks/${taskId}/attachments/${filename}`, {
+      responseType: 'blob', // Important pour télécharger des fichiers binaires
+    });
+  }
 };
 
 // Intercepteur pour gérer les erreurs globales

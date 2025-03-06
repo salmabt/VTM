@@ -1,4 +1,3 @@
-//components/Techniciens.jsx
 import React, { useState, useEffect } from 'react';
 import { Avatar, Card, List, Tag, Typography, Divider, Button, Spin, Modal } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
@@ -16,7 +15,7 @@ const TechniciensSection = ({
     onTasksUpdate,
     assignedVehicles,
     onVehiclesUpdate 
-  }) => {
+}) => {
     const [loadingTasks, setLoadingTasks] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -117,107 +116,114 @@ const TechniciensSection = ({
         </Modal>
       </div>
     );
-  };
+};
 
-  // Les sous-composants restent inchangés
-  const UserInfoSection = ({ selectedTech }) => (
+// Les sous-composants restent inchangés
+const UserInfoSection = ({ selectedTech }) => (
+  <div>
+    <Title level={5} style={{ color: '#1890ff' }}>Informations personnelles</Title>
+    <div style={{ lineHeight: 1.6 }}>
+      <Text strong>Email: </Text>{selectedTech.email || 'Non renseigné'}<br/>
+      <Text strong>Téléphone: </Text>{selectedTech.phone || 'Non renseigné'}
+    </div>
+  </div>
+);
+
+const SkillsSection = ({ selectedTech }) => (
+  <>
+    <Divider />
     <div>
-      <Title level={5} style={{ color: '#1890ff' }}>Informations personnelles</Title>
-      <div style={{ lineHeight: 1.6 }}>
-        <Text strong>Email: </Text>{selectedTech.email || 'Non renseigné'}<br/>
-        <Text strong>Téléphone: </Text>{selectedTech.phone || 'Non renseigné'}
+      <Title level={5} style={{ color: '#1890ff' }}>Compétences techniques</Title>
+      <div style={{ marginTop: 8 }}>
+        {selectedTech.skills?.length > 0 ? (
+          selectedTech.skills.map((skill, index) => (
+            <Tag key={index} color="blue" style={{ margin: 4, borderRadius: 12 }}>
+              {skill}
+            </Tag>
+          ))
+        ) : (
+          <Text type="secondary">Aucune compétence enregistrée</Text>
+        )}
       </div>
     </div>
-  );
+  </>
+);
 
-  const SkillsSection = ({ selectedTech }) => (
-    <>
-      <Divider />
-      <div>
-        <Title level={5} style={{ color: '#1890ff' }}>Compétences techniques</Title>
-        <div style={{ marginTop: 8 }}>
-          {selectedTech.skills?.length > 0 ? (
-            selectedTech.skills.map((skill, index) => (
-              <Tag key={index} color="blue" style={{ margin: 4, borderRadius: 12 }}>
-                {skill}
-              </Tag>
-            ))
-          ) : (
-            <Text type="secondary">Aucune compétence enregistrée</Text>
-          )}
-        </div>
-      </div>
-    </>
-  );
+const TasksSection = ({ tasks, vehicules }) => (
+  <>
+    <Divider />
+    <div>
+      <Title level={5} style={{ color: '#1890ff' }}>Interventions planifiées</Title>
+      <List
+        size="small"
+        dataSource={tasks}
+        renderItem={task => (
+          <TaskListItem task={task} vehicules={vehicules} />
+        )}
+      />
+    </div>
+  </>
+);
 
-  const TasksSection = ({ tasks, vehicules }) => (
-    <>
-      <Divider />
-      <div>
-        <Title level={5} style={{ color: '#1890ff' }}>Interventions planifiées</Title>
-        <List
-          size="small"
-          dataSource={tasks}
-          renderItem={task => (
-            <TaskListItem task={task} vehicules={vehicules} />
-          )}
-        />
-      </div>
-    </>
-  );
-
-  const TaskListItem = ({ task, vehicules }) => (
-    <List.Item style={{ padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
-      <div style={{ flex: 1 }}>
-        <Text strong style={{ display: 'block' }}>{task.title}</Text>
-       {/* Remplacer le format de date dans TaskListItem */}
-<Text type="secondary">
-  {moment(task.startDate).format('DD/MM HH:mm')} -{' '}
-  {moment(task.endDate).format('DD/MM HH:mm')}
-</Text>
-
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        
-        <Tag 
-          color={
-            task.status === 'planifié' ? 'blue' :
-            task.status === 'en cours' ? 'orange' : 'green'
-          }
-          style={{ marginLeft: 8 }}
-        >
-          {task.status}
-        </Tag>
-      </div>
-    </List.Item>
-  );
-
-  const VehiclesSection = ({ vehicles }) => (
-    <>
-      <Divider />
-      <div>
-        <Title level={5} style={{ color: '#1890ff' }}>Véhicules attribués</Title>
-        <List
-          size="small"
-          dataSource={vehicles}
-          renderItem={veh => (
-            <VehicleListItem vehicle={veh} />
-          )}
-        />
-      </div>
-    </>
-  );
-
-  const VehicleListItem = ({ vehicle }) => (
-    <List.Item>
-      <div style={{ flex: 1 }}>
-        <Text strong>{vehicle.model}</Text>
-        <Text type="secondary">{vehicle.registration}</Text>
-      </div>
-      <Tag color={vehicle.status === 'disponible' ? 'green' : 'orange'}>
-        {vehicle.status}
+const TaskListItem = ({ task, vehicules }) => (
+  <List.Item style={{ padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+    <div style={{ flex: 1 }}>
+      <Text strong style={{ display: 'block' }}>{task.title}</Text>
+      <Text type="secondary">
+        {moment(task.startDate).format('DD/MM HH:mm')} -{' '}
+        {moment(task.endDate).format('DD/MM HH:mm')}
+      </Text>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <Tag 
+        color={
+          task.status === 'planifié' ? 'blue' :
+          task.status === 'en cours' ? 'orange' : 'green'
+        }
+        style={{ marginLeft: 8 }}
+      >
+        {task.status}
       </Tag>
-    </List.Item>
-  );
+      {task.attachment && (
+        <Button 
+          type="link" 
+          href={task.attachment} 
+          target="_blank" 
+          icon={<UserOutlined />}
+        >
+          Télécharger la pièce jointe
+        </Button>
+      )}
+    </div>
+  </List.Item>
+);
 
-  export default TechniciensSection;
+const VehiclesSection = ({ vehicles }) => (
+  <>
+    <Divider />
+    <div>
+      <Title level={5} style={{ color: '#1890ff' }}>Véhicules attribués</Title>
+      <List
+        size="small"
+        dataSource={vehicles}
+        renderItem={veh => (
+          <VehicleListItem vehicle={veh} />
+        )}
+      />
+    </div>
+  </>
+);
+
+const VehicleListItem = ({ vehicle }) => (
+  <List.Item>
+    <div style={{ flex: 1 }}>
+      <Text strong>{vehicle.model}</Text>
+      <Text type="secondary">{vehicle.registration}</Text>
+    </div>
+    <Tag color={vehicle.status === 'disponible' ? 'green' : 'orange'}>
+      {vehicle.status}
+    </Tag>
+  </List.Item>
+);
+
+export default TechniciensSection;
