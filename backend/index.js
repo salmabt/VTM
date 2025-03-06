@@ -2,15 +2,16 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
-
 const authRouter = require('./routes/authRoute');
 const taskRouter = require('./routes/tasksRoutes');
 const voitureRouter = require('./routes/voitureRoutes');
 const technicienRouter = require('./routes/technicienRoutes'); // Ajouté
 const notesRouter = require('./routes/notesRoute'); 
 const gestionnairesRoutes = require('./routes/gestionnaireRoute');
-
+const { upload } = require('./config/multer');
+const path = require('path'); 
 const app = express();
+
 
 // Middleware
 app.use(cors({
@@ -29,7 +30,7 @@ app.use('/api/vehicules', voitureRouter);
 app.use('/api/techniciens', technicienRouter); 
 app.use('/api/notes', notesRouter);
 app.use('/api/gestionnaires', gestionnairesRoutes);
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Gestion des erreurs
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

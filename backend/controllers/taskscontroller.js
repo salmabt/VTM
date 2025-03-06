@@ -1,10 +1,14 @@
 const Task = require('../models/Task');
 const Technicien = require('../models/users');
 const Voiture = require('../models/Voiture');
+const fs = require('fs');
+const path = require('path');
 
 // Créer une nouvelle tâche
 exports.createTask = async (req, res) => {
   try {
+    console.log('Fichiers reçus:', req.files); // Debug
+    console.log('Corps de la requête:', req.body); // Debug
     console.log('Validation des références:', {
       technicien: req.body.technicien,
       vehicule: req.body.vehicule
@@ -28,8 +32,18 @@ exports.createTask = async (req, res) => {
         }
       });
     }
+    const attachments = req.files?.map(file => ({
+      filename: file.filename,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: file.size
+    })) || [];
 
-    const newTask = await Task.create(req.body);
+    const taskData = {
+      ...req.body,
+      attachments
+    };
+    const newTask = await Task.create(taskData);
     const populated = await Task.findById(newTask._id)
       .populate('technicien')
       .populate('vehicule');
@@ -38,6 +52,10 @@ exports.createTask = async (req, res) => {
     res.status(201).json(populated);
 
   } catch (error) {
+    // Supprimer les fichiers uploadés en cas d'erreur
+    req.files?.forEach(file => {
+      fs.unlinkSync(file.path);
+    });
     console.error('Erreur critique création:', error);
     res.status(400).json({
       message: 'Échec de la création',
@@ -140,16 +158,18 @@ exports.deleteTask = async (req, res) => {
     const task = await Task.findByIdAndDelete(req.params.id);
     
     if (!task) {
-      console.warn('Tentative suppression ID inexistant:', req.params.id);
       return res.status(404).json({ message: 'Tâche introuvable' });
     }
 
-    console.log('Tâche supprimée:', task._id);
-    res.json({ 
-      message: 'Suppression réussie',
-      deletedId: task._id 
+    // Suppression des fichiers
+    task.attachments.forEach(attachment => {
+      const filePath = path.join(__dirname, '../uploads', attachment.filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     });
 
+    res.json({ message: 'Suppression réussie' });
   } catch (error) {
     console.error('Erreur suppression:', error);
     res.status(500).json({

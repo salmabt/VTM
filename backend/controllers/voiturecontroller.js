@@ -19,9 +19,9 @@ exports.createVehicule = async (req, res) => {
 // ➜ Obtenir tous les véhicules
 exports.getAllVehicules = async (req, res) => {
   try {
-    console.log('Récupération de tous les véhicules');
+    //console.log('Récupération de tous les véhicules');
     const vehicules = await Vehicule.find();
-    console.log('Véhicules récupérés:', vehicules);
+    //console.log('Véhicules récupérés:', vehicules);
     res.json(vehicules);
   } catch (err) {
     console.error('Erreur lors de la récupération des véhicules:', err);

@@ -23,6 +23,13 @@ const taskSchema = new mongoose.Schema({
     enum: ['planifié', 'en cours', 'terminé'], 
     default: 'planifié' 
   },
+  attachments: [{
+    filename: String,
+    originalName: String,
+    mimeType: String,
+    size: Number,
+    uploadedAt: { type: Date, default: Date.now }
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Task', taskSchema);

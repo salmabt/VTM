@@ -1,4 +1,5 @@
 const express = require('express');
+const { upload } = require('../config/multer');
 const router = express.Router();
 const {
   createTask,
@@ -11,11 +12,20 @@ const {
 } = require('../controllers/taskscontroller'); // Assurez-vous que le chemin est correct
 
 // Routes pour les tâches
-router.post('/', createTask);
+router.post('/', 
+  upload.array('attachments', 5), // Accepter jusqu'à 5 fichiers
+  (req, res, next) => {
+    console.log('Fichiers reçus:', req.files);
+    next();
+  },
+  createTask
+);
 router.get('/', getAllTasks);
 router.get('/:id', getTaskById);
+router.put('/:id', upload.array('attachments'), updateTask);
 router.put('/:id', updateTask);
 router.delete('/:id', deleteTask);
+
 
 // Route pour récupérer les tâches d'un technicien spécifique
 router.get('/technicien/:technicienId', getTasksByTechnicien);
