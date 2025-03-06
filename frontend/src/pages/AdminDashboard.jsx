@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Input, Button, List, Card, Typography, message, Spin, Modal, Popconfirm } from 'antd';
+import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm } from 'antd';
 import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import techniciensApi from '../api/techniciens';
@@ -77,7 +77,8 @@ const AdminDashboard = () => {
     endDate: null,
     technicien: '',
     vehicule: '',
-    status: 'planifié'
+    status: 'planifié',
+    files: []
   });
 
   useEffect(() => {
@@ -100,6 +101,13 @@ const AdminDashboard = () => {
         setTasks(tasksData.data);
         setVehicules(vehRes.data);
         setVehiculesList(vehRes.data);
+        const normalizedTasks = tasksData.data.map(task => ({
+          ...task,
+          technicien: task.technicien?._id || task.technicien, // Extrait l'ID du technicien
+          vehicule: task.vehicule?._id || task.vehicule // Extrait l'ID du véhicule
+        }));
+        
+        setTasks(normalizedTasks); 
 
         console.log('Techniciens:', activeTechs.data);
         console.log('Tâches:', tasksData.data);
@@ -311,28 +319,110 @@ const AdminDashboard = () => {
 };
 
 
-  const handleCreateTask = async () => {
-    try {
-      const response = await tasksApi.createTask(newTask);
-      setTasks([...tasks, response.data]);
-      message.success('Tâche créée avec succès');
-      setNewTask({
-        title: '',
-        description: '',
-        client: '',
-        location: '',
-        startDate: null,
-        endDate: null,
-        technicien: '',
-        vehicule: '',
-        status: 'planifié',
-      });
-      setIsTaskModalVisible(false);
-    } catch (error) {
-      message.error('Erreur lors de la création de la tâche');
-    }
-  };
-
+    // Gestion tâches
+    const handleCreateTask = async () => {
+      try {
+        // Validation des champs obligatoires
+        const requiredFields = {
+          title: 'Titre',
+          description: 'Description',
+          technicien: 'Technicien', 
+          vehicule: 'Véhicule',
+          startDate: 'Date de début',
+          endDate: 'Date de fin'
+        };
+    
+        const missingFields = Object.entries(requiredFields)
+          .filter(([key]) => !newTask[key])
+          .map(([, value]) => value);
+    
+        if (missingFields.length > 0) {
+          return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
+        }
+    
+        // Validation des dates
+        const start = moment(newTask.startDate);
+        const end = moment(newTask.endDate);
+    
+        if (!start.isValid() || !end.isValid()) {
+          return message.error('Format de date invalide');
+        }
+    
+        if (end.isBefore(start)) {
+          return message.error('La date de fin doit être après la date de début');
+        }
+    
+        // Création du FormData
+        const formData = new FormData();
+        formData.append('title', newTask.title);
+        formData.append('description', newTask.description);
+        formData.append('client', newTask.client);
+        formData.append('location', newTask.location);
+        formData.append('technicien', newTask.technicien);
+        formData.append('vehicule', newTask.vehicule);
+        formData.append('startDate', start.toISOString());
+        formData.append('endDate', end.toISOString());
+        
+    
+        // Dans handleCreateTask, modifier la section des fichiers :
+        if (newTask.files?.length > 0) {
+          newTask.files.forEach(file => {
+            console.log(file);  // Vérifier chaque fichier ajouté
+            formData.append('attachments', file);
+          });
+        }
+        
+    
+        // Envoi de la requête
+        const response = await tasksApi.createTask(formData);
+        const createdTask = response.data;
+    
+        // Mise à jour optimiste
+        setVehiculesList(prev => 
+          prev.map(veh => 
+            veh._id === newTask.vehicule 
+              ? { ...veh, status: 'réservé' } 
+              : veh
+          )
+        );
+    
+        setTasks(prev => [
+          ...prev,
+          {
+            ...createdTask,
+            technicien: createdTask.technicien?._id,
+            vehicule: createdTask.vehicule?._id
+          }
+        ]);
+    
+        // Réinitialisation du formulaire
+        setNewTask({
+          title: '',
+          description: '',
+          client: '',
+          location: '',
+          startDate: null,
+          endDate: null,
+          technicien: '',
+          vehicule: '',
+          status: 'planifié',
+          files: []
+        });
+    
+        setIsModalVisible(false);
+        message.success('Tâche créée avec succès !');
+    
+      } catch (error) {
+        // Gestion des erreurs
+        const errorMessage = error.response?.data?.message ||
+          (error.code === 'ECONNABORTED' 
+            ? 'Timeout - Vérifiez votre connexion' 
+            : 'Erreur technique');
+    
+        console.error('Échec de création:', error);
+        message.error(`Échec : ${errorMessage}`);
+      }
+    };
  
 
   const menuItems = [
@@ -439,56 +529,71 @@ const AdminDashboard = () => {
                 </Card>
               )}
 
-              {selectedTask && (
-                <Modal
-                  title="Détails de la tâche"
-                  visible={!!selectedTask}
-                  onCancel={() => setSelectedTask(null)}
-                  footer={[
-                    <Button key="close" onClick={() => setSelectedTask(null)}>
-                      Fermer
-                    </Button>,
-                  ]}
+                    {selectedTask && (
+              <Modal
+              title="Détails de la tâche"
+              visible={!!selectedTask}
+              onCancel={() => setSelectedTask(null)}
+              footer={[
+                <Button key="close" onClick={() => setSelectedTask(null)}>
+                  Fermer
+                </Button>
+              ]}
+            >
+              <div>
+                <Text strong>Titre : </Text>
+                <Text>{selectedTask.title}</Text><br/>
+                
+                <Text strong>Client : </Text>
+                <Text>{selectedTask.client}</Text><br/>
+                
+                <Text strong>Localisation : </Text>
+                <Text>{selectedTask.location}</Text><br/>
+                
+                {/* Modification ici pour afficher seulement l'heure */}
+               {/* Modifier l'affichage de la période */}
+            <Text strong>Période : </Text>
+            <Text>
+              {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
+              {moment(selectedTask.endDate).format('DD/MM HH:mm')}
+            </Text><br/>
+            
+            
+                
+                <Text strong>Technicien : </Text>
+                <Text>
+                  {selectedTask.technicien?.name || 'Non assigné'}
+                </Text><br/>
+                
+                <Text strong>Véhicule : </Text>
+                <Text>
+                {selectedTask.vehicule?.model || 'Non assigné'}
+                </Text><br/>
+                
+                <Text strong>Statut : </Text>
+                <Tag color={
+                  selectedTask.status === 'planifié' ? 'blue' :
+                  selectedTask.status === 'en cours' ? 'orange' : 'green'
+                }>
+                  {selectedTask.status}
+                  
+                </Tag>
+                <Text strong>Pièces jointes :</Text>
+            {selectedTask.attachments?.map(attachment => (
+              <div key={attachment.filename}>
+                <a 
+                  href={`http://localhost:3000/uploads/${attachment.filename}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <div>
-                    <Text strong>Titre : </Text>
-                    <Text>{selectedTask.title}</Text>
-                    <br />
-                    <Text strong>Client : </Text>
-                    <Text>{selectedTask.client}</Text>
-                    <br />
-                    <Text strong>Localisation : </Text>
-                    <Text>{selectedTask.location}</Text>
-                    <br />
-                    <Text strong>Période : </Text>
-                    <Text>
-                      {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
-                      {moment(selectedTask.endDate).format('DD/MM HH:mm')}
-                    </Text>
-                    <br />
-                    <Text strong>Technicien : </Text>
-                    <Text>{selectedTask.technicien?.name || 'Non assigné'}</Text>
-                    <br />
-                    <Text strong>Véhicule : </Text>
-                    <Text>
-                      {selectedTask.vehicule?.model} ({selectedTask.vehicule?.registration || 'N/A'})
-                    </Text>
-                    <br />
-                    <Text strong>Statut : </Text>
-                    <Tag
-                      color={
-                        selectedTask.status === 'planifié'
-                          ? 'blue'
-                          : selectedTask.status === 'en cours'
-                          ? 'orange'
-                          : 'green'
-                      }
-                    >
-                      {selectedTask.status}
-                    </Tag>
-                  </div>
-                </Modal>
-              )}
+                  📄 {attachment.originalName} ({Math.round(attachment.size/1024)}KB)
+                </a>
+              </div>
+            ))}
+              </div>
+            </Modal>
+            
+            )}
 
               <TaskModal
                 isModalVisible={isTaskModalVisible}
