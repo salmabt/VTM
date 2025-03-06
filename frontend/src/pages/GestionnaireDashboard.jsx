@@ -1,3 +1,4 @@
+//frontend/src/pages/gestionnairedashboard
 import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Input, DatePicker, Typography, Button, Card, List,
@@ -53,7 +54,8 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
     endDate: null,
     technicien: '',
     vehicule: '',
-    status: 'planifié'
+    status: 'planifié',
+    files: []
   });
   // Ajoute ces états pour le modal et la date sélectionnée
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -265,15 +267,12 @@ useEffect(() => {
   };
   // Gestion tâches
   const handleCreateTask = async () => {
-    let normalizedTask; // Déclarer la variable en haut
-    let createdTask; // Déclarer la variable pour le rollback
-  
     try {
       // Validation des champs obligatoires
       const requiredFields = {
         title: 'Titre',
         description: 'Description',
-        technicien: 'Technicien',
+        technicien: 'Technicien', 
         vehicule: 'Véhicule',
         startDate: 'Date de début',
         endDate: 'Date de fin'
@@ -299,42 +298,48 @@ useEffect(() => {
         return message.error('La date de fin doit être après la date de début');
       }
   
-      // Création de l'objet normalisé
-      normalizedTask = {
-        ...newTask,
-        technicien: newTask.technicien,
-        vehicule: newTask.vehicule,
-        startDate: start.toISOString(),
-        endDate: end.toISOString()
-      };
+      // Création du FormData
+      const formData = new FormData();
+      formData.append('title', newTask.title);
+      formData.append('description', newTask.description);
+      formData.append('client', newTask.client);
+      formData.append('location', newTask.location);
+      formData.append('technicien', newTask.technicien);
+      formData.append('vehicule', newTask.vehicule);
+      formData.append('startDate', start.toISOString());
+      formData.append('endDate', end.toISOString());
+      
   
-      // Mise à jour optimiste IMMÉDIATE du statut du véhicule
+      // Dans handleCreateTask, modifier la section des fichiers :
+      if (newTask.files?.length > 0) {
+        newTask.files.forEach(file => {
+          console.log(file);  // Vérifier chaque fichier ajouté
+          formData.append('attachments', file);
+        });
+      }
+      
+  
+      // Envoi de la requête
+      const response = await tasksApi.createTask(formData);
+      const createdTask = response.data;
+  
+      // Mise à jour optimiste
       setVehiculesList(prev => 
         prev.map(veh => 
-          veh._id === normalizedTask.vehicule 
+          veh._id === newTask.vehicule 
             ? { ...veh, status: 'réservé' } 
             : veh
         )
       );
   
-      // Création de la tâche
-      const response = await tasksApi.createTask(normalizedTask);
-      createdTask = response.data;
-  
-      // Mise à jour optimiste des tâches
       setTasks(prev => [
         ...prev,
         {
           ...createdTask,
-          technicien: createdTask.technicien?._id || createdTask.technicien,
-          vehicule: createdTask.vehicule?._id || createdTask.vehicule
+          technicien: createdTask.technicien?._id,
+          vehicule: createdTask.vehicule?._id
         }
       ]);
-  
-      // Mise à jour API du statut du véhicule
-      await vehiculesApi.updateVehicule(normalizedTask.vehicule, {
-        status: 'réservé'
-      });
   
       // Réinitialisation du formulaire
       setNewTask({
@@ -346,29 +351,14 @@ useEffect(() => {
         endDate: null,
         technicien: '',
         vehicule: '',
-        status: 'planifié'
+        status: 'planifié',
+        files: []
       });
   
-      // Fermeture du modal
-      setTimeout(() => setIsModalVisible(false), 300);
+      setIsModalVisible(false);
       message.success('Tâche créée avec succès !');
   
     } catch (error) {
-      // Rollback en cas d'erreur
-      if (normalizedTask) {
-        setVehiculesList(prev => 
-          prev.map(veh => 
-            veh._id === normalizedTask.vehicule 
-              ? { ...veh, status: 'disponible' } 
-              : veh
-          )
-        );
-      }
-  
-      if (createdTask?._id) {
-        setTasks(prev => prev.filter(t => t._id !== createdTask._id));
-      }
-  
       // Gestion des erreurs
       const errorMessage = error.response?.data?.message ||
         (error.code === 'ECONNABORTED' 
@@ -473,7 +463,20 @@ useEffect(() => {
       selectedTask.status === 'en cours' ? 'orange' : 'green'
     }>
       {selectedTask.status}
+      
     </Tag>
+    <Text strong>Pièces jointes :</Text>
+{selectedTask.attachments?.map(attachment => (
+  <div key={attachment.filename}>
+    <a 
+      href={`http://localhost:3000/uploads/${attachment.filename}`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      📄 {attachment.originalName} ({Math.round(attachment.size/1024)}KB)
+    </a>
+  </div>
+))}
   </div>
 </Modal>
 
@@ -650,6 +653,18 @@ useEffect(() => {
       </Option>
     ))}
 </Select>
+<Input
+        type="file"
+        multiple
+        onChange={(e) => {
+          const files = Array.from(e.target.files);
+          console.log(files);  // Vérifier si les fichiers sont correctement capturés
+          setNewTask({...newTask, files});
+        }}
+        
+
+        style={{ marginBottom: 16 }}
+      />
                     <Button
                       type="primary"
                       onClick={handleCreateTask}
@@ -697,6 +712,22 @@ useEffect(() => {
                                     <Text>Résolution: {task.report.resolution}</Text>
                                   </div>
                                 )}
+                                  {task.attachments?.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                      <Text strong>Pièces jointes :</Text>
+                      {task.attachments.map(attachment => (
+                        <div key={attachment.filename}>
+                          <a
+                            href={`http://localhost:3000/uploads/${attachment.filename}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: 'block' }}
+                          >
+                            📎 {attachment.originalName} ({Math.round(attachment.size/1024)}KB)
+                          </a>
+                        </div>
+                      ))}
+                    </div>)}
                               </div>
                             }
                           />

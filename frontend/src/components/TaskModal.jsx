@@ -1,13 +1,12 @@
 //TaskModel 
-import React from "react";
-import { Modal, Input, Select, Button, Typography,TimePicker  } from "antd";
+import React ,{ useState } from "react";
+import { Modal, Input, Select, Button, Typography } from "antd";
 import moment from "moment";
 
 const { Text } = Typography;
 
 //const { RangePicker } = DatePicker;
 const { Option } = Select;
-
 const TaskModal = ({ 
   isModalVisible, 
   setIsModalVisible, 
@@ -17,7 +16,16 @@ const TaskModal = ({
   techniciens,
   vehiculesList
 }) => {
+  const [files, setFiles] = useState([]);
   
+  const handleFileChange = (e) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    setNewTask({
+      ...newTask,
+      files // Toujours un tableau (même vide)
+    });
+  };
+
   const handleAddTask = async () => {
     await handleCreateTask(); // Attendre la création de la tâche
     setIsModalVisible(false); // Fermer la modal après succès
@@ -88,7 +96,12 @@ const TaskModal = ({
             </Option>
         ))}
       </Select>
-      
+      <Input
+        type="file"
+        multiple
+        onChange={handleFileChange}
+        style={{ marginBottom: 16 }}
+      />
 
       
 

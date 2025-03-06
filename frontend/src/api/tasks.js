@@ -1,4 +1,4 @@
-//api/vehicules
+// api/tasks
 import axios from 'axios';
 
 const api = axios.create({
@@ -9,24 +9,20 @@ const api = axios.create({
   },
 });
 
-// Intercepteur pour gérer les erreurs globales
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response.status === 401) {
-      // Rediriger vers la page de connexion si le token est invalide
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+// api/tasks.js
+const tasksApi = {
+  createTask: (formData) => {
+    return api.post('/tasks', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data', // Spécifier le type pour les fichiers
+      },
+    });
+  },
 
-export default {
+
   // Gestion des tâches
   getAllTasks: () => api.get('/tasks'),
   getTaskById: (id) => api.get(`/tasks/${id}`),
-  createTask: (data) => api.post('/tasks', data),
   updateTask: (id, data) => api.put(`/tasks/${id}`, data),
   deleteTask: (id) => api.delete(`/tasks/${id}`),
 
@@ -46,3 +42,25 @@ export default {
   updateTaskStatus: (taskId, statusData) => api.patch(`/tasks/${taskId}/status`, statusData),
   addTaskReport: (taskId, reportData) => api.post(`/tasks/${taskId}/report`, reportData),
 };
+
+// Intercepteur pour gérer les erreurs globales
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      if (error.response.status === 401) {
+        // Rediriger vers la page de connexion si le token est invalide
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+      // Vous pouvez ajouter d'autres types d'erreurs ici
+    } else if (error.request) {
+      console.error('Request error:', error.request);
+    } else {
+      console.error('Error:', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default tasksApi; // Export par défaut de tasksApi
