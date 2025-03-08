@@ -58,3 +58,29 @@ exports.deleteVehicule = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+// ➜ Obtenir les véhicules par technicien
+exports.getVehiculesByTechnicien = async (req, res) => {
+  try {
+    const Task = require('../models/Task');
+    
+    // 1. Récupérer les tâches avec les véhicules peuplés
+    const tasks = await Task.find({ technicien: req.params.technicienId })
+                          .populate('vehicule');
+
+    // 2. Extraire les véhicules uniques
+    const vehiculesMap = new Map();
+    tasks.forEach(task => {
+      if(task.vehicule && !vehiculesMap.has(task.vehicule._id.toString())) {
+        vehiculesMap.set(task.vehicule._id.toString(), task.vehicule);
+      }
+    });
+
+    // 3. Convertir en tableau
+    const vehicules = Array.from(vehiculesMap.values());
+
+    res.json(vehicules);
+  } catch (err) {
+    console.error('Erreur:', err);
+    res.status(500).json({ error: err.message });
+  }
+};

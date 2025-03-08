@@ -18,4 +18,6 @@ router.put('/:id', voitureController.updateVehicule); // Utilise 'updateVehicule
 // ➜ Supprimer une voiture
 router.delete('/:id', voitureController.deleteVehicule); // Utilise 'deleteVehicule' comme dans le contrôleur
 
+// ➜ Récupérer les véhicules par technicien
+router.get('/technicien/:technicienId', voitureController.getVehiculesByTechnicien);
 module.exports = router;
