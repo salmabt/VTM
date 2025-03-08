@@ -214,16 +214,26 @@ const VehiclesSection = ({ vehicles }) => (
   </>
 );
 
-const VehicleListItem = ({ vehicle }) => (
-  <List.Item>
-    <div style={{ flex: 1 }}>
-      <Text strong>{vehicle.model}</Text>
-      <Text type="secondary">{vehicle.registration}</Text>
-    </div>
-    <Tag color={vehicle.status === 'disponible' ? 'green' : 'orange'}>
-      {vehicle.status}
-    </Tag>
-  </List.Item>
-);
+const VehicleListItem = ({ vehicle }) => {
+  const isReserved = vehicle.status === 'réservé';
+  
+  return (
+    <List.Item>
+      <div style={{ flex: 1 }}>
+        <Text strong>{vehicle.model}</Text>
+        <Text type="secondary">{vehicle.registration}</Text>
+      </div>
+      <Tag 
+        color={isReserved ? 'red' : 'green'}
+        style={{ 
+          textDecoration: isReserved ? 'line-through' : 'none',
+          opacity: isReserved ? 0.8 : 1
+        }}
+      >
+        {isReserved ? 'Réservé' : 'Disponible'}
+      </Tag>
+    </List.Item>
+  );
+};
 
 export default TechniciensSection;

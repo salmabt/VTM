@@ -1,12 +1,9 @@
-//TaskModel 
-import React ,{ useState } from "react";
-import { Modal, Input, Select, Button, Typography } from "antd";
-import moment from "moment";
+import React, { useState } from "react";
+import { Modal, Input, Select, DatePicker, Button } from "antd";
 
-const { Text } = Typography;
-
-//const { RangePicker } = DatePicker;
+const { RangePicker } = DatePicker;
 const { Option } = Select;
+
 const TaskModal = ({ 
   isModalVisible, 
   setIsModalVisible, 
@@ -17,18 +14,18 @@ const TaskModal = ({
   vehiculesList
 }) => {
   const [files, setFiles] = useState([]);
-  
+
   const handleFileChange = (e) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     setNewTask({
       ...newTask,
-      files // Toujours un tableau (même vide)
+      files
     });
   };
 
   const handleAddTask = async () => {
-    await handleCreateTask(); // Attendre la création de la tâche
-    setIsModalVisible(false); // Fermer la modal après succès
+    await handleCreateTask();
+    setIsModalVisible(false);
   };
 
   return (
@@ -38,7 +35,6 @@ const TaskModal = ({
       onCancel={() => setIsModalVisible(false)}
       footer={null}
     >
-      {/* Champ Titre */}
       <Input
         placeholder="Titre *"
         value={newTask.title}
@@ -46,7 +42,6 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
       
-      {/* Champ Description */}
       <Input.TextArea
         placeholder="Description *"
         value={newTask.description}
@@ -55,7 +50,6 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
 
-      {/* Champ Client */}
       <Input
         placeholder="Client *"
         value={newTask.client}
@@ -63,7 +57,6 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
 
-      {/* Champ Localisation */}
       <Input
         placeholder="Localisation"
         value={newTask.location}
@@ -71,7 +64,6 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
 
-      {/* Sélection du technicien */}
       <Select
         placeholder="Sélectionner un technicien *"
         onChange={(value) => setNewTask({ ...newTask, technicien: value })}
@@ -82,20 +74,31 @@ const TaskModal = ({
         style={{ marginBottom: 8, width: "100%" }}
       />
 
-      {/* Sélection du véhicule */}
       <Select
         placeholder="Sélectionner un véhicule *"
         onChange={(value) => setNewTask({...newTask, vehicule: value})}
         style={{ marginBottom: 8, width: "100%" }}
       >
         {vehiculesList
-          .filter(veh => veh.status === 'disponible') // Seuls les véhicules disponibles
+          .filter(veh => veh.status === 'disponible')
           .map(veh => (
             <Option key={veh._id} value={veh._id}>
               {veh.model} ({veh.registration})
             </Option>
         ))}
       </Select>
+      <RangePicker
+        showTime
+        format="DD/MM/YYYY HH:mm"
+        onChange={(dates) => setNewTask({
+          ...newTask,
+          startDate: dates?.[0]?.toISOString(),
+          endDate: dates?.[1]?.toISOString()
+        })}
+        style={{ marginBottom: 16, width: "100%" }}
+      />
+
+
       <Input
         type="file"
         multiple
@@ -103,13 +106,11 @@ const TaskModal = ({
         style={{ marginBottom: 16 }}
       />
 
-      
-
-      {/* Bouton Ajouter */}
       <Button 
         type="primary" 
         onClick={handleAddTask}
-        disabled={!newTask.title || !newTask.description || !newTask.technicien || !newTask.vehicule }
+        disabled={!newTask.title || !newTask.description || !newTask.technicien || !newTask.vehicule || !newTask.startDate || 
+!newTask.endDate  }
         block
       >
         Ajouter

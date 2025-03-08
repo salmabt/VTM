@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, List, Card, Typography, Spin, message, Menu, Button, Select } from 'antd';
-import { CalendarOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Layout, List, Card, Typography, Spin, message, Menu, Avatar, Button, Select, Tag } from 'antd';
+import { CalendarOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import tasksApi from '../api/tasks';
+import vehiculesApi from '../api/vehicules';
 
 const { Content, Sider, Header } = Layout;
 const { Title, Text } = Typography;
@@ -11,78 +12,65 @@ const { Option } = Select;
 const TechnicienDashboard = () => {
   const { userData, logout } = useAuth();
   const [tasks, setTasks] = useState([]);
+  const [vehicules, setVehicules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('1');
 
   useEffect(() => {
-    const loadTasks = async () => {
-      if (!userData?._id) {
-        console.error('ID du technicien non défini');
-        return;
-      }
+    const loadData = async () => {
+      if (!userData?._id) return;
 
       setLoading(true);
       try {
-        console.log('Technicien ID:', userData._id);
-        const response = await tasksApi.getTasksByTechnicien(userData._id);
-        console.log('Réponse de l\'API:', response.data);
-        setTasks(response.data);
+        const [tasksResponse, vehiculesResponse] = await Promise.all([
+          tasksApi.getTasksByTechnicien(userData._id),
+          vehiculesApi.getVehiculesByTechnicien(userData._id)
+        ]);
+
+        console.log('🚗 Liste des véhicules:', vehiculesResponse.data);
+        console.log('📌 Liste des tâches:', tasksResponse.data);
+
+        setTasks(tasksResponse.data);
+        setVehicules(vehiculesResponse.data);
       } catch (error) {
-        console.error('Erreur de chargement des tâches:', error);
-        message.error(`Erreur de chargement des tâches: ${error.message || 'Veuillez réessayer plus tard.'}`);
+        message.error(`Erreur de chargement: ${error.message}`);
       } finally {
         setLoading(false);
       }
     };
 
-    loadTasks();
+    loadData();
   }, [userData?._id]);
+
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      await tasksApi.updateTaskStatus(taskId, { status: newStatus });
+      setTasks(tasks.map(task =>
+        task._id === taskId ? { ...task, status: newStatus } : task
+      ));
+      message.success('Statut mis à jour avec succès');
+    } catch (error) {
+      message.error('Échec de la mise à jour du statut');
+    }
+  };
+
   const handleGetAttachments = async (taskId) => {
     try {
-      const response = await tasksApi.getTaskAttachments(taskId); // Appel API pour récupérer les pièces jointes
-      console.log('Pièces jointes:', response.data);
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
+      const response = await tasksApi.getTaskAttachments(taskId);
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
           task._id === taskId ? { ...task, attachments: response.data } : task
         )
       );
     } catch (error) {
-      console.error('Erreur lors de la récupération des pièces jointes:', error);
-      message.error('Erreur lors de la récupération des pièces jointes');
+      message.error('Erreur lors du chargement des pièces jointes');
     }
   };
-  
-  
+
   const handleDownloadAttachment = (taskId, filename) => {
     window.open(`/api/tasks/${taskId}/attachments/${filename}`, '_blank');
   };
-  
-  
 
-  const handleStatusChange = async (taskId, newStatus) => {
-    try {
-      console.log('Mise à jour du statut:', { taskId, newStatus }); // Log pour vérifier la requête
-  
-      // Appel à l'API pour mettre à jour le statut de la tâche
-      const response = await tasksApi.updateTaskStatus(taskId, { status: newStatus });
-  
-      console.log('Réponse de l\'API:', response.data); // Log pour vérifier la réponse
-  
-      // Mettre à jour l'état local des tâches
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task._id === taskId ? { ...task, status: newStatus } : task
-        )
-      );
-  
-      message.success('Statut de la tâche mis à jour avec succès');
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du statut:', error);
-      message.error(`Erreur lors de la mise à jour du statut: ${error.message || 'Veuillez réessayer plus tard.'}`);
-    }
-  };
-
-  
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Mes tâches' },
   ];
@@ -100,72 +88,119 @@ const TechnicienDashboard = () => {
           items={menuItems}
           onSelect={({ key }) => setSelectedMenu(key)}
         />
-        <div style={{ padding: 16, textAlign: 'center', position: 'absolute', bottom: 0, width: '100%' }}>
-          <Text strong>{userData?.name}</Text>
+        <div style={{
+          padding: 16,
+          textAlign: 'center',
+          position: 'absolute',
+          bottom: 0,
+          width: '100%'
+        }}>
+          <Avatar
+            size={64}
+            icon={<UserOutlined />}
+            style={{ backgroundColor: '#87d068', marginBottom: 8 }}
+          />
+          <Text strong style={{ display: 'block' }}>{userData?.name}</Text>
+          <Text type="secondary">Technicien certifié</Text>
         </div>
       </Sider>
-      
+
       <Layout style={{ padding: '0 24px 24px' }}>
-        <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Header style={{
+          background: '#fff',
+          padding: '0 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <Text strong>Connecté en tant que : {userData?.name}</Text>
           </div>
-          <Button icon={<LogoutOutlined />} onClick={logout}>Déconnexion</Button>
+          <Button
+            icon={<LogoutOutlined />}
+            onClick={logout}
+            danger
+          >
+            Déconnexion
+          </Button>
         </Header>
 
         <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
           {loading ? (
             <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
           ) : (
-            <Card title="Mes Tâches" bordered={false}>
-              <List
-  dataSource={tasks}
-  renderItem={task => (
-    <List.Item key={task._id}>
-      <List.Item.Meta
-        title={task.title}
-        description={
-          <>
-            <Text>Statut: </Text>
-            <Select
-              defaultValue={task.status}
-              style={{ width: 120, marginBottom: 8 }}
-              onChange={(value) => handleStatusChange(task._id, value)}
+            <Card
+              title="Mes Interventions"
+              bordered={false}
+              extra={<Tag color="blue">{tasks.length} tâches</Tag>}
             >
-              <Option value="planifié">Planifié</Option>
-              <Option value="en cours">En cours</Option>
-              <Option value="terminé">Terminé</Option>
-            </Select>
-            <br />
-            <Text>Description: {task.description}</Text><br />
-            <Text>Client: {task.client}</Text><br />
-            <Text>Localisation: {task.location}</Text><br />
+              <List
+                dataSource={tasks}
+                renderItem={task => {
+                  const vehicule = vehicules.find(v => String(v._id) === String(task.vehicule));
 
-            {/* Affichage des pièces jointes */}
-            {task.attachments && task.attachments.length > 0 && (
-              <div>
-                <Text strong>Pièces jointes :</Text>
-                <ul>
-                  {task.attachments.map((attachment, index) => (
-                    <li key={index}>
-                      <a
-                        href="#"
-                        onClick={() => handleDownloadAttachment(task._id, attachment.filename)}
-                      >
-                        {attachment.originalName}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </>
-        }
-      />
-    </List.Item>
-  )}
-/>
+                  return (
+                    <List.Item
+                      key={task._id}
+                      actions={[
+                        <Select
+                          value={task.status}
+                          style={{ width: 120 }}
+                          onChange={(value) => handleStatusChange(task._id, value)}
+                        >
+                          <Option value="planifié">Planifié</Option>
+                          <Option value="en cours">En cours</Option>
+                          <Option value="terminé">Terminé</Option>
+                        </Select>
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={<Text strong style={{ fontSize: 16 }}>{task.title}</Text>}
+                        description={
+                          <div style={{ lineHeight: 1.6 }}>
+                            <Text>Description: {task.description}</Text><br />
+                            <Text>Client: {task.client}</Text><br />
+                            <Text>Localisation: {task.location}</Text><br />
 
+                            {vehicule ? (
+                              <div style={{ margin: '8px 0' }}>
+                                <Text strong>Véhicule: </Text>
+                                <Tag color="geekblue">
+                                  {vehicule.model} ({vehicule.registration})
+                                </Tag>
+                              </div>
+                            ) : (
+                              <Text type="secondary">Aucun véhicule associé</Text>
+                            )}
+
+                            {task.attachments?.length > 0 && (
+                              <div style={{ marginTop: 8 }}>
+                                <Text strong>Pièces jointes:</Text>
+                                <ul style={{ paddingLeft: 20, marginTop: 4 }}>
+                                  {task.attachments.map((attachment, index) => (
+                                    <li key={index}>
+                                      <Button
+                                        type="link"
+                                        onClick={() => {
+                                          handleGetAttachments(task._id);
+                                          handleDownloadAttachment(task._id, attachment.filename);
+                                        }}
+                                        style={{ padding: 0 }}
+                                      >
+                                        {attachment.originalName}
+                                      </Button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        }
+                      />
+                    </List.Item>
+                  );
+                }}
+              />
             </Card>
           )}
         </Content>

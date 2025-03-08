@@ -19,4 +19,10 @@ export default {
   createVehicule: (data) => api.post('/vehicules', data),
   updateVehicule: (id, data) => api.put(`/vehicules/${id}`, data),
   deleteVehicule: (id) => api.delete(`/vehicules/${id}`),
+  getVehiculesByTechnicien: (technicienId) => 
+    api.get(`/vehicules/technicien/${technicienId}`)
+      .then(res => {
+        if (!Array.isArray(res.data)) throw new Error('Format de données invalide');
+        return res;
+      }),
 };

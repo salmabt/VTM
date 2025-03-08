@@ -140,18 +140,24 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
     );
   };
   // Ajouter ce useEffect pour synchroniser périodiquement
-useEffect(() => {
-  const interval = setInterval(async () => {
-    try {
-      const { data } = await vehiculesApi.getAllVehicules();
-      setVehiculesList(data);
-    } catch (error) {
-      console.error('Sync error:', error);
-    }
-  }, 5000); // Toutes les 5 secondes
-
-  return () => clearInterval(interval);
-}, []);
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await vehiculesApi.getAllVehicules();
+        // Garder le statut réservé si une tâche existe
+        const updated = data.map(veh => ({
+          ...veh,
+          status: tasks.some(t => t.vehicule === veh._id) ? 'réservé' : veh.status
+        }));
+        setVehiculesList(updated);
+        setVehicules(updated);
+      } catch (error) {
+        console.error('Sync error:', error);
+      }
+    }, 5000);
+  
+    return () => clearInterval(interval);
+  }, [tasks]);
 // Modification du chargement initial
 useEffect(() => {
   const loadAllData = async () => {
@@ -331,6 +337,13 @@ useEffect(() => {
             : veh
         )
       );
+      setVehicules(prev => 
+        prev.map(veh => 
+          veh._id === newTask.vehicule 
+            ? { ...veh, status: 'réservé' } 
+            : veh
+        )
+      );
   
       setTasks(prev => [
         ...prev,
@@ -439,11 +452,18 @@ useEffect(() => {
     
     {/* Modification ici pour afficher seulement l'heure */}
    {/* Modifier l'affichage de la période */}
-<Text strong>Période : </Text>
+   <Text strong>Peroide : </Text>
+  
+   
 <Text>
-  {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
-  {moment(selectedTask.endDate).format('DD/MM HH:mm')}
-</Text><br/>
+  {moment(selectedTask.startDate).format("DD/MM/YYYY HH:mm")} - 
+  {moment(selectedTask.endDate).format("DD/MM/YYYY HH:mm")}
+</Text>
+
+
+
+
+<br/>
 
 
     
@@ -541,11 +561,12 @@ useEffect(() => {
                               }}
                               selectable
                             // Dans le composant Calendar
+                             // Modifier onSelectSlot dans le composant Calendar
                               onSelectSlot={(slotInfo) => {
                                 setNewTask({ 
                                   ...newTask,
-                                  startDate: slotInfo.start.toISOString(),
-                                  endDate: slotInfo.end.toISOString() // Ajouter la date de fin
+                                  startDate: slotInfo.start,
+                                  endDate: slotInfo.end
                                 });
                                 setIsModalVisible(true);
                               }}
@@ -642,10 +663,10 @@ useEffect(() => {
   allowClear
   style={{ width: '100%' }}
 >
-  {vehiculesList
+{vehiculesList
     .filter(veh => 
-      veh.status === 'disponible' || 
-      veh._id === newTask.vehicule // Garde le véhicule sélectionné visible
+      (veh.status === 'disponible' && !tasks.some(t => t.vehicule === veh._id)) || 
+      veh._id === newTask.vehicule
     )
     .map(veh => (
       <Option key={veh._id} value={veh._id}>
