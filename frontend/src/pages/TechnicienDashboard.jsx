@@ -54,39 +54,54 @@ const TechnicienDashboard = () => {
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      // Mettre à jour le statut de la tâche via l'API
       const response = await tasksApi.updateTaskStatus(taskId, { status: newStatus });
       const updatedTask = response.data;
-  
-      // Mettre à jour la liste des tâches dans l'état local
+    
+      console.log("✅ Tâche mise à jour :", updatedTask);
+    
       setTasks(tasks.map(task =>
         task._id === taskId ? { ...task, status: newStatus } : task
       ));
   
-      // Si la tâche est terminée, mettre à jour le statut du véhicule associé
-      if (newStatus === 'terminé') {
+      // Vérifiez si la tâche est terminée avant de mettre à jour le véhicule
+      if (newStatus === 'terminé' && updatedTask.vehicule) {
         const vehicleId = updatedTask.vehicule._id;
-  
-        // Mettre à jour le statut du véhicule via l'API
-        await vehiculesApi.updateVehiculeStatus(vehicleId, { status: 'disponible' });
-  
-        // Mettre à jour la liste des véhicules dans l'état local
+    
+        // Ne mettez à jour le statut du véhicule que si la tâche est vraiment terminée
+        await vehiculesApi.updateVehicule(vehicleId, { status: 'disponible' });
+        await refreshVehicules();
+    
+        const updatedVehiculeResponse = await vehiculesApi.getVehiculeById(vehicleId);
+        console.log("🚗 Véhicule mis à jour :", updatedVehiculeResponse.data);
+    
         setVehicules(prevVehicles => 
           prevVehicles.map(vehicle => 
-            vehicle._id === vehicleId ? { ...vehicle, status: 'disponible' } : vehicle
+            vehicle._id === vehicleId ? { ...vehicle, status: updatedVehiculeResponse.data.status } : vehicle
+          )
+        );
+      } else if (newStatus === 'en cours' && updatedTask.vehicule) {
+        // Si la tâche est en cours, ne mettez pas le véhicule à "disponible"
+        const vehicleId = updatedTask.vehicule._id;
+        await vehiculesApi.updateVehicule(vehicleId, { status: 'réservé' });
+        await refreshVehicules();
+    
+        const updatedVehiculeResponse = await vehiculesApi.getVehiculeById(vehicleId);
+        console.log("🚗 Véhicule réservé :", updatedVehiculeResponse.data);
+    
+        setVehicules(prevVehicles => 
+          prevVehicles.map(vehicle => 
+            vehicle._id === vehicleId ? { ...vehicle, status: updatedVehiculeResponse.data.status } : vehicle
           )
         );
       }
   
-      // Afficher un message de succès
       message.success('Statut de la tâche mis à jour avec succès');
     } catch (error) {
-      // Gérer les erreurs
-      console.error('Erreur lors de la mise à jour du statut de la tâche:', error);
+      console.error('Erreur lors de la mise à jour du statut:', error);
       message.error('Échec de la mise à jour du statut');
     }
   };
-
+  
   const handleGetAttachments = async (taskId) => {
     try {
       const response = await tasksApi.getTaskAttachments(taskId);
@@ -170,9 +185,7 @@ const TechnicienDashboard = () => {
               <List
                 dataSource={tasks}
                 renderItem={task => {
-                  const vehiculeId = task.vehicule._id;
-                  const vehicule = vehicules.find(v => String(v._id) === String(vehiculeId));
-                   
+                  const vehicule = task.vehicule ? vehicules.find(v => String(v._id) === String(task.vehicule._id)) : null;
                   // Ajoutez les logs pour vérifier les dates
                     console.log(`Tâche: ${task.title}`);
                     console.log(`startDate: ${task.startDate}, type: ${typeof task.startDate}`);
@@ -201,7 +214,7 @@ const TechnicienDashboard = () => {
                             <Text>Client: {task.client}</Text><br />
                             <Text>Localisation: {task.location}</Text><br />
 
-                            {vehicule ? (
+                            {task.vehicule && task.vehicule._id ? (
                               <div style={{ margin: '8px 0' }}>
                                 <Text strong>Véhicule: </Text>
                                 <Tag color="geekblue">
