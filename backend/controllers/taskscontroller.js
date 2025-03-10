@@ -43,7 +43,10 @@ exports.createTask = async (req, res) => {
       ...req.body,
       attachments
     };
+    // Créer la tâche
     const newTask = await Task.create(taskData);
+    // Mise à jour du statut du véhicule après création de la tâche
+    await Voiture.findByIdAndUpdate(req.body.vehicule, { status: 'réservée' });
 
     // Récupérer la tâche avec les données associées
     const populated = await Task.findById(newTask._id)
@@ -218,13 +221,13 @@ exports.updateTaskStatus = async (req, res) => {
     const taskId = req.params.taskId;
     const { status } = req.body;
 
-    console.log('Requête reçue:', { taskId, status }); // Log pour vérifier la requête
+    console.log('Requête reçue:', { taskId, status });
 
     const task = await Task.findByIdAndUpdate(
       taskId,
       { status },
       { new: true, runValidators: true }
-    );
+    ).populate('vehicule'); // Ajout de populate pour inclure les détails du véhicule
 
     if (!task) {
       console.warn('Tâche introuvable ID:', taskId);
@@ -232,7 +235,7 @@ exports.updateTaskStatus = async (req, res) => {
     }
 
     console.log('Statut de la tâche mis à jour:', task._id);
-    res.json(task); // Renvoyer la tâche mise à jour
+    res.json(task); // Renvoyer la tâche mise à jour avec les détails du véhicule
 
   } catch (error) {
     console.error('Erreur lors de la mise à jour du statut:', error);
@@ -242,6 +245,7 @@ exports.updateTaskStatus = async (req, res) => {
     });
   }
 };
+
 
 // Récupérer les pièces jointes d'une tâche spécifique
 exports.getTaskAttachments = async (req, res) => {
