@@ -19,17 +19,27 @@ const TechnicienDashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       if (!userData?._id) return;
-
+  
       setLoading(true);
       try {
         const [tasksResponse, vehiculesResponse] = await Promise.all([
           tasksApi.getTasksByTechnicien(userData._id),
           vehiculesApi.getVehiculesByTechnicien(userData._id)
         ]);
-
+  
         console.log('🚗 Liste des véhicules:', vehiculesResponse.data);
         console.log('📌 Liste des tâches:', tasksResponse.data);
-
+  
+        // Afficher les détails des tâches
+        tasksResponse.data.forEach(task => {
+          console.log(`Tâche: ${task.title}`, task);
+        });
+  
+        // Afficher les détails des véhicules
+        vehiculesResponse.data.forEach(vehicule => {
+          console.log(`Véhicule: ${vehicule.model}`, vehicule);
+        });
+  
         setTasks(tasksResponse.data);
         setVehicules(vehiculesResponse.data);
       } catch (error) {
@@ -38,18 +48,41 @@ const TechnicienDashboard = () => {
         setLoading(false);
       }
     };
-
+  
     loadData();
   }, [userData?._id]);
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      await tasksApi.updateTaskStatus(taskId, { status: newStatus });
+      // Mettre à jour le statut de la tâche via l'API
+      const response = await tasksApi.updateTaskStatus(taskId, { status: newStatus });
+      const updatedTask = response.data;
+  
+      // Mettre à jour la liste des tâches dans l'état local
       setTasks(tasks.map(task =>
         task._id === taskId ? { ...task, status: newStatus } : task
       ));
-      message.success('Statut mis à jour avec succès');
+  
+      // Si la tâche est terminée, mettre à jour le statut du véhicule associé
+      if (newStatus === 'terminé') {
+        const vehicleId = updatedTask.vehicule._id;
+  
+        // Mettre à jour le statut du véhicule via l'API
+        await vehiculesApi.updateVehiculeStatus(vehicleId, { status: 'disponible' });
+  
+        // Mettre à jour la liste des véhicules dans l'état local
+        setVehicules(prevVehicles => 
+          prevVehicles.map(vehicle => 
+            vehicle._id === vehicleId ? { ...vehicle, status: 'disponible' } : vehicle
+          )
+        );
+      }
+  
+      // Afficher un message de succès
+      message.success('Statut de la tâche mis à jour avec succès');
     } catch (error) {
+      // Gérer les erreurs
+      console.error('Erreur lors de la mise à jour du statut de la tâche:', error);
       message.error('Échec de la mise à jour du statut');
     }
   };
@@ -137,7 +170,13 @@ const TechnicienDashboard = () => {
               <List
                 dataSource={tasks}
                 renderItem={task => {
-                  const vehicule = vehicules.find(v => String(v._id) === String(task.vehicule));
+                  const vehiculeId = task.vehicule._id;
+                  const vehicule = vehicules.find(v => String(v._id) === String(vehiculeId));
+                   
+                  // Ajoutez les logs pour vérifier les dates
+                    console.log(`Tâche: ${task.title}`);
+                    console.log(`startDate: ${task.startDate}, type: ${typeof task.startDate}`);
+                    console.log(`endDate: ${task.endDate}, type: ${typeof task.endDate}`);
 
                   return (
                     <List.Item
@@ -172,6 +211,15 @@ const TechnicienDashboard = () => {
                             ) : (
                               <Text type="secondary">Aucun véhicule associé</Text>
                             )}
+
+                          <div style={{ margin: '8px 0' }}>
+                            <Text strong>Date et heure de mission: </Text>
+                            <Text>
+                              {task.startDate && task.endDate && !isNaN(new Date(task.startDate).getTime()) && !isNaN(new Date(task.endDate).getTime())
+                                ? `${new Date(task.startDate).toLocaleString()} - ${new Date(task.endDate).toLocaleString()}`
+                                : 'Date non disponible'}
+                            </Text>
+                          </div>
 
                             {task.attachments?.length > 0 && (
                               <div style={{ marginTop: 8 }}>

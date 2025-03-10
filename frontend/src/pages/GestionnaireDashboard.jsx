@@ -154,10 +154,11 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
       } catch (error) {
         console.error('Sync error:', error);
       }
-    }, 5000);
+    }, 5000); // Synchroniser toutes les 5 secondes
   
     return () => clearInterval(interval);
   }, [tasks]);
+  
 // Modification du chargement initial
 useEffect(() => {
   const loadAllData = async () => {
@@ -463,10 +464,7 @@ useEffect(() => {
 
 
 
-<br/>
-
-
-    
+    <br/>
     <Text strong>Technicien : </Text>
     <Text>
       {selectedTask.technicien?.name || 'Non assigné'}
@@ -650,31 +648,31 @@ useEffect(() => {
                         value: t._id
                       }))}
                       onChange={value => setNewTask({...newTask, technicien: value})}
-                    />
-                 <Select
-  placeholder="Sélectionner un véhicule *"
-  onChange={(value) => setNewTask({...newTask, vehicule: value})}
-  value={newTask.vehicule}
-  showSearch
-  optionFilterProp="children"
-  filterOption={(input, option) => 
-    option.children.toLowerCase().includes(input.toLowerCase())
-  }
-  allowClear
-  style={{ width: '100%' }}
->
-{vehiculesList
-    .filter(veh => 
-      (veh.status === 'disponible' && !tasks.some(t => t.vehicule === veh._id)) || 
-      veh._id === newTask.vehicule
-    )
-    .map(veh => (
-      <Option key={veh._id} value={veh._id}>
-        {veh.model} ({veh.registration}) - {veh.status}
-      </Option>
-    ))}
-</Select>
-<Input
+                          />
+                    <Select
+                      placeholder="Sélectionner un véhicule *"
+                      onChange={(value) => setNewTask({...newTask, vehicule: value})}
+                      value={newTask.vehicule}
+                      showSearch
+                      optionFilterProp="children"
+                      filterOption={(input, option) => 
+                        option.children.toLowerCase().includes(input.toLowerCase())
+                      }
+                      allowClear
+                      style={{ width: '100%' }}
+                    >
+                    {vehiculesList
+                        .filter(veh => 
+                          (veh.status === 'disponible' && !tasks.some(t => t.vehicule === veh._id)) || 
+                          veh._id === newTask.vehicule
+                        )
+                        .map(veh => (
+                          <Option key={veh._id} value={veh._id}>
+                            {veh.model} ({veh.registration}) - {veh.status}
+                          </Option>
+                        ))}
+                    </Select>
+                    <Input
         type="file"
         multiple
         onChange={(e) => {
