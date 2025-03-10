@@ -56,44 +56,22 @@ const TechnicienDashboard = () => {
   }, [userData?._id]);
 
   ///status tache 
-  const handleStatusChange = async (taskId, newStatus) => {
+  const handleStatusChange = async (taskId, status) => {
     try {
-      // Mettre à jour le statut de la tâche via l'API
-      const response = await tasksApi.updateTaskStatus(taskId, { status: newStatus });
-      const updatedTask = response.data;
+      await tasksApi.updateTaskStatus(taskId, { status });
+      
+      // Optionnel : Rafraîchir les données des véhicules
+      const vehiculesResponse = await vehiculesApi.getVehiculesByTechnicien(userData._id);
+      setVehicules(vehiculesResponse.data);
   
-      // Mettre à jour l'état local des tâches
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task._id === taskId ? { ...task, status: newStatus } : task
-        )
-      );
-  
-      // Mettre à jour le statut du véhicule associé
-      if (updatedTask.vehicule) {
-        const vehicleId = updatedTask.vehicule._id;
-        const newVehicleStatus = newStatus === 'terminé' ? 'disponible' : 'réservé';
-        console.log(`Véhicule ID: ${vehicleId}, Nouveau statut: ${newVehicleStatus}`);
-  
-        // Mettre à jour l'état local du véhicule immédiatement
-        setVehicules(prevVehicles =>
-          prevVehicles.map(vehicle =>
-            vehicle._id === vehicleId ? { ...vehicle, status: newVehicleStatus } : vehicle
-          )
-        );
-  
-        // Mettre à jour le statut du véhicule via l'API (en arrière-plan)
-        await vehiculesApi.updateVehicule(vehicleId, { status: newVehicleStatus });
-  
-        // Rafraîchir les données des véhicules depuis le backend
-        const updatedVehiculesResponse = await vehiculesApi.getVehiculesByTechnicien(userData._id);
-        setVehicules(updatedVehiculesResponse.data);
-      }
-  
-      message.success('Statut de la tâche mis à jour avec succès');
+      // Mise à jour optimiste des tâches
+      setTasks(prev => prev.map(task => 
+        task._id === taskId ? { ...task, status } : task
+      ));
+      
+      message.success('Statut mis à jour');
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du statut:', error);
-      message.error('Échec de la mise à jour du statut');
+      message.error('Échec de la mise à jour');
     }
   };
 

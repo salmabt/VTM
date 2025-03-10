@@ -668,16 +668,20 @@ useEffect(() => {
                       allowClear
                       style={{ width: '100%' }}
                     >
-                    {vehiculesList
-                        .filter(veh => 
-                          (veh.status === 'disponible' && !tasks.some(t => t.vehicule === veh._id)) || 
-                          veh._id === newTask.vehicule
-                        )
-                        .map(veh => (
-                          <Option key={veh._id} value={veh._id}>
-                            {veh.model} ({veh.registration}) - {veh.status}
-                          </Option>
-                        ))}
+                   {vehiculesList
+    .filter(veh => 
+      (veh.status === 'disponible' && 
+       !tasks.some(t => 
+         t.vehicule === veh._id && 
+         t.status !== 'terminé' // Nouvelle condition
+       )) || 
+      veh._id === newTask.vehicule
+    )
+    .map(veh => (
+      <Option key={veh._id} value={veh._id}>
+        {veh.model} ({veh.registration}) - {veh.status}
+      </Option>
+    ))}
                     </Select>
                     <Input
         type="file"
