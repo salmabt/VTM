@@ -9,11 +9,8 @@ exports.createTask = async (req, res) => {
   try {
     console.log('Fichiers reçus:', req.files); // Debug
     console.log('Corps de la requête:', req.body); // Debug
-    console.log('Validation des références:', {
-      technicien: req.body.technicien,
-      vehicule: req.body.vehicule
-    });
 
+    // Vérifier les références (technicien et véhicule)
     const [technicien, vehicule] = await Promise.all([
       Technicien.findById(req.body.technicien),
       Voiture.findById(req.body.vehicule)
@@ -32,6 +29,8 @@ exports.createTask = async (req, res) => {
         }
       });
     }
+
+    // Gérer les pièces jointes
     const attachments = req.files?.map(file => ({
       filename: file.filename,
       originalName: file.originalname,
@@ -39,11 +38,14 @@ exports.createTask = async (req, res) => {
       size: file.size
     })) || [];
 
+    // Créer la tâche
     const taskData = {
       ...req.body,
       attachments
     };
     const newTask = await Task.create(taskData);
+
+    // Récupérer la tâche avec les données associées
     const populated = await Task.findById(newTask._id)
       .populate('technicien')
       .populate('vehicule');
@@ -53,9 +55,11 @@ exports.createTask = async (req, res) => {
 
   } catch (error) {
     // Supprimer les fichiers uploadés en cas d'erreur
-    req.files?.forEach(file => {
-      fs.unlinkSync(file.path);
-    });
+    if (req.files) {
+      req.files.forEach(file => {
+        fs.unlinkSync(file.path);
+      });
+    }
     console.error('Erreur critique création:', error);
     res.status(400).json({
       message: 'Échec de la création',
@@ -238,6 +242,7 @@ exports.updateTaskStatus = async (req, res) => {
     });
   }
 };
+
 // Récupérer les pièces jointes d'une tâche spécifique
 exports.getTaskAttachments = async (req, res) => {
   try {
@@ -261,7 +266,6 @@ exports.getTaskAttachments = async (req, res) => {
     });
   }
 };
-
 
 // Récupérer une pièce jointe spécifique d'une tâche
 exports.getAttachmentFile = async (req, res) => {

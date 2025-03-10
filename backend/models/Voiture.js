@@ -8,5 +8,3 @@ const voitureSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Voiture', voitureSchema); // Le nom du modèle est "Voiture"
-
-
