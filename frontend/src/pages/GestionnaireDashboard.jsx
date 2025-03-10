@@ -145,10 +145,14 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
       try {
         const { data } = await vehiculesApi.getAllVehicules();
         // Garder le statut réservé si une tâche existe
-        const updated = data.map(veh => ({
-          ...veh,
-          status: tasks.some(t => t.vehicule === veh._id) ? 'réservé' : veh.status
-        }));
+        const updated = data.map(veh => {
+          // Vérifiez si le véhicule est associé à une tâche active
+          const associatedTask = tasks.find(t => t.vehicule === veh._id && t.status !== 'terminé');
+          return {
+            ...veh,
+            status: associatedTask ? 'réservé' : veh.status // Seulement si la tâche n'est pas terminée
+          };
+        });
         setVehiculesList(updated);
         setVehicules(updated);
       } catch (error) {
@@ -315,7 +319,6 @@ useEffect(() => {
       formData.append('vehicule', newTask.vehicule);
       formData.append('startDate', start.toISOString());
       formData.append('endDate', end.toISOString());
-      
   
       // Dans handleCreateTask, modifier la section des fichiers :
       if (newTask.files?.length > 0) {
@@ -324,7 +327,6 @@ useEffect(() => {
           formData.append('attachments', file);
         });
       }
-      
   
       // Envoi de la requête
       const response = await tasksApi.createTask(formData);
@@ -371,6 +373,11 @@ useEffect(() => {
   
       setIsModalVisible(false);
       message.success('Tâche créée avec succès !');
+  
+      // Rafraîchir les données des véhicules depuis le backend
+      const updatedVehiculesResponse = await vehiculesApi.getAllVehicules();
+      setVehicules(updatedVehiculesResponse.data);
+      setVehiculesList(updatedVehiculesResponse.data);
   
     } catch (error) {
       // Gestion des erreurs
