@@ -9,6 +9,7 @@ const technicienRouter = require('./routes/technicienRoutes'); // Ajouté
 const notesRouter = require('./routes/notesRoute'); 
 const gestionnairesRoutes = require('./routes/gestionnaireRoute');
 const { upload } = require('./config/multer');
+const reportRoutes = require('./routes/reportRoutes');
 const path = require('path'); 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/api/techniciens', technicienRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/gestionnaires', gestionnairesRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/reports', reportRoutes);
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {

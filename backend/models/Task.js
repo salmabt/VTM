@@ -18,6 +18,11 @@ const taskSchema = new mongoose.Schema({
     ref: 'Voiture', 
     required: true 
   },
+  // Ajouter cette référence
+report: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Report'
+},
   status: { 
     type: String, 
     enum: ['planifié', 'en cours', 'terminé'], 
