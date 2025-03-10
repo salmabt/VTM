@@ -30,6 +30,18 @@ const TechnicienDashboard = () => {
           tasksApi.getTasksByTechnicien(userData._id),
           vehiculesApi.getVehiculesByTechnicien(userData._id)
         ]);
+        console.log('🚗 Liste des véhicules:', vehiculesResponse.data);
+        console.log('📌 Liste des tâches:', tasksResponse.data);
+       
+        // Afficher les détails des tâches
+        tasksResponse.data.forEach(task => {
+          console.log(`Tâche: ${task.title}`, task);
+        });
+  
+        // Afficher les détails des véhicules
+        vehiculesResponse.data.forEach(vehicule => {
+          console.log(`Véhicule: ${vehicule.model}`, vehicule);
+        });
 
         setTasks(tasksResponse.data);
         setVehicules(vehiculesResponse.data);
@@ -42,6 +54,48 @@ const TechnicienDashboard = () => {
 
     loadData();
   }, [userData?._id]);
+
+  ///status tache 
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      // Mettre à jour le statut de la tâche via l'API
+      const response = await tasksApi.updateTaskStatus(taskId, { status: newStatus });
+      const updatedTask = response.data;
+  
+      // Mettre à jour l'état local des tâches
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task._id === taskId ? { ...task, status: newStatus } : task
+        )
+      );
+  
+      // Mettre à jour le statut du véhicule associé
+      if (updatedTask.vehicule) {
+        const vehicleId = updatedTask.vehicule._id;
+        const newVehicleStatus = newStatus === 'terminé' ? 'disponible' : 'réservé';
+        console.log(`Véhicule ID: ${vehicleId}, Nouveau statut: ${newVehicleStatus}`);
+  
+        // Mettre à jour l'état local du véhicule immédiatement
+        setVehicules(prevVehicles =>
+          prevVehicles.map(vehicle =>
+            vehicle._id === vehicleId ? { ...vehicle, status: newVehicleStatus } : vehicle
+          )
+        );
+  
+        // Mettre à jour le statut du véhicule via l'API (en arrière-plan)
+        await vehiculesApi.updateVehicule(vehicleId, { status: newVehicleStatus });
+  
+        // Rafraîchir les données des véhicules depuis le backend
+        const updatedVehiculesResponse = await vehiculesApi.getVehiculesByTechnicien(userData._id);
+        setVehicules(updatedVehiculesResponse.data);
+      }
+  
+      message.success('Statut de la tâche mis à jour avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+      message.error('Échec de la mise à jour du statut');
+    }
+  };
 
   // Fetch reports (this part can be customized based on how reports are fetched)
   const loadReports = async () => {
@@ -85,22 +139,24 @@ const TechnicienDashboard = () => {
     }
   };
   
-  const handleStatusChange = async (taskId, status) => {
+  const handleGetAttachments = async (taskId) => {
     try {
-      // Call your API to update the task's status
-      await tasksApi.updateTaskStatus(taskId, { status });
-  
-      // Update the task list in the state to reflect the new status
-      const updatedTasks = tasks.map((task) =>
-        task._id === taskId ? { ...task, status } : task
+      const response = await tasksApi.getTaskAttachments(taskId);
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task._id === taskId ? { ...task, attachments: response.data } : task
+        )
       );
-      setTasks(updatedTasks);
-      message.success('Statut de la tâche mis à jour');
     } catch (error) {
-      message.error('Erreur lors de la mise à jour du statut de la tâche');
+      message.error('Erreur lors du chargement des pièces jointes');
     }
   };
-  
+
+  const handleDownloadAttachment = (taskId, filename) => {
+    window.open(`/api/tasks/${taskId}/attachments/${filename}`, '_blank');
+  };
+
+
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -206,6 +262,29 @@ const TechnicienDashboard = () => {
                                   : 'Date non disponible'}
                               </Text>
                             </div>
+
+                            {task.attachments?.length > 0 && (
+                              <div style={{ marginTop: 8 }}>
+                                <Text strong>Pièces jointes:</Text>
+                                <ul style={{ paddingLeft: 20, marginTop: 4 }}>
+                                  {task.attachments.map((attachment, index) => (
+                                    <li key={index}>
+                                      <Button
+                                        type="link"
+                                        onClick={() => {
+                                          handleGetAttachments(task._id);
+                                          handleDownloadAttachment(task._id, attachment.filename);
+                                        }}
+                                        style={{ padding: 0 }}
+                                      >
+                                        {attachment.originalName}
+                                      </Button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
                           </div>
                         }
                       />
