@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm } from 'antd';
+import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber } from 'antd';
 import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { BarChart ,PieChart, CartesianGrid, XAxis, YAxis, Bar,Legend ,Pie,Cell } from 'recharts'; 
+
 import { useAuth } from '../contexts/AuthContext';
 import techniciensApi from '../api/techniciens';
 import gestionnairesApi from '../api/gestionnaires';
 import TechniciensSection from '../components/TechniciensSection';
 import tasksApi from '../api/tasks';
 import vehiculesApi from '../api/vehicules';
+import reportsApi from '../api/reports';
 import TaskModal from '../components/TaskModal';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -80,6 +83,51 @@ const AdminDashboard = () => {
     status: 'planifié',
     files: []
   });
+  const [exportLoading, setExportLoading] = useState(false);
+const [activeReportTab, setActiveReportTab] = useState('1');
+const [techDetails, setTechDetails] = useState(null);
+const [vehicleDetails, setVehicleDetails] = useState(null);
+const [rating, setRating] = useState({});
+const [showRateModal, setShowRateModal] = useState(false);
+  const [currentTechId, setCurrentTechId] = useState(null);
+  const [currentRating, setCurrentRating] = useState(0);
+// Dans la partie véhicules
+const calculateUtilisation = (tasks, vehiculeId) => {
+  return tasks
+    .filter(task => task.vehicule === vehiculeId)
+    .reduce((total, task) => {
+      const start = moment(task.startDate);
+      const end = moment(task.endDate);
+      return total + end.diff(start, 'hours', true);
+    }, 0);
+};
+
+// Mettre à jour le chargement des données
+useEffect(() => {
+  const loadReportData = async () => {
+    try {
+      const [techRes, vehRes, tasksRes] = await Promise.all([
+        reportsApi.getTechniciensStatsDetailed(),
+        reportsApi.getVehiculesStats(),
+        tasksApi.getAllTasks()
+      ]);
+
+      const tasks = tasksRes.data;
+      
+      setVehicules(vehRes.data.map(veh => ({
+        ...veh,
+        utilisationHeures: calculateUtilisation(tasks, veh._id),
+        lastMaintenance: veh.lastMaintenance ? 
+          moment(veh.lastMaintenance).format('DD/MM/YYYY') : 'N/A'
+      })));
+
+    } catch (error) {
+      message.error('Erreur de chargement des statistiques');
+    }
+  };
+  
+  if (selectedMenu === '3') loadReportData();
+}, [selectedMenu]);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -423,7 +471,81 @@ const AdminDashboard = () => {
         message.error(`Échec : ${errorMessage}`);
       }
     };
- 
+    const handleExportExcel = async () => {
+      setExportLoading(true);
+      try {
+        const response = await reportsApi.exportExcel();
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'rapport-interventions.xlsx');
+        document.body.appendChild(link);
+        link.click();
+      } catch (error) {
+        message.error('Erreur lors de l\'export');
+      } finally {
+        setExportLoading(false);
+      }
+    };
+    
+    const handleExportPDF = async () => {
+      setExportLoading(true);
+  try {
+    const response = await reportsApi.exportExcel();
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'rapport-interventions.xlsx');
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    message.error('Erreur lors de l\'export');
+  } finally {
+    setExportLoading(false);
+  }
+    };
+  // Ajoutez cette fonction dans le composant
+const getVehicleStatusColor = (status) => {
+  switch(status) {
+    case 'disponible': return 'green';
+    case 'réservé': return 'orange';
+    case 'en entretien': return 'red';
+    default: return 'gray';
+  }
+};
+const handleRateChange = async (techId) => {
+  const newRating = prompt("Entrez une note (0-5) :");
+  const parsedRating = parseFloat(newRating);
+  
+  if (!isNaN(parsedRating) && parsedRating >= 0 && parsedRating <= 5) {
+    try {
+      await techniciensApi.updateRating(techId, parsedRating);
+      setTechniciens(prev => prev.map(tech => 
+        tech._id === techId ? {
+          ...tech,
+          averageRating: ((tech.averageRating * tech.ratingCount) + parsedRating) / (tech.ratingCount + 1),
+          ratingCount: tech.ratingCount + 1
+        } : tech
+      ));
+      message.success('Note enregistrée !');
+    } catch (error) {
+      message.error('Erreur lors de la mise à jour de la note');
+    }
+  } else {
+    message.error('Veuillez entrer une note valide entre 0 et 5.');
+  }
+};
+
+const handleSaveRating = () => {
+  setRatings((prev) => ({ ...prev, [currentTechId]: currentRating }));
+  setShowRateModal(false);
+};
+
+const closeRateModal = () => {
+  setShowRateModal(false);
+};
+
+
 
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
@@ -663,11 +785,165 @@ const AdminDashboard = () => {
                 </Card>
               )}
 
-              {selectedMenu === '3' && (
-                <Card title="Rapports" variant="borderless">
-                  <Button type="primary" onClick={() => alert('Générer rapport')}>Générer Rapport</Button>
-                </Card>
-              )}
+{selectedMenu === '3' && (
+  <Card title="Rapports et Historique" bordered={false}>
+    <Tabs defaultActiveKey="1">
+      
+      {/* Suivi des Techniciens */}
+      <Tabs.TabPane tab="Suivi Techniciens" key="1">
+        <div className="report-section">
+          <Title level={3}>📊 Performances des Techniciens</Title>
+          <Row gutter={[16, 16]}>
+
+            <Col span={24} md={12}>
+              <Card title="📈 Statistiques des Techniciens">
+                <BarChart
+                  width={500}
+                  height={300}
+                  data={techniciens}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar 
+                    dataKey="completedTasks" 
+                    fill="#8884d8" 
+                    name="Missions terminées"
+                  />
+                  <Bar 
+                    dataKey="averageRating" 
+                    fill="#82ca9d" 
+                    name="Note moyenne/5"
+                  />
+                </BarChart>
+              </Card>
+            </Col>
+
+            <Col span={24} md={12}>
+              <Card title="📝 Détails des Techniciens">
+                <List
+                  dataSource={techniciens}
+                  renderItem={tech => (
+                    <List.Item>
+{/* Modifier cette partie dans la liste des techniciens */}
+<Statistic
+  title={tech.name}
+  value={tech.completedTasks ?? 0}
+  suffix={
+    <>
+      <div style={{ marginTop: 5 }}>
+        <Text strong>Nombre de Missions realisé: {tech.completedTasks}</Text>
+        <br />
+        <Text Strong>Note sur la qualité de rapport soumis: {(tech.averageRating ?? 0).toFixed(1)}/5 ⭐</Text>
+        <br />
+        <Text Strong>Compétences: {tech.skills?.length ? tech.skills.join(", ") : "Aucune"}</Text>
+      </div>
+      <Button
+        type="primary"
+        size="small"
+        onClick={() => handleRateChange(tech._id)}
+        style={{ marginTop: 5 }}
+      >
+        ⭐ Noter
+      </Button>
+    </>
+  }
+/>
+</List.Item>
+                  )}
+                />
+              </Card>
+            </Col>
+
+          </Row>
+        </div>
+      </Tabs.TabPane>
+
+      {/* Utilisation des Véhicules */}
+      <Tabs.TabPane tab="Utilisation Véhicules" key="2">
+        <div className="vehicle-reports">
+          <Title level={3}>🚗 Gestion et Utilisation des Véhicules</Title>
+          <Row gutter={[16, 16]}>
+
+            <Col span={24} md={12}>
+              <Card title="📊 Statut des Véhicules">
+                <PieChart width={400} height={400}>
+                  <Pie
+                    data={vehicules.reduce((acc, veh) => {
+                      const exist = acc.find(item => item.name === veh.status);
+                      exist ? exist.value++ : acc.push({ 
+                        name: veh.status, 
+                        value: 1 
+                      });
+                      return acc;
+                    }, [])}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    label
+                    dataKey="value"
+                  >
+                    {vehicules.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={getVehicleStatusColor(entry.status)} 
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </Card>
+            </Col>
+
+            <Col span={24} md={12}>
+              <Card title="⏳ Temps d'Utilisation">
+                <List
+                  dataSource={vehicules}
+                  renderItem={vehicle => (
+                    <List.Item>
+                      <Statistic
+                        title={`${vehicle.model} (${vehicle.registration})`}
+                        value={vehicle.utilisationHeures}
+                        suffix="heures"
+                        precision={1}
+                      />
+                      <Tag color={getVehicleStatusColor(vehicle.status)}>
+                        {vehicle.status}
+                      </Tag>
+                    </List.Item>
+                  )}
+                />
+              </Card>
+            </Col>
+
+          </Row>
+
+          <Card title="🛠️ Historique des Maintenances" style={{ marginTop: 16 }}>
+            <Timeline>
+              {vehicules.map(vehicle => (
+                <Timeline.Item 
+                  key={vehicle._id} 
+                  color={getVehicleStatusColor(vehicle.status)}
+                >
+                  <strong>{vehicle.model} ({vehicle.registration})</strong>
+                  <div>Dernière maintenance: {vehicle.lastMaintenance}</div>
+                  <div>Heures d'utilisation: {vehicle.utilisationHeures}h</div>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </Card>
+
+        </div>
+      </Tabs.TabPane>
+    </Tabs>
+  </Card>
+)}
+
 
               {selectedMenu === '4' && (
                 <Card title="Gestion des Gestionnaires" variant="borderless">

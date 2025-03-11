@@ -216,32 +216,46 @@ exports.getTasksByTechnicien = async (req, res) => {
 };
 
 // Mettre à jour le statut d'une tâche
+// Dans exports.updateTaskStatus
 exports.updateTaskStatus = async (req, res) => {
   try {
     const taskId = req.params.taskId;
     const { status } = req.body;
 
-    console.log('Requête reçue:', { taskId, status });
-
     const task = await Task.findByIdAndUpdate(
       taskId,
       { status },
       { new: true, runValidators: true }
-    ).populate('vehicule'); // Ajout de populate pour inclure les détails du véhicule
+    ).populate('vehicule');
 
     if (!task) {
-      console.warn('Tâche introuvable ID:', taskId);
       return res.status(404).json({ message: 'Tâche introuvable' });
     }
 
-    console.log('Statut de la tâche mis à jour:', task._id);
-    res.json(task); // Renvoyer la tâche mise à jour avec les détails du véhicule
+    // Nouvelle logique de mise à jour du véhicule
+    if (status === 'terminé' && task.vehicule) {
+      const vehicleId = task.vehicule._id;
+      
+      // Vérifier s'il reste des tâches actives pour ce véhicule
+      const activeTasks = await Task.find({
+        vehicule: vehicleId,
+        status: { $ne: 'terminé' },
+        _id: { $ne: taskId }
+      });
+
+      if (activeTasks.length === 0) {
+        await Voiture.findByIdAndUpdate(vehicleId, { status: 'disponible' });
+        console.log(`Statut véhicule ${vehicleId} mis à jour à disponible`);
+      }
+    }
+
+    res.json(task);
 
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du statut:', error);
+    console.error('Erreur mise à jour statut:', error);
     res.status(500).json({
-      message: 'Échec de la mise à jour du statut',
-      error: error.message,
+      message: 'Échec de la mise à jour',
+      error: error.message
     });
   }
 };
@@ -303,3 +317,49 @@ exports.getAttachmentFile = async (req, res) => {
     });
   }
 };
+// Après avoir marqué une tâche comme terminée
+exports.updateTaskStatus = async (req, res) => {
+  try {
+    const task = await Task.findByIdAndUpdate(
+      req.params.taskId,
+      { status: req.body.status },
+      { new: true }
+    ).populate('technicien vehicule');
+
+    // Mettre à jour les stats du technicien
+    if (req.body.status === 'terminé') {
+      await Technicien.findByIdAndUpdate(
+        task.technicien._id,
+        { 
+          $inc: { completedTasks: 1 },
+          $set: { 
+            averageRating: await calculateAverageRating(task.technicien._id) 
+          }
+        }
+      );
+    }
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+async function calculateAverageRating(technicienId) {
+  const result = await Task.aggregate([
+    { 
+      $match: { 
+        technicien: mongoose.Types.ObjectId(technicienId),
+        rating: { $exists: true } 
+      } 
+    },
+    { 
+      $group: {
+        _id: null,
+        average: { $avg: "$rating" }
+      } 
+    }
+  ]);
+  
+  return result[0]?.average || 0;
+}

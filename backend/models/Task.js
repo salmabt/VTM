@@ -34,7 +34,14 @@ report: {
     mimeType: String,
     size: Number,
     uploadedAt: { type: Date, default: Date.now }
-  }]
-}, { timestamps: true });
-
+  }],
+  rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+    required: false
+  }
+},
+{ timestamps: true } // <- Cette accolade était mal placée
+);
 module.exports = mongoose.model('Task', taskSchema);
