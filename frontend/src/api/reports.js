@@ -33,4 +33,7 @@ export default {
   addReport,
   getReports,
   getReportsByTechnicien,
+  exportExcel: () => axios.get('/api/reports/excel', { responseType: 'blob' }),
+  exportPDF: () => axios.get('/api/reports/pdf', { responseType: 'blob' }),
+  getTechStats: (techId) => axios.get(`/api/reports/tech/${techId}`)
 };

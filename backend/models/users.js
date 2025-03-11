@@ -10,6 +10,15 @@ const userSchema = new mongoose.Schema({
   isApproved: { type: Boolean, default: false },
   skills: { type: Array, default: [] },
   archived: { type: Boolean, default: false },
+  completedTasks: { 
+    type: Number, 
+    required: false
+  },
+  averageRating: { 
+    type: Number,
+    required: false 
+   
+  },
 }, { timestamps: true });
 
 // Middleware pour hacher le mot de passe avant de sauvegarder
