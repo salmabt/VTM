@@ -139,58 +139,55 @@ console.log("Mot de passe stocké en base:", user.password);
 };
 
 // VALIDATION PAR L'ADMINISTRATEUR
-// backend/authController.js
-const isAdmin = require('../middleware/isAdmin');
-
-// Route de validation (protégée par isAdmin)
-exports.validateUser = [isAdmin, async (req, res, next) => {
+exports.validateUser = async (req, res, next) => {
   try {
-    const { userId } = req.params;
+      const { userId } = req.params;
 
-    // Récupérer l'utilisateur en attente
-    const pendingUser = await PendingUser.findById(userId);
-    if (!pendingUser) {
-      return next(new createError('Pending user not found!', 404));
-    }
+      // Récupérer l'utilisateur en attente
+      const pendingUser = await PendingUser.findById(userId);
+      if (!pendingUser) {
+          return next(new createError('Pending user not found!', 404));
+      }
 
-    // Créer un utilisateur validé avec les données de PendingUser
-    const approvedUser = await User.create({
-      name: pendingUser.name,
-      email: pendingUser.email,
-      password: pendingUser.password,
-      role: pendingUser.role,
-      phone: pendingUser.phone,
-      skills: pendingUser.skills,
-      isApproved: true,
-    });
+      // Créer un utilisateur validé avec les données de PendingUser
+      const approvedUser = await User.create({
+          name: pendingUser.name,
+          email: pendingUser.email,
+          password: pendingUser.password,
+          role: pendingUser.role,
+          phone: pendingUser.phone, // Utiliser le téléphone de PendingUser
+          skills: pendingUser.skills, // Utiliser les compétences de PendingUser
+          isApproved: true,
+      });
 
-    // Supprimer l'utilisateur en attente
-    await PendingUser.findByIdAndDelete(userId);
+      // Supprimer l'utilisateur en attente
+      await PendingUser.findByIdAndDelete(userId);
 
-    // Envoyer un e-mail de confirmation
-    const userMailOptions = {
-      from: process.env.GMAIL_USER,
-      to: approvedUser.email,
-      subject: 'Votre inscription a été approuvée',
-      html: `<p>Félicitations ! Votre profil technicien est maintenant actif.</p>
-             <p>Identifiant technicien : ${approvedUser._id}</p>
-             <a href="http://localhost:5173/login">Se connecter</a>`,
-    };
+      // Envoyer un e-mail de confirmation
+      const userMailOptions = {
+          from: process.env.GMAIL_USER,
+          to: approvedUser.email,
+          subject: 'Votre inscription a été approuvée',
+          html: `<p>Félicitations ! Votre profil technicien est maintenant actif.</p>
+                 <p>Identifiant technicien : ${approvedUser._id}</p>
+                 <a href="http://localhost:5173/login">Se connecter</a>`,
+      };
 
-    await transporter.sendMail(userMailOptions);
+      await transporter.sendMail(userMailOptions);
 
-    res.status(200).json({
-      status: 'success',
-      message: 'User approved and technician profile created',
-      user: {
-        _id: approvedUser._id,
-        name: approvedUser.name,
-        email: approvedUser.email,
-        phone: approvedUser.phone,
-        skills: approvedUser.skills,
-      },
-    });
+      res.status(200).json({
+          status: 'success',
+          message: 'User approved and technician profile created',
+          user: {
+              _id: approvedUser._id,
+              name: approvedUser.name,
+              email: approvedUser.email,
+              phone: approvedUser.phone,
+              skills: approvedUser.skills,
+          },
+      });
   } catch (error) {
-    next(error);
+      next(error);
   }
-}];
+};
+
