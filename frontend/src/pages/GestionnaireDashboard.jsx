@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Input, DatePicker, Typography, Button, Card, List,
-  Select, message, Spin, Tag, Modal
+  Select, message, Spin, Tag, Modal,Badge 
 } from 'antd';
 import {
   CalendarOutlined, FileTextOutlined,
-  UnorderedListOutlined, LogoutOutlined, CarOutlined, ClockCircleOutlined 
+  UnorderedListOutlined, LogoutOutlined, CarOutlined, ClockCircleOutlined, BellOutlined 
 } from '@ant-design/icons';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -62,6 +62,8 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('');
+  const [notifications, setNotifications] = useState([]);
+
   
   const handleAddNote = async () => {
     if (newNote.trim()) {
@@ -511,7 +513,19 @@ useEffect(() => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <Text strong>Connecté en tant que : {userData?.name}</Text>
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Notification Button with Badge */}
+            <Badge count={notifications} style={{ marginRight: 16 }}>
+              <Button
+                icon={<BellOutlined />}
+                onClick={() => message.info('Vous avez des notifications')}
+                shape="circle"
+                style={{ fontSize: 20 }}
+              />
+            </Badge>
+           
             <Button icon={<LogoutOutlined />} onClick={logout}>Déconnexion</Button>
+            </div>
           </Header>
           <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
             {loading ? (

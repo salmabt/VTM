@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, List, Card, Typography, Spin, message, Menu, Avatar, Button, Select, Tag, Form, Input, DatePicker } from 'antd';
-import { CalendarOutlined, LogoutOutlined, UserOutlined, FileTextOutlined } from '@ant-design/icons';
+import { Layout, List, Card, Typography, Spin, message, Menu, Avatar, Button, Select, Tag, Form, Input,  Badge } from 'antd';
+import { CalendarOutlined, LogoutOutlined, UserOutlined, FileTextOutlined, BellOutlined} from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import tasksApi from '../api/tasks';
 import vehiculesApi from '../api/vehicules';
@@ -18,6 +18,7 @@ const TechnicienDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('1');
   const [reports, setReports] = useState([]);  // State for reports
+  const [notifications, setNotifications] = useState([]);
   const [form] = Form.useForm();  // Form instance for the report form
 
   useEffect(() => {
@@ -177,6 +178,16 @@ const TechnicienDashboard = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <Text strong>Connecté en tant que : {userData?.name}</Text>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Notification Button with Badge */}
+            <Badge count={notifications} style={{ marginRight: 16 }}>
+              <Button
+                icon={<BellOutlined />}
+                onClick={() => message.info('Vous avez des notifications')}
+                shape="circle"
+                style={{ fontSize: 20 }}
+              />
+            </Badge>
           <Button
             icon={<LogoutOutlined />}
             onClick={logout}
@@ -184,6 +195,7 @@ const TechnicienDashboard = () => {
           >
             Déconnexion
           </Button>
+          </div>
         </Header>
 
         <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>

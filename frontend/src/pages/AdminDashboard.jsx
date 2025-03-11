@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm } from 'antd';
-import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm,Badge  } from 'antd';
+import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined, BellOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import techniciensApi from '../api/techniciens';
 import gestionnairesApi from '../api/gestionnaires';
@@ -80,6 +80,8 @@ const AdminDashboard = () => {
     status: 'planifié',
     files: []
   });
+  const [notifications, setNotifications] = useState([]);
+
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -458,7 +460,19 @@ const AdminDashboard = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <Text strong>Connecté en tant que : {userData?.name}</Text>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Notification Button with Badge */}
+            <Badge count={notifications} style={{ marginRight: 16 }}>
+              <Button
+                icon={<BellOutlined />}
+                onClick={() => message.info('Vous avez des notifications')}
+                shape="circle"
+                style={{ fontSize: 20 }}
+              />
+            </Badge>
+           
           <Button icon={<UserOutlined />} onClick={logout}>Déconnexion</Button>
+          </div>
         </Header>
 
         <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>

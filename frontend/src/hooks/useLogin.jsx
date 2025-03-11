@@ -27,7 +27,6 @@ const useLogin = () => {
             if ( res.status === 200) {
                 message.success(data.message);
                 login(data.token, data.user);
-
                 return data.user;
             }else if (res.status === 404){
                 setError(data.message);
