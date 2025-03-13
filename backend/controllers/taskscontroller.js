@@ -3,6 +3,7 @@ const Technicien = require('../models/users');
 const Voiture = require('../models/Voiture');
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
 
 // Créer une nouvelle tâche
 exports.createTask = async (req, res) => {
@@ -362,5 +363,16 @@ async function calculateAverageRating(technicienId) {
   ]);
   
   return result[0]?.average || 0;
+
 }
+// Récupérer le nombre total de tâches
+exports.getTotalTasks = async (req, res) => {
+  try {
+    const totalTasks = await Task.countDocuments({}); // Compte tous les documents dans la collection Task
+    res.json({ totalTasks });
+  } catch (error) {
+    console.error("Erreur lors du comptage des tâches:", error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
 

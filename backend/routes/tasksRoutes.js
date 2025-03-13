@@ -8,10 +8,11 @@ const {
   updateTask,
   deleteTask,
   getTasksByTechnicien,
-  updateTaskStatus ,
+  updateTaskStatus,
   getTaskAttachments,
-  getAttachmentFile// Utilisez la fonction directement
-} = require('../controllers/taskscontroller'); // Assurez-vous que le chemin est correct
+  getAttachmentFile,
+  getTotalTasks // Assurez-vous que cette fonction est importée
+} = require('../controllers/taskscontroller');
 
 // Routes pour les tâches
 router.post('/', 
@@ -22,24 +23,24 @@ router.post('/',
   },
   createTask
 );
-router.get('/', getAllTasks);
-router.get('/:id', getTaskById);
-router.put('/:id', upload.array('attachments'), updateTask);
-router.put('/:id', updateTask);
-router.delete('/:id', deleteTask);
 
+router.get('/', getAllTasks);
+router.get('/count', getTotalTasks); // Définissez cette route en premier
+router.get('/:id', getTaskById); // Définissez cette route après
+router.put('/:id', upload.array('attachments'), updateTask);
+router.delete('/:id', deleteTask);
 
 // Route pour récupérer les tâches d'un technicien spécifique
 router.get('/technicien/:technicienId', getTasksByTechnicien);
 
 // Route pour mettre à jour le statut d'une tâche
-router.patch('/:taskId/status', updateTaskStatus); // Utilisez la fonction directement
+router.patch('/:taskId/status', updateTaskStatus);
+
 // Récupérer les pièces jointes d'une tâche spécifique
 router.get('/:id/attachments', getTaskAttachments);
 
 // Télécharger une pièce jointe spécifique d'une tâche
 router.get('/:id/attachments/:filename', getAttachmentFile);
-
 
 
 
