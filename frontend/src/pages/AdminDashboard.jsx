@@ -14,6 +14,7 @@ import TaskModal from '../components/TaskModal';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import HomeDashboard from './HomeDashboard'; // Assurez-vous que le chemin est correct
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -548,10 +549,11 @@ const closeRateModal = () => {
 
 
   const menuItems = [
-    { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
-    { key: '2', icon: <UserOutlined />, label: 'Techniciens' },
-    { key: '3', icon: <FileTextOutlined />, label: 'Rapports' },
-    { key: '4', icon: <UserOutlined />, label: 'Gestionnaires' },
+    { key: '1', icon: <UserOutlined />, label: 'Dashboard' },
+    { key: '2', icon: <CalendarOutlined />, label: 'Calendrier' },
+    { key: '3', icon: <UserOutlined />, label: 'Techniciens' },
+    { key: '4', icon: <FileTextOutlined />, label: 'Rapports' },
+    { key: '5', icon: <UserOutlined />, label: 'Gestionnaires' },
   ];
   // Composant personnalisé pour afficher les événements
   const CustomEvent = ({ event }) => (
@@ -588,7 +590,10 @@ const closeRateModal = () => {
             <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
           ) : (
             <>
-              {selectedMenu === '1' && (
+            {selectedMenu === '1' && (
+            <HomeDashboard /> // Affichez le tableau de bord d'accueil si l'option est sélectionnée
+          )}
+              {selectedMenu === '2' && (
                 <Card title="Calendrier des interventions" bordered={false}>
                   <TechniciensSection
                     techniciens={techniciens}
@@ -727,7 +732,7 @@ const closeRateModal = () => {
                 vehiculesList={vehicules}
               />
 
-              {selectedMenu === '2' && (
+              {selectedMenu === '3' && (
                 <Card title="Gestion des Techniciens" variant="borderless">
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
                     <Input
@@ -785,7 +790,7 @@ const closeRateModal = () => {
                 </Card>
               )}
 
-{selectedMenu === '3' && (
+{selectedMenu === '4' && (
   <Card title="Rapports et Historique" bordered={false}>
     <Tabs defaultActiveKey="1">
       
@@ -945,7 +950,7 @@ const closeRateModal = () => {
 )}
 
 
-              {selectedMenu === '4' && (
+              {selectedMenu === '5' && (
                 <Card title="Gestion des Gestionnaires" variant="borderless">
                   <Button
                     type="primary"

@@ -44,4 +44,14 @@ router.put('/:id/restore', restoreTechnicien);
 router.get('/archived', getArchivedTechniciens);
 
 
+router.get('/count', async (req, res) => {
+  try {
+    const countTechniciens = await Technicien.countDocuments({ role: 'technicien' });
+    res.json({ totalTechniciens: countTechniciens });
+  } catch (error) {
+    console.error("Erreur lors du comptage des techniciens:", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
 module.exports = router;

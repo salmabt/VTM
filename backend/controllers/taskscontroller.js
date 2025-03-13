@@ -363,3 +363,4 @@ async function calculateAverageRating(technicienId) {
   
   return result[0]?.average || 0;
 }
+
