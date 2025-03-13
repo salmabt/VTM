@@ -8,6 +8,8 @@ const { Text } = Typography;
 
 const HomeDashboard = () => {
   const [totalEmployees, setTotalEmployees] = useState(0);
+  const [bestTechnician, setBestTechnician] = useState(null);
+
   const [totalTasks, setTotalTasks] = useState(0);
   const [totalGestionnaires, setTotalGestionnaires] = useState(0);
 
@@ -22,16 +24,35 @@ const HomeDashboard = () => {
         console.error('Erreur lors de la récupération du nombre de techniciens:', error);
       });
 
-    // Récupérer le nombre total de tâches
-    axios.get('http://localhost:3000/tasks/count')
-      .then(response => {
-        setTotalTasks(response.data.totalTasks);
-      })
-      .catch(error => {
-        console.error('Erreur lors de la récupération des statistiques:', error);
-      });
+    // Récupérer le nombre total de gestionnaires
+    axios.get('http://localhost:3000/api/gestionnaires/count')
+    .then(response => {
+      setTotalGestionnaires(response.data.totalGestionnaires);
+    })
+    .catch(error => {
+      console.error('Erreur lors de la récupération du nombre de gestionnaires:', error);
+    });
+  
+    axios.get('http://localhost:3000/api/tasks/count')
+    .then(response => {
+      setTotalTasks(response.data.totalTasks); 
+    })
+    .catch(error => {
+      console.error('Erreur lors de la récupération du nombre de tâches:', error);
+    });
 
-  }, []);
+    axios.get('http://localhost:3000/api/techniciens/bestTechnician')
+    .then(response => {
+      setBestTechnician(response.data.name);
+    })
+    .catch(error => {
+      console.error('Erreur lors de la récupération du meilleur technicien:', error);
+    });
+
+
+    }, []);
+    
+  
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -50,7 +71,7 @@ const HomeDashboard = () => {
             <Card style={{ background: '#fde2e2', textAlign: 'center' }}>
               <Statistic
                 title="Best Technician"
-                value={23}
+                value={bestTechnician}
                 prefix={<UserOutlined />}
               />
             </Card>

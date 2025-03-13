@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 
+
 exports.loginGestionnaire = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -200,6 +201,15 @@ exports.deleteGestionnaire = async (req, res, next) => {
       status: 'success',
       message: 'Gestionnaire supprimé',
     });
+  } catch (error) {
+    next(error);
+  }
+};
+exports.countGestionnaires = async (req, res, next) => {
+  try {
+    const totalGestionnaires = await User.countDocuments({ role: "gestionnaire" });
+    
+    res.status(200).json({ totalGestionnaires });
   } catch (error) {
     next(error);
   }

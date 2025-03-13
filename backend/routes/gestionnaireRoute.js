@@ -25,4 +25,7 @@ router.put('/:id/restore', gestionnaireController.restoreGestionnaire);
 // DELETE /api/gestionnaires/:id -> Supprimer un gestionnaire
 router.delete('/:id', gestionnaireController.deleteGestionnaire);
 
+router.get('/count', gestionnaireController.countGestionnaires);
+
+
 module.exports = router;
