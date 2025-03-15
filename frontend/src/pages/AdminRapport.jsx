@@ -1,51 +1,119 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Card, Tabs, Row, Col, List, Statistic, Button, Tag, Timeline, Typography, Spin, message } from 'antd';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
 
-const { Text, Title } = Typography; // Extrayez `Text` et `Title` de `Typography`
+const { Text, Title } = Typography;
 const { TabPane } = Tabs;
 
 const AdminRapport = () => {
-  // États pour stocker les données des techniciens et des véhicules
   const [techniciens, setTechniciens] = useState([]);
   const [vehicules, setVehicules] = useState([]);
-  const [loading, setLoading] = useState(true); // État pour gérer le chargement
+  const [loading, setLoading] = useState(true);
 
-  // Fonction pour récupérer les données des techniciens depuis l'API
+  // Récupérer les techniciens
   const fetchTechniciens = async () => {
     try {
-      const response = await fetch('/api/techniciens'); // Remplacez par votre endpoint
-      const data = await response.json();
-      setTechniciens(data);
+      const response = await axios.get(`http://localhost:3000/api/techniciens?timestamp=${new Date().getTime()}`);
+      console.log('Données reçues de l\'API:', response.data);
+      const data = response.data;
+      const formattedData = data.map((tech) => ({
+        ...tech,
+        averageRating: tech.averageRating ?? 0,
+        completedTasks: tech.completedTasks ?? 0,
+        ratingCount: tech.ratingCount ?? 0,
+      }));
+      setTechniciens(formattedData);
+      localStorage.setItem('techniciens', JSON.stringify(formattedData));
     } catch (error) {
       console.error('Erreur lors de la récupération des techniciens:', error);
+      message.error('Erreur lors de la récupération des données des techniciens');
     }
   };
 
-  // Fonction pour récupérer les données des véhicules depuis l'API
+  // Récupérer les véhicules
   const fetchVehicules = async () => {
     try {
-      const response = await fetch('/api/vehicules'); // Remplacez par votre endpoint
-      const data = await response.json();
-      setVehicules(data);
+      const response = await axios.get('http://localhost:3000/api/vehicules');
+      setVehicules(response.data);
     } catch (error) {
       console.error('Erreur lors de la récupération des véhicules:', error);
+      message.error('Erreur lors de la récupération des données des véhicules');
     }
   };
 
-  // Utilisez useEffect pour charger les données au montage du composant
+  // Charger les données au montage du composant
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await fetchTechniciens();
-      await fetchVehicules();
-      setLoading(false);
+      try {
+        const storedTechniciens = localStorage.getItem('techniciens');
+        if (storedTechniciens) {
+          setTechniciens(JSON.parse(storedTechniciens));
+        } else {
+          await fetchTechniciens();
+        }
+        await fetchVehicules();
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données:', error);
+        message.error('Erreur lors de la récupération des données');
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
   }, []);
 
-  // Fonction pour obtenir la couleur en fonction du statut du véhicule
+
+  // Gérer la mise à jour de la note d'un technicien
+  const handleRateChange = async (techId) => {
+    const newRating = prompt('Entrez une note (0-5) :');
+    const parsedRating = parseFloat(newRating);
+  
+    if (!isNaN(parsedRating) && parsedRating >= 0 && parsedRating <= 5) {
+      try {
+        const response = await axios.post(`http://localhost:3000/api/techniciens/${techId}/rate`, {
+          rating: parsedRating,
+        });
+        console.log('API Response:', response.data);
+  
+        const updatedTechnicien = response.data;
+        console.log('Technicien mis à jour:', updatedTechnicien);
+  
+        setTechniciens((prev) => {
+          const updatedTechniciens = prev.map((tech) =>
+            tech._id === techId
+              ? {
+                  ...tech,
+                  averageRating: updatedTechnicien.averageRating,
+                  ratingCount: updatedTechnicien.ratingCount,
+                }
+              : tech
+          );
+          localStorage.setItem('techniciens', JSON.stringify(updatedTechniciens));
+          return updatedTechniciens;
+        });
+        message.success('Note enregistrée !');
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour de la note:', error);
+        if (error.response) {
+          console.error('Réponse du serveur:', error.response.data);
+          console.error('Statut:', error.response.status);
+          console.error('En-têtes:', error.response.headers);
+        } else if (error.request) {
+          console.error('Aucune réponse reçue:', error.request);
+        } else {
+          console.error('Erreur lors de la configuration de la requête:', error.message);
+        }
+        message.error('Erreur lors de la mise à jour de la note');
+      }
+    } else {
+      message.error('Veuillez entrer une note valide entre 0 et 5.');
+    }
+  };
+
+  // Couleur du statut des véhicules
   const getVehicleStatusColor = (status) => {
     switch (status) {
       case 'disponible':
@@ -59,38 +127,19 @@ const AdminRapport = () => {
     }
   };
 
-  // Fonction pour gérer la notation d'un technicien
-  const handleRateChange = async (techId) => {
-    const newRating = prompt('Entrez une note (0-5) :');
-    const parsedRating = parseFloat(newRating);
-
-    if (!isNaN(parsedRating) && parsedRating >= 0 && parsedRating <= 5) {
-      setTechniciens((prev) =>
-        prev.map((tech) =>
-          tech._id === techId
-            ? {
-                ...tech,
-                averageRating: ((tech.averageRating * tech.ratingCount) + parsedRating) / (tech.ratingCount + 1),
-                ratingCount: tech.ratingCount + 1,
-              }
-            : tech
-        )
-      );
-      message.success('Note enregistrée !');
-    } else {
-      message.error('Veuillez entrer une note valide entre 0 et 5.');
-    }
-  };
-
-  // Afficher un spinner pendant le chargement des données
+  // Affichage du chargement
   if (loading) {
-    return <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />;
+    return (
+      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+        <Spin size="large" />
+        <p>Chargement des données en cours...</p>
+      </div>
+    );
   }
 
   return (
     <Card title="Rapports et Historique" bordered={false}>
       <Tabs defaultActiveKey="1">
-        {/* Suivi des Techniciens */}
         <TabPane tab="Suivi Techniciens" key="1">
           <div className="report-section">
             <Title level={3}>📊 Performances des Techniciens</Title>
@@ -98,13 +147,13 @@ const AdminRapport = () => {
               <Col span={24} md={12}>
                 <Card title="📈 Statistiques des Techniciens">
                   <BarChart
-                    width={500}
-                    height={300}
+                    width={800}
+                    height={400}
                     data={techniciens}
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="name" angle={-0} textAnchor="end" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
@@ -152,7 +201,6 @@ const AdminRapport = () => {
           </div>
         </TabPane>
 
-        {/* Utilisation des Véhicules */}
         <TabPane tab="Utilisation Véhicules" key="2">
           <div className="vehicle-reports">
             <Title level={3}>🚗 Gestion et Utilisation des Véhicules</Title>
