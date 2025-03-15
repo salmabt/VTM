@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Card, Row, Col, Statistic, Typography, Progress } from 'antd';
-import { UserOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { Layout, Card, Row, Col, Statistic, Typography, Button, Modal } from 'antd';
+import { UserOutlined, UnorderedListOutlined, FilterOutlined } from '@ant-design/icons';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
+import DatePicker from 'antd/es/date-picker';
+
+const { RangePicker } = DatePicker;
+const { Content } = Layout;
+const { Text } = Typography;
+
 const TaskBarChart = ({ data }) => {
   const monthNames = [
     'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
     'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'
   ];
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data}>
@@ -30,8 +37,7 @@ const TaskBarChart = ({ data }) => {
     </ResponsiveContainer>
   );
 };
-const { Content } = Layout;
-const { Text } = Typography;
+
 const HomeDashboard = () => {
   const [totalEmployees, setTotalEmployees] = useState(0);
   const [bestTechnician, setBestTechnician] = useState(null);
@@ -39,65 +45,93 @@ const HomeDashboard = () => {
   const [totalGestionnaires, setTotalGestionnaires] = useState(0);
   const [tasks, setTasks] = useState([]);
   const [tasksPerMonth, setTasksPerMonth] = useState([]);
+  const [visible, setVisible] = useState(false);
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
   useEffect(() => {
-    // Récupérer le nombre total de techniciens (employés)
-    axios.get('http://localhost:3000/api/techniciens/count')
-      .then(response => {
-        setTotalEmployees(response.data.totalTechniciens);
-      })
-      .catch(error => {
-        console.error('Erreur lors de la récupération du nombre de techniciens:', error);
-      });
-    // Récupérer le nombre total de gestionnaires
-    axios.get('http://localhost:3000/api/gestionnaires/count')
-    .then(response => {
-      setTotalGestionnaires(response.data.totalGestionnaires);
-    })
-    .catch(error => {
-      console.error('Erreur lors de la récupération du nombre de gestionnaires:', error);
-    });
-    axios.get('http://localhost:3000/api/tasks/count')
-    .then(response => {
-      setTotalTasks(response.data.totalTasks);
-    })
-    .catch(error => {
-      console.error('Erreur lors de la récupération du nombre de tâches:', error);
-    });
-    axios.get('http://localhost:3000/api/techniciens/bestTechnician')
-    .then(response => {
-      setBestTechnician(response.data.name);
-    })
-    .catch(error => {
-      console.error('Erreur lors de la récupération du meilleur technicien:', error);
-    });
-    axios.get('http://localhost:3000/api/tasks')
-    .then(response => {
-      setTasks(response.data); // Stocker les tâches dans l'état
-    })
-    .catch(error => {
-      console.error('Erreur lors de la récupération des tâches:', error);
-    });
-     // Fetch tasks per month
-     axios.get('http://localhost:3000/api/tasks/count-by-month')
-     .then(response => {
-       setTasksPerMonth(response.data);
-     })
-     .catch(error => {
-       console.error('Erreur lors de la récupération des tâches par mois:', error);
-     });
-  }, []);
-  // Calculer le pourcentage de tâches actives, terminées, etc.
+    const fetchData = async () => {
+      try {  // Données filtrées
+        const params = {};
+        if (startDate && endDate) {
+          params.startDate = startDate.toISOString();
+          params.endDate = endDate.toISOString();
+        }
+
+        // Données non filtrées
+           // Techniciens
+           const techniciensRes = await axios.get('http://localhost:3000/api/techniciens/count', { params });
+           setTotalEmployees(techniciensRes.data.totalTechniciens);
+
+           const gestionnairesRes = await axios.get('http://localhost:3000/api/gestionnaires/count', { params });
+           setTotalGestionnaires(gestionnairesRes.data.totalGestionnaires);
+        const tasksMonthRes = await axios.get('http://localhost:3000/api/tasks/count-by-month');
+        setTasksPerMonth(tasksMonthRes.data);
+
+      
+        const tasksRes = await axios.get('http://localhost:3000/api/tasks/count', { params });
+        setTotalTasks(tasksRes.data.totalTasks);
+
+        const bestTechRes = await axios.get('http://localhost:3000/api/techniciens/bestTechnician', { params });
+        setBestTechnician(bestTechRes.data?.name || 'Aucun');
+
+        const tasksListRes = await axios.get('http://localhost:3000/api/tasks', { params });
+        setTasks(tasksListRes.data);
+      } catch (error) {
+        console.error('Erreur:', error);
+      }
+    };
+
+    fetchData();
+  }, [startDate, endDate]);
+
+  const handleDateChange = (dates) => {
+    setDateRange(dates);
+    if (dates && dates[0] && dates[1]) {
+      setStartDate(dates[0]);
+      setEndDate(dates[1]);
+    } else {
+      setStartDate(null);
+      setEndDate(null);
+    }
+  };
+
   const activeTasks = tasks.filter(task => task.status === 'en cours').length;
   const completedTasks = tasks.filter(task => task.status === 'terminé').length;
   const plannedTasks = tasks.filter(task => task.status === 'planifié').length;
   const totalTasksCount = tasks.length;
-  // Pourcentages des tâches
+
   const activeTasksPercent = totalTasksCount > 0 ? Math.round((activeTasks / totalTasksCount) * 100) : 0;
   const completedTasksPercent = totalTasksCount > 0 ? Math.round((completedTasks / totalTasksCount) * 100) : 0;
   const plannedTasksPercent = totalTasksCount > 0 ? Math.round((plannedTasks / totalTasksCount) * 100) : 0;
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Content style={{ margin: '24px 16px', padding: 24, background: '#F5F5F5' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <Button 
+            type="primary" 
+            icon={<FilterOutlined />} 
+            onClick={() => setVisible(true)}
+          >
+            Filtrer
+          </Button>
+        </div>
+
+        <Modal
+          title="Filtrer par période"
+          visible={visible}
+          onCancel={() => setVisible(false)}
+          onOk={() => setVisible(false)}
+        >
+          <RangePicker
+            value={dateRange}
+            onChange={handleDateChange}
+            style={{ width: '100%' }}
+          />
+        </Modal>
+
         <Row gutter={[16, 16]}>
           <Col span={6}>
             <Card style={{ background: '#FFF5CC', textAlign: 'center' }}>

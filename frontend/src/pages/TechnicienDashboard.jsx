@@ -342,9 +342,8 @@ const TechnicienDashboard = () => {
       rules={[{ required: true }]}
     >
       <Select>
-        <Option value="terminé">Terminé</Option>
-        <Option value="en cours">En cours</Option>
-        <Option value="en attente">En attente</Option>
+      <Option value="reussi">Réussi</Option>
+      <Option value="echouée">Échoué</Option>
       </Select>
     </Form.Item>
 

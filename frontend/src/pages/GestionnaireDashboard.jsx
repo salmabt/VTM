@@ -403,7 +403,7 @@ useEffect(() => {
   };
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
-    { key: '2', icon: <FileTextOutlined />, label: 'Rapports' },
+    
     { key: '3', icon: <UnorderedListOutlined />, label: 'Tâches' },
     { key: '4', icon: <CarOutlined />, label: 'Voitures' },
     { key: '5', icon: <ClockCircleOutlined />, label: 'Chronologie' },
@@ -603,30 +603,7 @@ useEffect(() => {
                                 techniciens={techniciens}
                                 vehiculesList={vehiculesList}
                               />
-                                {selectedMenu === '2' && (
-                                  <Card title="Rapports d'intervention" bordered={false}>
-                                    <List
-                                      dataSource={tasks.filter(t => t.report)}
-                                      renderItem={task => (
-                                        <List.Item>
-                                          <List.Item.Meta
-                                            title={task.title}
-                                            description={
-                                              <div>
-                                                <Text strong>Technicien: </Text>
-                                                <Text>{task.technicien?.user?.name || 'Non assigné'}</Text><br />
-                                                <Text strong>Durée: </Text>
-                                                <Text>{task.report?.timeSpent}h</Text><br />
-                                                <Text strong>Résolution: </Text>
-                                                <Text>{task.report?.resolution}</Text>
-                                              </div>
-                                            }
-                                          />
-                                        </List.Item>
-                                      )}
-                                    />
-                                  </Card>
-                                              )}
+                                
                               {selectedMenu === '3' && (
                 <Card title="Gestion des tâches" bordered={false}>
                   <div style={{ marginBottom: 16, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
