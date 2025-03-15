@@ -258,6 +258,26 @@ useEffect(() => {
   }
 }, [tasks, vehicules]); // Déclenché à chaque changement de tâches ou véhicules
   // Gestion véhicules
+// Remplacer l'effet existant par :
+useEffect(() => {
+  if (selectedTask) {
+    const loadTaskDetails = async () => {
+      try {
+        // Chargement direct depuis l'API sans dépendre du state tasks
+        const response = await tasksApi.getTaskById(selectedTask._id);
+        setSelectedTask({
+          ...response.data,
+          // Garder les données locales si nécessaire
+          technicien: selectedTask.technicien, 
+          vehicule: selectedTask.vehicule
+        });
+      } catch (error) {
+        message.error('Erreur de chargement des détails');
+      }
+    };
+    loadTaskDetails();
+  }
+}, [selectedTask?._id]); // Déclenché quand l'ID de la tâche change // Se déclenche quand la liste des tâches change
   const handleAddVehicule = async () => {
     try {
       const { data } = await vehiculesApi.createVehicule(newVehicule);
@@ -505,6 +525,31 @@ useEffect(() => {
   </div>
 ))}
   </div>
+  <div style={{ marginTop: 20 }}>
+      <Title level={5}>Rapports d'intervention</Title>
+      {selectedTask.reports?.length > 0 ? (
+        selectedTask.reports.map(report => (
+          <Card 
+            key={report._id} 
+            style={{ marginBottom: 16, backgroundColor: '#fafafa' }}
+          >
+            <Text strong>{report.title}</Text>
+            <div style={{ marginTop: 8 }}>
+              <Text>Statut final: </Text>
+              <Tag color={report.finalStatus === 'reussi' ? 'green' : 'red'}>
+                {report.finalStatus}
+              </Tag>
+            </div>
+            <Text>Durée: {report.timeSpent} heures</Text><br/>
+            <Text>Description: {report.description}</Text><br/>
+            <Text>Problèmes: {report.issuesEncountered}</Text><br/>
+            <Text>Date: {new Date(report.createdAt).toLocaleDateString()}</Text>
+          </Card>
+        ))
+      ) : (
+        <Text type="secondary">Aucun rapport soumis pour cette tâche</Text>
+      )}
+    </div>
 </Modal>
 
 )}

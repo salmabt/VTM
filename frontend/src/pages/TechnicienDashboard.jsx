@@ -101,17 +101,18 @@ const TechnicienDashboard = () => {
   
   const handleReportSubmit = async (values) => {
     try {
-      // Ajouter taskId et corriger les noms de champs
       const reportData = {
         ...values,
-        issuesEncountered: values.issuesEncountered,
-        finalStatus: values.finalStatus,
-        taskId: values.taskId,
+        taskId: values.taskId
       };
       
-      const response = await reportsApi.addReport(reportData); // <-- Utiliser reportsApi
+      const response = await reportsApi.addReport(reportData);
       message.success('Rapport soumis avec succès');
-      setReports([...reports, response.report]); // <-- Utiliser response.report
+      
+      // Rafraîchir les données de la tâche
+      const updatedTasks = await tasksApi.getTasksByTechnicien(userData._id);
+      setTasks(updatedTasks.data);
+      
       form.resetFields();
     } catch (error) {
       message.error('Erreur lors de la soumission du rapport');

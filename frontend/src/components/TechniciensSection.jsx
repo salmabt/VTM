@@ -1,3 +1,4 @@
+//techniciensection
 import React, { useState, useEffect } from 'react';
 import { Avatar, Card, List, Tag, Typography, Divider, Button, Spin, Modal } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
@@ -18,7 +19,7 @@ const TechniciensSection = ({
 }) => {
     const [loadingTasks, setLoadingTasks] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
-
+      const [showAllTechs, setShowAllTechs] = useState(false); 
     const vehiculeExists = (vehiculeId) => 
       vehicules.some(v => v._id === vehiculeId);
 
@@ -55,15 +56,16 @@ const TechniciensSection = ({
     };
 
     return (
-      <div style={{ marginBottom: 24 }}>
+      <div>
+        {/* Section des avatars */}
         <div style={{ 
           display: 'flex',
           gap: 16,
-          overflowX: 'auto',
+          flexWrap: 'wrap',
           padding: '8px 0',
           minHeight: 120
         }}>
-          {techniciens.map(tech => (
+          {techniciens.slice(0, showAllTechs ? techniciens.length : 4).map(tech => (
             <div
               key={tech._id}
               onClick={() => handleTechClick(tech)}
@@ -89,6 +91,17 @@ const TechniciensSection = ({
           ))}
         </div>
 
+        {/* Bouton Voir plus/moins */}
+        {techniciens.length > 4 && (
+          <Button 
+            onClick={() => setShowAllTechs(!showAllTechs)}
+            style={{ marginTop: 8 }}
+          >
+            {showAllTechs ? 'Voir moins' : 'Voir plus'}
+          </Button>
+        )}
+
+        {/* Modal des détails */}
         <Modal 
           title={`Détails de ${selectedTech?.name}`}
           visible={isModalVisible}
@@ -117,6 +130,7 @@ const TechniciensSection = ({
       </div>
     );
 };
+
 
 // Les sous-composants restent inchangés
 const UserInfoSection = ({ selectedTech }) => (
