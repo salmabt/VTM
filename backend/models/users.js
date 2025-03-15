@@ -16,8 +16,14 @@ const userSchema = new mongoose.Schema({
   },
   averageRating: { 
     type: Number,
-    required: false 
+    required: false,
+    default: 0  
    
+  },
+  ratingCount: {
+    type: Number,
+    required: false,
+    default: 0 
   },
 }, { timestamps: true });
 

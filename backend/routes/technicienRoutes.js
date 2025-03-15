@@ -105,4 +105,28 @@ router.get('/bestTechnician', async (req, res) => {
   }
 });
 
+// Route pour noter un technicien
+router.post('/:id/rate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating } = req.body;
+
+    const technicien = await Technicien.findById(id);
+    if (!technicien) {
+      return res.status(404).json({ message: 'Technicien non trouvé' });
+    }
+
+    const newRatingCount = technicien.ratingCount + 1;
+    const newAverageRating = ((technicien.averageRating * technicien.ratingCount) + rating) / newRatingCount;
+
+    technicien.averageRating = newAverageRating;
+    technicien.ratingCount = newRatingCount;
+    await technicien.save();
+
+    res.json(technicien);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
