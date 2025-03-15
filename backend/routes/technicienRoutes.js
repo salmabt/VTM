@@ -45,47 +45,62 @@ router.put('/:id/restore', restoreTechnicien);
 router.get('/archived', getArchivedTechniciens);
 
 
+// GET /api/techniciens/count
 router.get('/count', async (req, res) => {
   try {
-    const countTechniciens = await Technicien.countDocuments({ role: 'technicien' });
+    const { startDate, endDate } = req.query;
+    const filter = { role: 'technicien' };
+
+    if (startDate && endDate) {
+      filter.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const countTechniciens = await Technicien.countDocuments(filter);
     res.json({ totalTechniciens: countTechniciens });
   } catch (error) {
-    console.error("Erreur lors du comptage des techniciens:", error);
+    console.error("Erreur lors du comptage:", error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
 
+// controllers/technicienController.js
 router.get('/bestTechnician', async (req, res) => {
   try {
-    // Regroupement des tâches par technicien et comptage des tâches
+    const { startDate, endDate } = req.query;
+    const matchStage = {};
+
+    if (startDate && endDate) {
+      matchStage.startDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
     const technicienWithMostTasks = await Task.aggregate([
+      { $match: matchStage },
       {
         $group: {
-          _id: '$technicien', // On groupe par l'ID du technicien
-          taskCount: { $sum: 1 } // On compte le nombre de tâches par technicien
+          _id: '$technicien',
+          taskCount: { $sum: 1 }
         }
       },
-      {
-        $sort: { taskCount: -1 } // On trie par nombre de tâches, du plus grand au plus petit
-      },
-      {
-        $limit: 1 // On prend le technicien avec le plus grand nombre de tâches
-      }
+      { $sort: { taskCount: -1 } },
+      { $limit: 1 }
     ]);
 
     if (technicienWithMostTasks.length === 0) {
-      return res.status(404).json({ message: 'Aucun technicien trouvé' });
+      return res.json({ name: 'Aucun' });
     }
 
     const technicienId = technicienWithMostTasks[0]._id;
-
-    // Recherche des détails du technicien
-    const bestTechnician = await Technicien.findById(technicienId)
-      .select('name');
-
-    res.json({ name: bestTechnician.name });
+    const bestTechnician = await Technicien.findById(technicienId).select('name');
+    
+    res.json({ name: bestTechnician?.name || 'Aucun' });
   } catch (error) {
-    console.error('Erreur lors de la récupération du meilleur technicien:', error);
+    console.error('Erreur:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });

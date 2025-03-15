@@ -205,10 +205,20 @@ exports.deleteGestionnaire = async (req, res, next) => {
     next(error);
   }
 };
+// GET /api/gestionnaires/count
 exports.countGestionnaires = async (req, res, next) => {
   try {
-    const totalGestionnaires = await User.countDocuments({ role: "gestionnaire" });
-    
+    const { startDate, endDate } = req.query;
+    const filter = { role: "gestionnaire" };
+
+    if (startDate && endDate) {
+      filter.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const totalGestionnaires = await User.countDocuments(filter);
     res.status(200).json({ totalGestionnaires });
   } catch (error) {
     next(error);

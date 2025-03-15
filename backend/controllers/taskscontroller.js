@@ -368,11 +368,61 @@ async function calculateAverageRating(technicienId) {
 // Récupérer le nombre total de tâches
 exports.getTotalTasks = async (req, res) => {
   try {
-    const totalTasks = await Task.countDocuments({}); // Compte tous les documents dans la collection Task
+    const { startDate, endDate } = req.query;
+    const filter = {};
+
+    if (startDate && endDate) {
+      filter.startDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const totalTasks = await Task.countDocuments(filter);
     res.json({ totalTasks });
   } catch (error) {
     console.error("Erreur lors du comptage des tâches:", error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+// Récupérer les statistiques par mois (existant)
+exports.getTasksCountByMonth = async (req, res) => {
+  try {
+    const tasksByMonth = await Task.aggregate([
+      {
+        $project: {
+          month: { $month: "$startDate" } // Utiliser startDate au lieu de createdAt
+        }
+      },
+      {
+        $group: {
+          _id: "$month",  // Group by the month of startDate
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    // Générer tous les mois avec count=0 par défaut
+    const allMonths = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      count: 0
+    }));
+    // Fusionner avec les données existantes
+    tasksByMonth.forEach(item => {
+      const index = item._id - 1;
+      allMonths[index].count = item.count;
+    });
+    res.json(allMonths);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
 
