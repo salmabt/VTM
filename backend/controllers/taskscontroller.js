@@ -1,6 +1,7 @@
 const Task = require('../models/Task');
 const Technicien = require('../models/users');
 const Voiture = require('../models/Voiture');
+const Report = require('../models/Report');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -101,18 +102,24 @@ exports.getTaskById = async (req, res) => {
       .populate('vehicule');
 
     if (!task) {
-      console.warn('Tâche introuvable ID:', req.params.id);
       return res.status(404).json({ message: 'Ressource non trouvée' });
     }
 
-    res.json(task);
+    // Récupérer les rapports associés
+    const reports = await Report.find({ taskId: task._id });
+    
+    // Créer un objet combiné
+    const response = {
+      ...task.toObject(),
+      reports // Ajouter les rapports à la réponse
+    };
+
+    res.json(response); // Envoyer la réponse combinée
 
   } catch (error) {
-    console.error(`Erreur recherche tâche ${req.params.id}:`, error);
     res.status(500).json({
       message: 'Échec de la récupération',
-      error: error.message,
-      invalidId: mongoose.Types.ObjectId.isValid(req.params.id)
+      error: error.message
     });
   }
 };
