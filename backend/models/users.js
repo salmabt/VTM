@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String ,required: false},
   isApproved: { type: Boolean, default: false },
   skills: { type: Array, default: [] },
-  archived: { type: Boolean, default: false },
+  archived: { type: Boolean, default: false, required: true },
   averageRating: { 
     type: Number,
     default: 0.00, // Initialiser avec 2 décimales

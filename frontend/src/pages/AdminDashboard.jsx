@@ -102,7 +102,47 @@ const calculateUtilisation = (tasks, vehiculeId) => {
       return total + end.diff(start, 'hours', true);
     }, 0);
 };
+useEffect(() => {
+  const loadTechniciens = async () => {
+    try {
+      const [activeRes, archivedRes] = await Promise.all([
+        techniciensApi.getAllTechniciens(),
+        techniciensApi.getArchivedTechniciens()
+      ]);
+      setTechniciens(activeRes.data);
+      setArchivedTechniciens(archivedRes.data);
+    } catch (error) {
+      message.error('Erreur de chargement des techniciens');
+    }
+  };
 
+  if (selectedMenu === '3') loadTechniciens();
+}, [selectedMenu]);
+// Dans AdminDashboard.js, ajoutez ce useEffect
+useEffect(() => {
+  const interval = setInterval(async () => {
+    try {
+      const { data } = await vehiculesApi.getAllVehicules();
+      const updated = data.map(veh => {
+        const associatedTask = tasks.find(t => 
+          t.vehicule === veh._id && 
+          t.status !== 'terminé'
+        );
+        return {
+          ...veh,
+          status: associatedTask ? 'réservé' : veh.status
+        };
+      });
+      
+      setVehiculesList(updated);
+      setVehicules(updated);
+    } catch (error) {
+      console.error('Sync error:', error);
+    }
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, [tasks]); // Ajoutez cette dépendance
 // Mettre à jour le chargement des données
 useEffect(() => {
   const loadReportData = async () => {
@@ -130,44 +170,73 @@ useEffect(() => {
   if (selectedMenu === '3') loadReportData();
 }, [selectedMenu]);
 
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      try {
-        const [activeTechs, archivedTechs, gestionnairesData, archivedGestionnairesData, tasksData, vehRes] = await Promise.all([
-          techniciensApi.getAllTechniciens(),
-          techniciensApi.getArchivedTechniciens(),
-          gestionnairesApi.getAllGestionnaires(),
-          gestionnairesApi.getArchivedGestionnaires(),
-          tasksApi.getAllTasks(),
-          vehiculesApi.getAllVehicules()
-        ]);
+useEffect(() => {
+  const loadInitialData = async () => {
+    setLoading(true);
+    try {
+      const [activeTechs, archivedTechs, gestionnairesData, archivedGestionnairesData, tasksData, vehRes] = await Promise.all([
+        techniciensApi.getAllTechniciens(),
+        techniciensApi.getArchivedTechniciens(),
+        gestionnairesApi.getAllGestionnaires(),
+        gestionnairesApi.getArchivedGestionnaires(),
+        // Modification ici : ajout du paramètre populate directement
+        tasksApi.getAllTasks({ populate: 'reports' }),
+        vehiculesApi.getAllVehicules()
+      ]);
 
-        setTechniciens(activeTechs.data);
-        setArchivedTechniciens(archivedTechs.data);
-        setGestionnaires(gestionnairesData.data.filter(g => !g.archived));
-        setArchivedGestionnaires(archivedGestionnairesData);
-        setTasks(tasksData.data);
-        setVehicules(vehRes.data);
-        setVehiculesList(vehRes.data);
-        const normalizedTasks = tasksData.data.map(task => ({
-          ...task,
-          technicien: task.technicien?._id || task.technicien, // Extrait l'ID du technicien
-          vehicule: task.vehicule?._id || task.vehicule // Extrait l'ID du véhicule
-        }));
-        
-        setTasks(normalizedTasks); 
+      const verifyActive = activeTechs.data.filter(t => !t.archived);
+      const verifyArchived = archivedTechs.data.filter(t => t.archived);
 
-        console.log('Techniciens:', activeTechs.data);
-        console.log('Tâches:', tasksData.data);
-      } catch (error) {
-        message.error('Erreur de chargement initial');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadInitialData();
-  }, []);
+      setTechniciens(verifyActive);
+      setArchivedTechniciens(verifyArchived);
+
+      setGestionnaires(gestionnairesData.data.filter(g => !g.archived));
+      setArchivedGestionnaires(archivedGestionnairesData);
+      // Utilisation des données directement depuis la réponse
+      setTasks(tasksData.data.map(task => ({
+        ...task,
+        technicien: task.technicien?._id || task.technicien,
+        vehicule: task.vehicule?._id || task.vehicule,
+        reports: task.reports || []
+      })));
+      setVehicules(vehRes.data);
+      setVehiculesList(vehRes.data);
+
+      console.log('Techniciens:', activeTechs.data);
+      console.log('Tâches:', tasksData.data);
+    } catch (error) {
+      message.error('Erreur de chargement initial');
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadInitialData();
+}, []);
+useEffect(() => {
+  const updateTechnicianData = () => {
+    if (!selectedTech) return;
+    
+    const validTasks = tasks.filter(task => 
+      task.technicien === selectedTech._id && 
+      vehicules.some(v => v._id === task.vehicule)
+    );
+
+    setTechTasks(validTasks);
+    
+    const updatedVehicles = vehicules.filter(v => 
+      validTasks.some(task => task.vehicule === v._id)
+    ).map(veh => ({
+      ...veh,
+      status: validTasks.some(t => 
+        t.vehicule === veh._id && t.status !== 'terminé'
+      ) ? 'réservé' : veh.status
+    }));
+
+    setAssignedVehicles(updatedVehicles);
+  };
+
+  updateTechnicianData();
+}, [tasks, vehicules, selectedTech]);
 
   
 
@@ -234,16 +303,28 @@ useEffect(() => {
 
   const handleArchiveTechnicien = async (technicienId) => {
     try {
-      const archived = await techniciensApi.archiveTechnicien(technicienId);
-      console.log('Technicien archivé:', archived); // Ajoute cette ligne pour vérifier la réponse de l'API
-      setTechniciens((prev) => prev.filter(g => g._id !== technicienId));
-      setArchivedTechniciens((prev) => [...prev, archived]);
-      message.success('Technicien archivé');
+      setLoading(true);
+      
+      // 1. Archive via l'API
+      await techniciensApi.archiveTechnicien(technicienId);
+      
+      // 2. Rafraîchissement immédiat des données
+      const [activeRes, archivedRes] = await Promise.all([
+        techniciensApi.getAllTechniciens(),
+        techniciensApi.getArchivedTechniciens()
+      ]);
+      
+      // 3. Mise à jour des états avec les nouvelles données
+      setTechniciens(activeRes.data);
+      setArchivedTechniciens(archivedRes.data);
+  
+      message.success('Technicien archivé avec succès');
     } catch (error) {
-      message.error(error.message);
+      message.error("Échec de l'archivage : " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   const handleRestoreTechnicien = async (technicienId) => {
     try {
@@ -505,6 +586,20 @@ useEffect(() => {
     setExportLoading(false);
   }
     };
+    // Ajoutez cette fonction de gestionnaire
+const handleSelectEvent = async (event) => {
+  try {
+    const { data } = await tasksApi.getTaskById(event.resource._id);
+    setSelectedTask({
+      ...data,
+      technicien: data.technicien?._id,
+      vehicule: data.vehicule?._id,
+      reports: data.reports || []
+    });
+  } catch (error) {
+    message.error('Erreur de chargement des détails');
+  }
+};
   const menuItems = [
     { key: '1', icon: <UserOutlined />, label: 'Dashboard' },
     { key: '2', icon: <CalendarOutlined />, label: 'Calendrier' },
@@ -582,7 +677,7 @@ useEffect(() => {
                     components={{
                       event: CustomEvent, // Utilisez le composant personnalisé ici
                     }}
-                    onSelectEvent={(event) => setSelectedTask(event.resource)}
+                    onSelectEvent={handleSelectEvent}
                     onSelectSlot={(slotInfo) => {
                       setNewTask({
                         ...newTask,
@@ -640,19 +735,16 @@ useEffect(() => {
             <Text>
               {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
               {moment(selectedTask.endDate).format('DD/MM HH:mm')}
-            </Text><br/>
-            
-            
-                
-                <Text strong>Technicien : </Text>
-                <Text>
-                  {selectedTask.technicien?.name || 'Non assigné'}
-                </Text><br/>
-                
-                <Text strong>Véhicule : </Text>
-                <Text>
-                {selectedTask.vehicule?.model || 'Non assigné'}
-                </Text><br/>
+            </Text>    <br/>
+            <Text strong>Technicien : </Text>
+<Text>
+  {techniciens.find(t => t._id === selectedTask.technicien)?.name || 'Non assigné'}
+</Text><br/>
+
+<Text strong>Véhicule : </Text>
+<Text>
+  {vehicules.find(v => v._id === selectedTask.vehicule)?.model || 'Non assigné'}
+</Text><br/>
                 
                 <Text strong>Statut : </Text>
                 <Tag color={
@@ -674,6 +766,32 @@ useEffect(() => {
                 </a>
               </div>
             ))}
+             {/* Section des rapports d'intervention */}
+    <div style={{ marginTop: 20 }}>
+      <Title level={5}>Rapports d'intervention</Title>
+      {selectedTask.reports?.length > 0 ? (
+        selectedTask.reports.map(report => (
+          <Card 
+            key={report._id} 
+            style={{ marginBottom: 16, backgroundColor: '#fafafa' }}
+          >
+            <Text strong>{report.title}</Text>
+            <div style={{ marginTop: 8 }}>
+              <Text>Statut final: </Text>
+              <Tag color={report.finalStatus === 'reussi' ? 'green' : 'red'}>
+                {report.finalStatus}
+              </Tag>
+            </div>
+            <Text>Durée: {report.timeSpent} heures</Text><br/>
+            <Text>Description: {report.description}</Text><br/>
+            <Text>Problèmes: {report.issuesEncountered}</Text><br/>
+            <Text>Date: {new Date(report.createdAt).toLocaleDateString()}</Text>
+          </Card>
+        ))
+      ) : (
+        <Text type="secondary">Aucun rapport soumis pour cette tâche</Text>
+      )}
+    </div>
               </div>
             </Modal>
             
@@ -713,9 +831,7 @@ useEffect(() => {
                     </Button>
                   </div>
                   <List
-                    dataSource={Array.isArray(showArchived ? archivedTechniciens : techniciens)
-                      ? showArchived ? archivedTechniciens : techniciens
-                      : []}
+                    dataSource={showArchived ? archivedTechniciens : techniciens}
                     renderItem={(tech) => (
                       <List.Item
                         actions={
@@ -737,10 +853,10 @@ useEffect(() => {
                               ]
                         }
                       >
-                        <List.Item.Meta
-                          title={<>{tech.name} {showArchived && <Text type="secondary">(Archivé)</Text>}</>}
-                          description={`Compétences: ${tech.skills}`}
-                        />
+                       <List.Item.Meta
+  title={<>{tech.name} {showArchived && <Text type="secondary">(Archivé)</Text>}</>}
+  description={`Compétences: ${tech.skills?.join(', ') || 'Aucune'}`}
+/>
                       </List.Item>
                     )}
                   />

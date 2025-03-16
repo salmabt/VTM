@@ -92,7 +92,7 @@ exports.getAllTechniciens = async (req, res) => {
   try {
     const techniciens = await Technicien.find({ 
       role: 'technicien',
-      archived: false // Ajout du filtre
+      archived: { $ne: true }// Ajout du filtre
     });
     res.json(techniciens);
   } catch (error) {
@@ -133,12 +133,13 @@ exports.updateTechnicien = async (req, res, next) => {
 
 
 
+// backend/controllers/technicienController.js
 exports.getArchivedTechniciens = async (req, res) => {
   try {
     const techniciens = await Technicien.find({ 
       role: 'technicien',
-      archived: true // Ajout du filtre
-    });
+      archived: true
+    }).select('name email phone skills archived'); // Ajoutez les champs nécessaires
     res.json(techniciens);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -150,17 +151,18 @@ exports.archiveTechnicien = async (req, res) => {
   try {
     const { id } = req.params;
     
-    const archivedTechnicien = await Technicien.findByIdAndUpdate(
-      id,
-      { archived: true },
-      { new: true ,runValidators: true} // Retourne le document modifié
-    );
+    // Méthode plus fiable avec .save()
+    const technicien = await Technicien.findById(id);
+    if (!technicien) return res.status(404).json({ message: "Technicien non trouvé" });
+
+    technicien.archived = true;
+    await technicien.save(); // Utilisation de save() pour garantir la validation
 
     res.status(200).json({
       status: 'success',
-      data: archivedTechnicien // Structure de réponse standardisée
+      data: technicien.toObject() // Retourne toutes les données mises à jour
     });
-    
+
   } catch (error) {
     res.status(500).json({
       status: 'error',

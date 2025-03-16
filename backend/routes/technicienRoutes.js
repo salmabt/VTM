@@ -2,23 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Technicien = require('../models/users');
 const Task = require('../models/Task');
-const {createTechnicien, archiveTechnicien,restoreTechnicien,getArchivedTechniciens,updateTechnicien,loginTechnicien,getTechniciensWithStats } = require('../controllers/technicienController');
+const {createTechnicien, archiveTechnicien,restoreTechnicien,getArchivedTechniciens,updateTechnicien,loginTechnicien,getTechniciensWithStats ,getAllTechniciens } = require('../controllers/technicienController');
 
 router.post('/', createTechnicien);
 router.post('/login', loginTechnicien);
 
-router.get('/', async (req, res) => {
-  try {
-    const techniciens = await Technicien.find({ role: 'technicien' })
-    .select('name email phone skills availability averageRating ratingCount completedTasks')
-      .lean();
-
-    res.json(techniciens);
-  } catch (error) {
-    console.error('Erreur techniciens:', error);
-    res.status(500).json({ message: 'Erreur lors de la récupération des techniciens' });
-  }
-});
+router.get('/', getAllTechniciens); // Utilisation de la fonction importée
+router.get('/archived', getArchivedTechniciens);
 
 
 router.put('/:id', async (req, res) => {
@@ -42,7 +32,7 @@ router.put('/:id', async (req, res) => {
 
 router.put('/:id/archive', archiveTechnicien);
 router.put('/:id/restore', restoreTechnicien);
-router.get('/archived', getArchivedTechniciens);
+
 
 
 // GET /api/techniciens/count
