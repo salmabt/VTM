@@ -14,17 +14,16 @@ const AdminRapport = () => {
   // Récupérer les techniciens
   const fetchTechniciens = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/techniciens?timestamp=${new Date().getTime()}`);
-      console.log('Données reçues de l\'API:', response.data);
-      const data = response.data;
-      const formattedData = data.map((tech) => ({
-        ...tech,
-        averageRating: tech.averageRating ?? 0,
+      const response = await axios.get(`http://localhost:3000/api/techniciens/with-stats?timestamp=${Date.now()}`);
+      const formattedData = response.data.map(tech => ({
+        _id: tech._id,
+        name: tech.name,
+        skills: tech.skills || [],
         completedTasks: tech.completedTasks ?? 0,
-        ratingCount: tech.ratingCount ?? 0,
+        averageRating: Number((tech.averageRating || 0).toFixed(1)),
+        ratingCount: tech.ratingCount || 0
       }));
       setTechniciens(formattedData);
-      localStorage.setItem('techniciens', JSON.stringify(formattedData));
     } catch (error) {
       console.error('Erreur lors de la récupération des techniciens:', error);
       message.error('Erreur lors de la récupération des données des techniciens');
@@ -41,18 +40,20 @@ const AdminRapport = () => {
       message.error('Erreur lors de la récupération des données des véhicules');
     }
   };
-
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchTechniciens();
+      fetchVehicules();
+    }, 30000); // Rafraîchit toutes les 30 secondes
+  
+    return () => clearInterval(interval);
+  }, []);
   // Charger les données au montage du composant
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const storedTechniciens = localStorage.getItem('techniciens');
-        if (storedTechniciens) {
-          setTechniciens(JSON.parse(storedTechniciens));
-        } else {
-          await fetchTechniciens();
-        }
+        await fetchTechniciens();
         await fetchVehicules();
       } catch (error) {
         console.error('Erreur lors de la récupération des données:', error);
@@ -67,51 +68,36 @@ const AdminRapport = () => {
 
 
   // Gérer la mise à jour de la note d'un technicien
-  const handleRateChange = async (techId) => {
-    const newRating = prompt('Entrez une note (0-5) :');
-    const parsedRating = parseFloat(newRating);
-  
-    if (!isNaN(parsedRating) && parsedRating >= 0 && parsedRating <= 5) {
-      try {
-        const response = await axios.post(`http://localhost:3000/api/techniciens/${techId}/rate`, {
-          rating: parsedRating,
-        });
-        console.log('API Response:', response.data);
-  
-        const updatedTechnicien = response.data;
-        console.log('Technicien mis à jour:', updatedTechnicien);
-  
-        setTechniciens((prev) => {
-          const updatedTechniciens = prev.map((tech) =>
-            tech._id === techId
-              ? {
-                  ...tech,
-                  averageRating: updatedTechnicien.averageRating,
-                  ratingCount: updatedTechnicien.ratingCount,
-                }
-              : tech
-          );
-          localStorage.setItem('techniciens', JSON.stringify(updatedTechniciens));
-          return updatedTechniciens;
-        });
-        message.success('Note enregistrée !');
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour de la note:', error);
-        if (error.response) {
-          console.error('Réponse du serveur:', error.response.data);
-          console.error('Statut:', error.response.status);
-          console.error('En-têtes:', error.response.headers);
-        } else if (error.request) {
-          console.error('Aucune réponse reçue:', error.request);
-        } else {
-          console.error('Erreur lors de la configuration de la requête:', error.message);
-        }
-        message.error('Erreur lors de la mise à jour de la note');
-      }
-    } else {
-      message.error('Veuillez entrer une note valide entre 0 et 5.');
+  const [updatingRating, setUpdatingRating] = useState(null);
+// Dans AdminRapport.js - Modifier la fonction handleRateChange
+const handleRateChange = async (techId) => {
+  const newRating = prompt('Entrez une note (0-5) :');
+  const parsedRating = parseFloat(newRating);
+
+  if (!isNaN(parsedRating) && parsedRating >= 0 && parsedRating <= 5) {
+    setUpdatingRating(techId);
+    try {
+      // Envoyer la note et attendre la réponse mise à jour
+      const { data: updatedTech } = await axios.post(
+        `http://localhost:3000/api/techniciens/${techId}/rate`,
+        { rating: parsedRating }
+      );
+
+      // Mettre à jour l'état avec la réponse directe du serveur
+      setTechniciens(prev => prev.map(tech => 
+        tech._id === techId ? { ...tech, ...updatedTech } : tech
+      ));
+      
+      message.success('Note enregistrée !');
+    } catch (error) {
+      message.error('Erreur lors de la mise à jour');
+    } finally {
+      setUpdatingRating(null);
     }
-  };
+  } else {
+    message.error('Note invalide (0-5 seulement)');
+  }
+};
 
   // Couleur du statut des véhicules
   const getVehicleStatusColor = (status) => {
@@ -125,6 +111,18 @@ const AdminRapport = () => {
       default:
         return 'gray';
     }
+    // Lors de la mise à jour du statut
+const markAsCompleted = async (taskId) => {
+  try {
+    await axios.patch(`/api/tasks/${taskId}/status`, {
+      status: 'terminé' // Envoyer le statut exact avec accent
+    });
+    message.success('Tâche marquée comme terminée !');
+    refreshData(); // Recharger les données
+  } catch (error) {
+    message.error('Échec de la mise à jour');
+  }
+};
   };
 
   // Affichage du chargement
@@ -146,20 +144,41 @@ const AdminRapport = () => {
             <Row gutter={[16, 16]}>
               <Col span={24} md={12}>
                 <Card title="📈 Statistiques des Techniciens">
-                  <BarChart
-                    width={800}
-                    height={400}
-                    data={techniciens}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-0} textAnchor="end" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="completedTasks" fill="#8884d8" name="Missions terminées" />
-                    <Bar dataKey="averageRating" fill="#82ca9d" name="Note moyenne/5" />
-                  </BarChart>
+                <BarChart
+  width={800}
+  height={400}
+  data={techniciens}
+  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+>
+  <CartesianGrid strokeDasharray="3 3" />
+  <XAxis 
+    dataKey="name" 
+    angle={-45} 
+    textAnchor="end"
+    tick={{ fontSize: 12 }}
+    interval={0}
+  />
+  <YAxis />
+  <Tooltip 
+    formatter={(value, name) => 
+      name === 'Note moyenne/5' ? value.toFixed(2) : value
+    }
+  />
+  <Legend />
+  <Bar 
+    dataKey="completedTasks" 
+    fill="#8884d8" 
+    name="Missions terminées"
+    barSize={20}
+  />
+  <Bar 
+    dataKey="averageRating" 
+    fill="#82ca9d" 
+    name="Note moyenne/5"
+    barSize={20}
+    label={{ fill: 'white', formatter: (value) => value.toFixed(1) }}
+  />
+</BarChart>
                 </Card>
               </Col>
 
@@ -175,20 +194,25 @@ const AdminRapport = () => {
                           suffix={
                             <>
                               <div style={{ marginTop: 5 }}>
-                                <Text strong>Nombre de Missions réalisées: {tech.completedTasks}</Text>
+                              <Text strong>
+    Nombre de Missions réalisées: {tech.completedTasks > 0 ? tech.completedTasks : 'Aucune'}
+</Text>
+
+
                                 <br />
                                 <Text strong>Note sur la qualité de rapport soumis: {(tech.averageRating ?? 0).toFixed(1)}/5 ⭐</Text>
                                 <br />
                                 <Text strong>Compétences: {tech.skills?.length ? tech.skills.join(', ') : 'Aucune'}</Text>
                               </div>
                               <Button
-                                type="primary"
-                                size="small"
-                                onClick={() => handleRateChange(tech._id)}
-                                style={{ marginTop: 5 }}
-                              >
-                                ⭐ Noter
-                              </Button>
+  type="primary"
+  size="small"
+  onClick={() => handleRateChange(tech._id)}
+  loading={updatingRating === tech._id}
+  style={{ marginTop: 5 }}
+>
+  {updatingRating === tech._id ? 'Enregistrement...' : '⭐ Noter'}
+</Button>
                             </>
                           }
                         />
