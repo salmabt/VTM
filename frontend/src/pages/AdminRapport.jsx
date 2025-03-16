@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, Tabs, Row, Col, List, Statistic, Button, Tag, Timeline, Typography, Spin, message } from 'antd';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const { Text, Title } = Typography;
 const { TabPane } = Tabs;
@@ -31,19 +31,30 @@ const AdminRapport = () => {
   };
 
   // Récupérer les véhicules
-  const fetchVehicules = async () => {
+  const fetchVehiculesWithUtilisation = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/vehicules');
-      setVehicules(response.data);
+      const vehiculesWithUtilisation = await Promise.all(
+        response.data.map(async (vehicle) => {
+          const utilisationResponse = await axios.get(`http://localhost:3000/api/vehicules/${vehicle._id}/utilisation`);
+          return {
+            ...vehicle,
+            utilisationHeures: utilisationResponse.data.totalDuration
+          };
+        })
+      );
+      setVehicules(vehiculesWithUtilisation);
     } catch (error) {
       console.error('Erreur lors de la récupération des véhicules:', error);
       message.error('Erreur lors de la récupération des données des véhicules');
     }
   };
+
+
   useEffect(() => {
     const interval = setInterval(() => {
       fetchTechniciens();
-      fetchVehicules();
+      fetchVehiculesWithUtilisation();
     }, 30000); // Rafraîchit toutes les 30 secondes
   
     return () => clearInterval(interval);
@@ -54,7 +65,7 @@ const AdminRapport = () => {
       setLoading(true);
       try {
         await fetchTechniciens();
-        await fetchVehicules();
+        await fetchVehiculesWithUtilisation();
       } catch (error) {
         console.error('Erreur lors de la récupération des données:', error);
         message.error('Erreur lors de la récupération des données');
@@ -111,18 +122,6 @@ const handleRateChange = async (techId) => {
       default:
         return 'gray';
     }
-    // Lors de la mise à jour du statut
-const markAsCompleted = async (taskId) => {
-  try {
-    await axios.patch(`/api/tasks/${taskId}/status`, {
-      status: 'terminé' // Envoyer le statut exact avec accent
-    });
-    message.success('Tâche marquée comme terminée !');
-    refreshData(); // Recharger les données
-  } catch (error) {
-    message.error('Échec de la mise à jour');
-  }
-};
   };
 
   // Affichage du chargement
@@ -230,32 +229,6 @@ const markAsCompleted = async (taskId) => {
             <Title level={3}>🚗 Gestion et Utilisation des Véhicules</Title>
             <Row gutter={[16, 16]}>
               <Col span={24} md={12}>
-                <Card title="📊 Statut des Véhicules">
-                  <PieChart width={400} height={400}>
-                    <Pie
-                      data={vehicules.reduce((acc, veh) => {
-                        const exist = acc.find((item) => item.name === veh.status);
-                        exist ? exist.value++ : acc.push({ name: veh.status, value: 1 });
-                        return acc;
-                      }, [])}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      label
-                      dataKey="value"
-                    >
-                      {vehicules.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getVehicleStatusColor(entry.status)} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </Card>
-              </Col>
-
-              <Col span={24} md={12}>
                 <Card title="⏳ Temps d'Utilisation">
                   <List
                     dataSource={vehicules}
@@ -273,8 +246,7 @@ const markAsCompleted = async (taskId) => {
                   />
                 </Card>
               </Col>
-            </Row>
-
+              <Col span={24} md={12}>
             <Card title="🛠️ Historique des Maintenances" style={{ marginTop: 16 }}>
               <Timeline>
                 {vehicules.map((vehicle) => (
@@ -286,6 +258,8 @@ const markAsCompleted = async (taskId) => {
                 ))}
               </Timeline>
             </Card>
+            </Col>
+            </Row>
           </div>
         </TabPane>
       </Tabs>
