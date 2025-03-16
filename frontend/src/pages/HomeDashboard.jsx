@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Card, Row, Col, Statistic, Typography, Button, Modal } from 'antd';
+import { Layout, Card, Row, Col, Statistic, Typography, Button, Modal, message } from 'antd';
 import { UserOutlined, UnorderedListOutlined, FilterOutlined } from '@ant-design/icons';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
-import DatePicker from 'antd/es/date-picker';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { DatePicker } from 'antd';
 
 const { RangePicker } = DatePicker;
 const { Content } = Layout;
@@ -38,6 +38,23 @@ const TaskBarChart = ({ data }) => {
   );
 };
 
+const normalizedStatus = (status) => {
+  return status.trim().toLowerCase().replace(/ée$/, 'é'); // Normaliser "réservée" en "réservé"
+};
+
+const getVehicleStatusColor = (status) => {
+  switch (normalizedStatus(status)) {
+    case 'disponible':
+      return 'green';
+    case 'réservé':
+      return 'red';
+    case 'en entretien':
+      return 'orange';
+    default:
+      return 'gray';
+  }
+};
+
 const HomeDashboard = () => {
   const [totalEmployees, setTotalEmployees] = useState(0);
   const [bestTechnician, setBestTechnician] = useState(null);
@@ -49,27 +66,38 @@ const HomeDashboard = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [vehicules, setVehicules] = useState([]);
+
+  // Récupérer les véhicules
+  const fetchVehicules = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/vehicules');
+      console.log('Données des véhicules:', response.data); // Log pour vérifier les données
+      setVehicules(response.data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des véhicules:', error);
+      message.error('Erreur lors de la récupération des données des véhicules');
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      try {  // Données filtrées
+      try {
         const params = {};
         if (startDate && endDate) {
           params.startDate = startDate.toISOString();
           params.endDate = endDate.toISOString();
         }
 
-        // Données non filtrées
-           // Techniciens
-           const techniciensRes = await axios.get('http://localhost:3000/api/techniciens/count', { params });
-           setTotalEmployees(techniciensRes.data.totalTechniciens);
+        const techniciensRes = await axios.get('http://localhost:3000/api/techniciens/count', { params });
+        setTotalEmployees(techniciensRes.data.totalTechniciens);
 
-           const gestionnairesRes = await axios.get('http://localhost:3000/api/gestionnaires/count', { params });
-           setTotalGestionnaires(gestionnairesRes.data.totalGestionnaires);
+        const gestionnairesRes = await axios.get('http://localhost:3000/api/gestionnaires/count', { params });
+        setTotalGestionnaires(gestionnairesRes.data.totalGestionnaires);
+
         const tasksMonthRes = await axios.get('http://localhost:3000/api/tasks/count-by-month');
         setTasksPerMonth(tasksMonthRes.data);
 
-      
         const tasksRes = await axios.get('http://localhost:3000/api/tasks/count', { params });
         setTotalTasks(tasksRes.data.totalTasks);
 
@@ -84,6 +112,7 @@ const HomeDashboard = () => {
     };
 
     fetchData();
+    fetchVehicules();
   }, [startDate, endDate]);
 
   const handleDateChange = (dates) => {
@@ -105,6 +134,17 @@ const HomeDashboard = () => {
   const activeTasksPercent = totalTasksCount > 0 ? Math.round((activeTasks / totalTasksCount) * 100) : 0;
   const completedTasksPercent = totalTasksCount > 0 ? Math.round((completedTasks / totalTasksCount) * 100) : 0;
   const plannedTasksPercent = totalTasksCount > 0 ? Math.round((plannedTasks / totalTasksCount) * 100) : 0;
+
+  const pieData = vehicules.reduce((acc, veh) => {
+    const status = normalizedStatus(veh.status); // Normaliser le statut
+    const exist = acc.find((item) => item.name === status);
+    if (exist) {
+      exist.value++;
+    } else {
+      acc.push({ name: status, value: 1 });
+    }
+    return acc;
+  }, []);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -171,57 +211,77 @@ const HomeDashboard = () => {
           </Col>
         </Row>
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col span={12}>
-            <Card title="Tasks Per Month">
-              <TaskBarChart data={tasksPerMonth} />
+        <Col span={24} md={12}>
+            <Card title="📊 Statut des Véhicules">
+              <PieChart width={400} height={400}>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  label
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={getVehicleStatusColor(entry.name)} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
             </Card>
           </Col>
           <Col span={12}>
-          
-          <Card title="Tasks">
-  <div style={{ textAlign: 'center' }}>
-    <div 
-      style={{
-        width: 120,
-        height: 120,
-        borderRadius: '50%',
-        background: `conic-gradient(
-          #FF4D4F 0deg ${completedTasksPercent * 3.6}deg,
-          #FAAD14 ${completedTasksPercent * 3.6}deg ${(completedTasksPercent + plannedTasksPercent) * 3.6}deg,
-          #52C41A ${(completedTasksPercent + plannedTasksPercent) * 3.6}deg 360deg
-        )`,
-        margin: '0 auto',
-        position: 'relative'
-      }}
-    >
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        backgroundColor: 'white',
-        width: '80%',
-        height: '80%',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <Text strong>{`${completedTasksPercent}%`}</Text>
-      </div>
-    </div>
-    <div style={{ marginTop: 16 }}>
-      <Text type="danger">● Terminées ({completedTasksPercent}%)</Text><br />
-      <Text type="warning">● Planifiées ({plannedTasksPercent}%)</Text><br />
-      <Text type="success">● En cours ({activeTasksPercent}%)</Text><br />
-    </div>
-  </div>
-</Card>
-
+            <Card title="Tasks">
+              <div style={{ textAlign: 'center' }}>
+                <div 
+                  style={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: '50%',
+                    background: `conic-gradient(
+                      #FF4D4F 0deg ${completedTasksPercent * 3.6}deg,
+                      #FAAD14 ${completedTasksPercent * 3.6}deg ${(completedTasksPercent + plannedTasksPercent) * 3.6}deg,
+                      #52C41A ${(completedTasksPercent + plannedTasksPercent) * 3.6}deg 360deg
+                    )`,
+                    margin: '0 auto',
+                    position: 'relative'
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    backgroundColor: 'white',
+                    width: '80%',
+                    height: '80%',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Text strong>{`${completedTasksPercent}%`}</Text>
+                  </div>
+                </div>
+                <div style={{ marginTop: 16 }}>
+                  <Text type="danger">● Terminées ({completedTasksPercent}%)</Text><br />
+                  <Text type="warning">● Planifiées ({plannedTasksPercent}%)</Text><br />
+                  <Text type="success">● En cours ({activeTasksPercent}%)</Text><br />
+                </div>
+              </div>
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card title="Tasks Per Month">
+              <TaskBarChart data={tasksPerMonth} />
+            </Card>
           </Col>
         </Row>
       </Content>
     </Layout>
   );
 };
+
 export default HomeDashboard;
