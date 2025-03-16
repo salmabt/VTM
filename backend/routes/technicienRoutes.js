@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Technicien = require('../models/users');
 const Task = require('../models/Task');
-const {createTechnicien, archiveTechnicien,restoreTechnicien,getArchivedTechniciens,updateTechnicien,loginTechnicien } = require('../controllers/technicienController');
+const {createTechnicien, archiveTechnicien,restoreTechnicien,getArchivedTechniciens,updateTechnicien,loginTechnicien,getTechniciensWithStats } = require('../controllers/technicienController');
 
 router.post('/', createTechnicien);
 router.post('/login', loginTechnicien);
@@ -10,7 +10,7 @@ router.post('/login', loginTechnicien);
 router.get('/', async (req, res) => {
   try {
     const techniciens = await Technicien.find({ role: 'technicien' })
-      .select('name email phone skills availability')
+    .select('name email phone skills availability averageRating ratingCount completedTasks')
       .lean();
 
     res.json(techniciens);
@@ -106,27 +106,42 @@ router.get('/bestTechnician', async (req, res) => {
 });
 
 // Route pour noter un technicien
+// Ajouter une validation et initialisation des valeurs
 router.post('/:id/rate', async (req, res) => {
   try {
     const { id } = req.params;
     const { rating } = req.body;
 
-    const technicien = await Technicien.findById(id);
-    if (!technicien) {
-      return res.status(404).json({ message: 'Technicien non trouvé' });
+    // Validation basique
+    if (isNaN(rating) || rating < 0 || rating > 5) {
+      return res.status(400).json({ message: 'Note invalide' });
     }
 
+    // Trouver le technicien
+    const technicien = await Technicien.findById(id);
+    if (!technicien) return res.status(404).json({ message: 'Technicien non trouvé' });
+
+    // Calcul simplifié
     const newRatingCount = technicien.ratingCount + 1;
-    const newAverageRating = ((technicien.averageRating * technicien.ratingCount) + rating) / newRatingCount;
+    const newAverageRating = 
+      ((technicien.averageRating * technicien.ratingCount) + parseFloat(rating)) / newRatingCount;
 
-    technicien.averageRating = newAverageRating;
-    technicien.ratingCount = newRatingCount;
-    await technicien.save();
+    // Mise à jour directe
+    const updated = await Technicien.findByIdAndUpdate(
+      id,
+      { 
+        averageRating: Number(newAverageRating.toFixed(1)), // 1 décimal
+        ratingCount: newRatingCount 
+      },
+      { new: true, select: 'name averageRating ratingCount completedTasks skills' } 
+    );
 
-    res.json(technicien);
+    res.json(updated);
+    
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+router.get('/with-stats', getTechniciensWithStats); 
 
 module.exports = router;

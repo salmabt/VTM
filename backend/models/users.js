@@ -10,20 +10,19 @@ const userSchema = new mongoose.Schema({
   isApproved: { type: Boolean, default: false },
   skills: { type: Array, default: [] },
   archived: { type: Boolean, default: false },
-  completedTasks: { 
-    type: Number, 
-    required: false
-  },
   averageRating: { 
     type: Number,
-    required: false,
-    default: 0  
-   
+    default: 0.00, // Initialiser avec 2 décimales
+    set: v => Number(v.toFixed(2)),
+    validate: {
+      validator: v => v >= 0 && v <= 5,
+      message: 'La note doit être entre 0 et 5'
+    }
   },
   ratingCount: {
     type: Number,
-    required: false,
-    default: 0 
+    default: 0,
+    min: 0
   },
 }, { timestamps: true });
 

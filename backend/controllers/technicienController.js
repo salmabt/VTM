@@ -1,6 +1,7 @@
 //backend/techniciencontroller
 const mongoose = require('mongoose');
 const Technicien = require('../models/users');
+const Task = require('../models/Task');
 const createError = require('../utils/appError');
 const bcrypt = require('bcryptjs'); 
 const jwt = require('jsonwebtoken');
@@ -196,4 +197,34 @@ exports.restoreTechnicien = async (req, res) => {
     });
   }
 };
+exports.getTechniciensWithStats = async (req, res) => {
+  try {
+    const techniciens = await Technicien.find({ role: 'technicien' });
+
+    const techniciensWithStats = await Promise.all(
+      techniciens.map(async (tech) => {
+        // Compter les tâches terminées pour ce technicien
+        const completedTasks = await Task.countDocuments({
+          technicien: tech._id,
+          status: 'terminé' // Vérifier l'orthographe exacte
+        });
+
+        return {
+          _id: tech._id,
+          name: tech.name,
+          skills: tech.skills || [],
+          completedTasks: completedTasks, // Utiliser le compte dynamique
+          averageRating: tech.averageRating ?? 0,
+          ratingCount: tech.ratingCount ?? 0,
+        };
+      })
+    );
+
+    res.json(techniciensWithStats);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des techniciens:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
 
