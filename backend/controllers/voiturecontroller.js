@@ -84,3 +84,30 @@ exports.getVehiculesByTechnicien = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+//calculer la durée d'utilisation totale 
+exports.getVehiculeUtilisation = async (req, res) => {
+  try {
+    const Task = require('../models/Task');
+    const vehiculeId = req.params.id;
+
+    // Récupérer toutes les tâches terminées associées à ce véhicule
+    const tasks = await Task.find({
+      vehicule: vehiculeId,
+      status: 'terminé'
+    });
+
+    // Calculer la durée totale en heures
+    let totalDuration = 0;
+    tasks.forEach(task => {
+      if (task.endDate && task.startDate) {
+        const durationInHours = (task.endDate - task.startDate) / (1000 * 60 * 60);
+        totalDuration += durationInHours;
+      }
+    });
+
+    res.json({ vehiculeId, totalDuration });
+  } catch (err) {
+    console.error('Erreur lors du calcul de la durée d\'utilisation:', err);
+    res.status(500).json({ error: err.message });
+  }
+};

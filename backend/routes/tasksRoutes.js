@@ -11,7 +11,9 @@ const {
   updateTaskStatus,
   getTaskAttachments,
   getAttachmentFile,
-  getTotalTasks,getTasksCountByMonth // Assurez-vous que cette fonction est importée
+  getTotalTasks,
+  getTasksCountByMonth// Assurez-vous que cette fonction est importée
+ 
 } = require('../controllers/taskscontroller');
 
 // Routes pour les tâches

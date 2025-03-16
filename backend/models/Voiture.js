@@ -10,10 +10,13 @@ const voitureSchema = new mongoose.Schema({
     default: 'disponible'
   } ,
   utilisationHeures: { 
-    type: Number
-    ,required: false
+    type: Number,
+    required: false,
+    default: 0
   },
-  lastMaintenance: Date
+  lastMaintenance: {
+    type: Date
+  }
 
 });
 

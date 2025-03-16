@@ -20,4 +20,6 @@ router.delete('/:id', voitureController.deleteVehicule); // Utilise 'deleteVehic
 
 // ➜ Récupérer les véhicules par technicien
 router.get('/technicien/:technicienId', voitureController.getVehiculesByTechnicien);
+
+router.get('/:id/utilisation', voitureController.getVehiculeUtilisation);
 module.exports = router;

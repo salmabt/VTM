@@ -363,8 +363,17 @@ exports.updateTaskStatus = async (req, res) => {
         if (activeTasks.length === 0) {
           await Voiture.findByIdAndUpdate(task.vehicule._id, { status: 'disponible' });
         }
-      }
-    }
+
+         // Calculer la durée en heures
+         const durationInHours = (task.endDate - task.startDate) / (1000 * 60 * 60);
+
+         // Mettre à jour le temps d'utilisation du véhicule
+         await Voiture.findByIdAndUpdate(task.vehicule._id, {
+           $inc: { utilisationHeures: durationInHours }
+         });
+       }
+     }
+    
 
     res.json(task);
 
@@ -428,8 +437,6 @@ exports.getTasksCountByMonth = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 
 

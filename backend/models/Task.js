@@ -44,4 +44,5 @@ report: {
 },
 { timestamps: true } // <- Cette accolade était mal placée
 );
+
 module.exports = mongoose.model('Task', taskSchema);
