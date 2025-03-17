@@ -163,7 +163,7 @@ useEffect(() => {
       })));
 
     } catch (error) {
-      message.error('Erreur de chargement des statistiques');
+
     }
   };
   

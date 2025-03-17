@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, Tabs, Row, Col, List, Statistic, Button, Tag, Timeline, Typography, Spin, message } from 'antd';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 const { Text, Title } = Typography;
 const { TabPane } = Tabs;
 
@@ -77,6 +78,37 @@ const AdminRapport = () => {
     fetchData();
   }, []);
 
+  const exportToExcel = () => {
+    const ws = XLSX.utils.book_new();
+  
+    // Feuille des techniciens
+    const wsTechniciens = XLSX.utils.json_to_sheet(
+      techniciens.map(tech => ({
+        Nom: tech.name,
+        'Missions terminées': tech.completedTasks,
+        'Note moyenne': tech.averageRating.toFixed(1)
+      }))
+    );
+    XLSX.utils.book_append_sheet(ws, wsTechniciens, 'Techniciens');
+  
+    // Feuille des véhicules
+    const wsVehicules = XLSX.utils.json_to_sheet(
+      vehicules.map(vehicle => ({
+        Modèle: vehicle.model,
+        Immatriculation: vehicle.registration,
+        'Heures d\'utilisation': vehicle.utilisationHeures,
+        Statut: vehicle.status
+      }))
+    );
+    XLSX.utils.book_append_sheet(ws, wsVehicules, 'Véhicules');
+  
+    // Génération du fichier
+    const excelBuffer = XLSX.write(ws, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  
+    saveAs(data, 'rapport.xlsx');
+  };
+
 
   // Gérer la mise à jour de la note d'un technicien
   const [updatingRating, setUpdatingRating] = useState(null);
@@ -136,6 +168,10 @@ const handleRateChange = async (techId) => {
 
   return (
     <Card title="Rapports et Historique" bordered={false}>
+      <div style={{ marginBottom: 16 }}>
+  
+  <Button type="default" onClick={exportToExcel}>📊 Exporter en Excel</Button>
+</div>
       <Tabs defaultActiveKey="1">
         <TabPane tab="Suivi Techniciens" key="1">
           <div className="report-section">
