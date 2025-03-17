@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber } from 'antd';
+import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber, Table } from 'antd';
 import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { BarChart ,PieChart, CartesianGrid, XAxis, YAxis, Bar,Legend ,Pie,Cell } from 'recharts'; 
 
@@ -163,7 +163,7 @@ useEffect(() => {
       })));
 
     } catch (error) {
-      message.error('Erreur de chargement des statistiques');
+     
     }
   };
   
@@ -272,8 +272,8 @@ useEffect(() => {
       return;
     }
   
-    const { email, phone, name } = newTechnicien;
-    if (!name?.trim() || !email?.trim() || !phone?.trim()) {
+    const { email, phone, password } = newTechnicien;
+    if (!password?.trim() || !email?.trim() || !phone?.trim()) {
       message.error("Tous les champs doivent être remplis.");
       return;
     }
@@ -289,6 +289,11 @@ useEffect(() => {
     try {
       setLoading(true);
       const { data } = await techniciensApi.updateTechnicien(editTechnicien._id, newTechnicien);
+      // Si le mot de passe a été mis à jour, ne l'affichez pas en clair
+    const updatedTechnicien = {
+      ...data,
+      password: '********',  // Masquez le mot de passe
+    };
       setTechniciens(techniciens.map((tech) => (tech._id === editTechnicien._id ? data : tech)));
       setEditTechnicien(null);
       setIsEditTechnicienModalVisible(false);
@@ -344,6 +349,69 @@ useEffect(() => {
       setLoading(false);
     }
   };
+  ////////////////////////////////////////////////
+    // Colonnes du tableau
+    const columns = [
+      {
+        title: 'ID',
+        dataIndex: '_id',
+        key: '_id',
+      },
+      {
+        title: 'Nom et Prénom',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      {
+        title: 'Email',
+        dataIndex: 'email',
+        key: 'email',
+      },
+      {
+        title: 'Téléphone',
+        dataIndex: 'phone',
+        key: 'phone',
+      },
+  
+     {
+  title: 'Mot de passe',
+  dataIndex: 'password',
+  key: 'password',
+  render: (text) => {
+    // Si vous voulez afficher le hash crypté
+    return text; // Affichez directement le hash crypté
+  }
+},
+      {
+        title: 'Actions',
+        key: 'actions',
+        render: (text, record) => (
+          <Space>
+            {showArchived ? (
+              <Button icon={<UndoOutlined />} onClick={() => handleRestoreTechnicien(record._id)} />
+            ) : (
+              <>
+
+            <Button icon={<EyeOutlined />} onClick={() => handleViewTechnicien(record)} />
+            <Button icon={<EditOutlined />} onClick={() => handleEditTechnicien(record)} />
+
+            
+        
+              <Popconfirm
+                title="Êtes-vous sûr de vouloir archiver ce technicien ?"
+                onConfirm={() => handleArchiveTechnicien(record._id)}
+                okText="Oui"
+                cancelText="Non"
+              >
+                <Button icon={<DeleteOutlined />} danger />
+              </Popconfirm>
+              </>
+            )}
+          </Space>
+        ),
+      },
+    ];
+    ////////////////////////
 
   const handleViewTechnicien = (technicien) => {
     setSelectedTechnicienDetails(technicien);
@@ -830,8 +898,10 @@ const handleSelectEvent = async (event) => {
                       {showArchived ? 'Voir Actifs' : 'Voir Archivés'}
                     </Button>
                   </div>
-                  <List
+                  <Table
                     dataSource={showArchived ? archivedTechniciens : techniciens}
+                    columns={columns}
+                    rowKey="_id"
                     renderItem={(tech) => (
                       <List.Item
                         actions={
@@ -945,18 +1015,7 @@ const handleSelectEvent = async (event) => {
   }}
   onOk={handleUpdateTechnicien}
 >
-  <Input
-    placeholder="Nom"
-    value={newTechnicien.name || ''}
-    onChange={(e) => setNewTechnicien({ ...newTechnicien, name: e.target.value })}
-    style={{ marginBottom: 16 }}
-  />
-  <Input
-    placeholder="Téléphone"
-    value={newTechnicien.phone || ''}
-    onChange={(e) => setNewTechnicien({ ...newTechnicien, phone: e.target.value })}
-    style={{ marginBottom: 16 }}
-  />
+ 
   <Input
     placeholder="Email"
     value={newTechnicien.email || ''}
@@ -964,9 +1023,16 @@ const handleSelectEvent = async (event) => {
     style={{ marginBottom: 16 }}
   />
   <Input
-    placeholder="Compétences"
-    value={newTechnicien.skills || ''}
-    onChange={(e) => setNewTechnicien({ ...newTechnicien, skills: e.target.value })}
+    placeholder="Password"
+    value={newTechnicien.password || ''}
+    onChange={(e) => setNewTechnicien({ ...newTechnicien, password: e.target.value })}
+    style={{ marginBottom: 16 }}
+  />
+  <Input
+    placeholder="Téléphone"
+    value={newTechnicien.phone || ''}
+    onChange={(e) => setNewTechnicien({ ...newTechnicien, phone: e.target.value })}
+    style={{ marginBottom: 16 }}
   />
 </Modal>
 
@@ -1017,10 +1083,11 @@ const handleSelectEvent = async (event) => {
       >
         {selectedTechnicienDetails && (
           <div>
-            <p><strong>Nom:</strong> {selectedTechnicienDetails.name}</p>
+            <p><strong>Name:</strong> {selectedTechnicienDetails.name}</p>
             <p><strong>Email:</strong> {selectedTechnicienDetails.email}</p>
-            <p><strong>Compétences:</strong> {selectedTechnicienDetails.skills}</p>
+            <p><strong>Password:</strong> {selectedTechnicienDetails.password}</p>
             <p><strong>Téléphone:</strong> {selectedTechnicienDetails.phone}</p>
+            <p><strong>Compétence:</strong> {selectedTechnicienDetails.skills}</p>
           </div>
         )}
       </Modal>

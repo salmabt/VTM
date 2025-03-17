@@ -65,7 +65,7 @@ const TechniciensSection = ({
           padding: '8px 0',
           minHeight: 120
         }}>
-          {techniciens.slice(0, showAllTechs ? techniciens.length : 4).map(tech => (
+          {techniciens.slice(0, showAllTechs ? techniciens.length : 8).map(tech => (
             <div
               key={tech._id}
               onClick={() => handleTechClick(tech)}
@@ -93,12 +93,14 @@ const TechniciensSection = ({
 
         {/* Bouton Voir plus/moins */}
         {techniciens.length > 4 && (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
           <Button 
             onClick={() => setShowAllTechs(!showAllTechs)}
             style={{ marginTop: 8 }}
           >
             {showAllTechs ? 'Voir moins' : 'Voir plus'}
           </Button>
+          </div>
         )}
 
         {/* Modal des détails */}
