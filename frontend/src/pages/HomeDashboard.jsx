@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Card, Row, Col, Statistic, Typography, Button, Modal, message } from 'antd';
+import { Layout, Card, Row, Col, Statistic, Typography, Button, Modal, message,Select} from 'antd';
 import { UserOutlined, UnorderedListOutlined, FilterOutlined } from '@ant-design/icons';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { DatePicker } from 'antd';
+import moment from 'moment';
 
 const { RangePicker } = DatePicker;
 const { Content } = Layout;
 const { Text } = Typography;
+
 
 const TaskBarChart = ({ data }) => {
   const monthNames = [
@@ -67,7 +69,7 @@ const HomeDashboard = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [vehicules, setVehicules] = useState([]);
-
+  const [selectedYear, setSelectedYear] = useState(2025)
   // Récupérer les véhicules
   const fetchVehicules = async () => {
     try {
@@ -79,23 +81,28 @@ const HomeDashboard = () => {
       message.error('Erreur lors de la récupération des données des véhicules');
     }
   };
+  const handleYearChange = (year) => {
+    setSelectedYear(year);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const params = {};
+        const params = { year: selectedYear };
         if (startDate && endDate) {
           params.startDate = startDate.toISOString();
           params.endDate = endDate.toISOString();
         }
-
+    
         const techniciensRes = await axios.get('http://localhost:3000/api/techniciens/count', { params });
         setTotalEmployees(techniciensRes.data.totalTechniciens);
 
         const gestionnairesRes = await axios.get('http://localhost:3000/api/gestionnaires/count', { params });
         setTotalGestionnaires(gestionnairesRes.data.totalGestionnaires);
 
-        const tasksMonthRes = await axios.get('http://localhost:3000/api/tasks/count-by-month');
+        const tasksMonthRes = await axios.get('http://localhost:3000/api/tasks/count-by-month', { 
+          params: { year: selectedYear } // Add year parameter
+        });
         setTasksPerMonth(tasksMonthRes.data);
 
         const tasksRes = await axios.get('http://localhost:3000/api/tasks/count', { params });
@@ -113,7 +120,7 @@ const HomeDashboard = () => {
 
     fetchData();
     fetchVehicules();
-  }, [startDate, endDate]);
+  }, [startDate, endDate,selectedYear]);
 
   const handleDateChange = (dates) => {
     setDateRange(dates);
@@ -145,6 +152,7 @@ const HomeDashboard = () => {
     }
     return acc;
   }, []);
+  const years = Array.from({ length: 2050 - 2000 + 1 }, (_, i) => 2000 + i);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -275,6 +283,26 @@ const HomeDashboard = () => {
           </Col>
           <Col span={12}>
             <Card title="Tasks Per Month">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+              <Select
+  value={selectedYear}
+  onChange={handleYearChange}
+  style={{ width: 120 }}
+  showSearch
+  placeholder="Sélectionner une année"
+  optionFilterProp="children"
+  filterOption={(input, option) =>
+    option.children.toString().toLowerCase().includes(input.toLowerCase())
+  }
+>
+  {years.map(year => (
+    <Select.Option key={year} value={year}>
+      {year}
+    </Select.Option>
+  ))}
+</Select>
+
+              </div>
               <TaskBarChart data={tasksPerMonth} />
             </Card>
           </Col>

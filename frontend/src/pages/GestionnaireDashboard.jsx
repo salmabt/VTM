@@ -63,6 +63,9 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('');
   const [notifications, setNotifications] = useState([]);
+  ///////editvoiture/////////
+  const [editingVehicule, setEditingVehicule] = useState(null);
+const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
   
   const handleAddNote = async () => {
@@ -296,6 +299,21 @@ useEffect(() => {
       message.success('Véhicule supprimé avec succès');
     } catch (error) {
       message.error(error.response?.data?.message || 'Erreur de suppression');
+    }
+  };
+  const handleUpdateVehicule = async () => {
+    try {
+      const { data } = await vehiculesApi.updateVehicule(editingVehicule._id, editingVehicule);
+      setVehicules(prev => 
+        prev.map(v => v._id === data._id ? data : v)
+      );
+      setVehiculesList(prev => 
+        prev.map(v => v._id === data._id ? data : v)
+      );
+      message.success('Véhicule modifié avec succès');
+      setIsEditModalVisible(false);
+    } catch (error) {
+      message.error(error.response?.data?.error || 'Erreur lors de la modification');
     }
   };
   // Gestion tâches
@@ -803,6 +821,39 @@ useEffect(() => {
                   />
                 </Card>
               )}
+              
+{isEditModalVisible && (
+  <Modal
+    title="Modifier le véhicule"
+    visible={isEditModalVisible}
+    onCancel={() => setIsEditModalVisible(false)}
+    onOk={handleUpdateVehicule}
+    okText="Enregistrer"
+    cancelText="Annuler"
+  >
+    <Input
+      placeholder="Immatriculation"
+      value={editingVehicule?.registration || ''}
+      onChange={e => setEditingVehicule({...editingVehicule, registration: e.target.value})}
+      style={{ marginBottom: 16 }}
+    />
+    <Input
+      placeholder="Modèle"
+      value={editingVehicule?.model || ''}
+      onChange={e => setEditingVehicule({...editingVehicule, model: e.target.value})}
+      style={{ marginBottom: 16 }}
+    />
+    <Select
+      value={editingVehicule?.status || 'disponible'}
+      onChange={value => setEditingVehicule({...editingVehicule, status: value})}
+      style={{ width: '100%' }}
+    >
+      <Option value="disponible">Disponible</Option>
+      <Option value="en entretien">En entretien</Option>
+      <Option value="réservé">Réservé</Option>
+    </Select>
+  </Modal>
+)}
               {selectedMenu === '4' && (
                 <Card title="Gestion des véhicules" bordered={false}>
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -840,12 +891,20 @@ useEffect(() => {
                     dataSource={vehicules}
                     renderItem={vehicule => (
                       <List.Item
-                        actions={[
-                          <Button danger onClick={() => handleDeleteVehicule(vehicule._id)}>
-                            Supprimer
-                          </Button>
-                        ]}
-                      >
+                      actions={[
+                        <Button 
+                          onClick={() => {
+                            setEditingVehicule(vehicule);
+                            setIsEditModalVisible(true);
+                          }}
+                        >
+                          Modifier
+                        </Button>,
+                        <Button danger onClick={() => handleDeleteVehicule(vehicule._id)}>
+                          Supprimer
+                        </Button>
+                      ]}
+                    >
                         <List.Item.Meta
                           title={
                             <Text strong>

@@ -407,32 +407,46 @@ exports.getTotalTasks = async (req, res) => {
   }
 };
 // Récupérer les statistiques par mois (existant)
+// In taskscontroller.js (backend)
 exports.getTasksCountByMonth = async (req, res) => {
   try {
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+
     const tasksByMonth = await Task.aggregate([
       {
+        $match: {
+          startDate: {
+            $gte: new Date(year, 0, 1), // Start of selected year
+            $lt: new Date(year + 1, 0, 1) // Start of next year
+          }
+        }
+      },
+      {
         $project: {
-          month: { $month: "$startDate" } // Utiliser startDate au lieu de createdAt
+          month: { $month: "$startDate" }
         }
       },
       {
         $group: {
-          _id: "$month",  // Group by the month of startDate
+          _id: "$month",
           count: { $sum: 1 }
         }
       }
     ]);
-    // Générer tous les mois avec count=0 par défaut
+
+    // Generate all months with count=0
     const allMonths = Array.from({ length: 12 }, (_, i) => ({
       month: i + 1,
       count: 0
     }));
-    // Fusionner avec les données existantes
+
+    // Merge with actual data
     tasksByMonth.forEach(item => {
-      const index = item._id - 1;
-      allMonths[index].count = item.count;
+      allMonths[item._id - 1].count = item.count;
     });
+
     res.json(allMonths);
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
