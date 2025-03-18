@@ -71,10 +71,10 @@ const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 const [calendarDate, setCalendarDate] = useState(new Date());
 const [calendarView, setCalendarView] = useState('month');
 
-=======
+
 const [editingTask, setEditingTask] = useState(null); // Pour stocker la tâche en cours de modification
 const [isTaskEditModalVisible, setIsTaskEditModalVisible] = useState(false); // Pour gérer la visibilité du modal
->>>>>>> 6e5361276243708b0c0ee47b3f9162df82a4a12c
+
   
   const handleAddNote = async () => {
     if (newNote.trim()) {

@@ -28,8 +28,12 @@ const AdminDashboard = () => {
   };
 
   const isValidPhoneNumber = (phoneNumber) => {
-    const regex = /^[0-9]{8}$/;
+    const regex = /^\+216\d{8}$/; // Format +216 suivi de 8 chiffres
     return regex.test(phoneNumber);
+  };
+  const isValidPassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
   };
 
   const { userData, logout } = useAuth();
@@ -50,8 +54,25 @@ const AdminDashboard = () => {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
+    phone: '', 
     role: 'gestionnaire',
   });
+  const [formErrors, setFormErrors] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: ''
+  });
+  const [editFormErrors, setEditFormErrors] = useState({
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [calendarDate, setCalendarDate] = useState(new Date());
+const [calendarView, setCalendarView] = useState('month');
   const [editTechnicien, setEditTechnicien] = useState(null);
   const [isEditTechnicienModalVisible, setIsEditTechnicienModalVisible] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -422,70 +443,138 @@ useEffect(() => {
     setViewModalVisible(true);
   };
  ///////////////////////////GESTIONNAIRES/////////////////////////////////////
-  const handleAddGestionnaire = async () => {
-    try {
-      setLoading(true);
-      const response = await gestionnairesApi.createGestionnaire(newGestionnaire);
-      if (response && response.status === 'success') {
-        setGestionnaires([...gestionnaires, response.data]);
-        message.success('Gestionnaire ajouté avec succès');
-        setIsGestionnaireModalVisible(false);
-        setNewGestionnaire({ name: '', email: '', password: '', role: 'gestionnaire' });
-      }
-    } catch (error) {
-      message.error(error.message || 'Erreur lors de la création');
-    } finally {
-      setLoading(false);
+ const handleAddGestionnaire = async () => {
+  const errors = {};
+
+  // Réinitialiser les erreurs
+  setFormErrors({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: ''
+  });
+
+  // Validation des champs
+  if (!newGestionnaire.name.trim()) {
+    errors.name = 'Le nom est obligatoire';
+  }
+  if (!newGestionnaire.email.trim()) {
+    errors.email = "L'email est obligatoire";
+  } else if (!isValidEmail(newGestionnaire.email)) {
+    errors.email = "Email invalide";
+  }
+  if (!newGestionnaire.phone.trim()) {
+    errors.phone = 'Le téléphone est obligatoire';
+  } else if (!isValidPhoneNumber(newGestionnaire.phone)) {
+    errors.phone = 'Format: +21612345678';
+  }
+  if (!newGestionnaire.password.trim()) {
+    errors.password = 'Le mot de passe est obligatoire';
+  } else if (!isValidPassword(newGestionnaire.password)) {
+    errors.password = '8 caractères, majuscule, minuscule et caractère spécial';
+  }
+  if (newGestionnaire.password !== newGestionnaire.confirmPassword) {
+    errors.confirmPassword = 'Les mots de passe ne correspondent pas';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const response = await gestionnairesApi.createGestionnaire(newGestionnaire);
+    if (response && response.status === 'success') {
+      setGestionnaires([...gestionnaires, response.data]);
+      message.success('Gestionnaire ajouté avec succès');
+      setIsGestionnaireModalVisible(false);
+      setNewGestionnaire({ 
+        name: '', 
+        email: '', 
+        password: '', 
+        confirmPassword: '',
+        phone: '',
+        role: 'gestionnaire' 
+      });
     }
-  };
+  } catch (error) {
+    message.error(error.message || 'Erreur lors de la création');
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleEditGestionnaire = (gestionnaire) => {
-    setEditGestionnaire(gestionnaire);
-    setNewGestionnaire({
-      name: gestionnaire.name,
-      email: gestionnaire.email,
-      password: '', // Laisser vide pour la sécurité
-      role: gestionnaire.role,
-    });
-    setIsEditGestionnaireModalVisible(true);
-  };
+const handleEditGestionnaire = (gestionnaire) => {
+  setEditGestionnaire(gestionnaire);
+  setNewGestionnaire({
+    email: gestionnaire.email,
+    phone: gestionnaire.phone || '',
+    password: '',
+    confirmPassword: ''
+  });
+  setIsEditGestionnaireModalVisible(true);
+};
 
-  const handleUpdateGestionnaire = async () => {
-    try {
-      setLoading(true);
-      if (!newGestionnaire.name?.trim() || !newGestionnaire.email?.trim()) {
-        message.error("Le nom et l'email sont obligatoires.");
-        return;
-      }
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(newGestionnaire.email)) {
-        message.error("L'email n'est pas valide.");
-        return;
-      }
-      const cleanData = Object.fromEntries(
-        Object.entries(newGestionnaire).filter(([_, v]) => v !== '')
-      );
+const handleUpdateGestionnaire = async () => {
+  const errors = {};
 
-      const response = await gestionnairesApi.updateGestionnaire(
-        editGestionnaire._id,
-        cleanData
-      );
-      console.log('Gestionnaire mis à jour:', response.data);
+  // Réinitialiser les erreurs
+  setEditFormErrors({
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  });
 
-     setGestionnaires(gestionnaires.map(g =>
+  // Validation des champs obligatoires
+  if (!newGestionnaire.email.trim()) {
+    errors.email = "L'email est obligatoire";
+  } else if (!isValidEmail(newGestionnaire.email)) {
+    errors.email = "Format email invalide";
+  }
+
+  if (!newGestionnaire.phone.trim()) {
+    errors.phone = 'Le téléphone est obligatoire';
+  } else if (!isValidPhoneNumber(newGestionnaire.phone)) {
+    errors.phone = 'Format: +21612345678';
+  }
+
+  if (!newGestionnaire.password.trim()) {
+    errors.password = 'Le mot de passe est obligatoire';
+  } else if (!isValidPassword(newGestionnaire.password)) {
+    errors.password = '8 caractères avec majuscule, minuscule et caractère spécial';
+  }
+
+  if (newGestionnaire.password !== newGestionnaire.confirmPassword) {
+    errors.confirmPassword = 'Les mots de passe ne correspondent pas';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    setEditFormErrors(errors);
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const response = await gestionnairesApi.updateGestionnaire(
+      editGestionnaire._id,
+      newGestionnaire
+    );
+    
+    setGestionnaires(gestionnaires.map(g => 
       g._id === editGestionnaire._id ? { ...g, ...response.data } : g
     ));
 
-      message.success('Mise à jour réussie');
-      setIsEditGestionnaireModalVisible(false);
-    } catch (error) {
-      console.error('Erreur détaillée:', error);
-      message.error(error.message || 'Échec de la mise à jour');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    message.success('Mise à jour réussie');
+    setIsEditGestionnaireModalVisible(false);
+  } catch (error) {
+    message.error(error.message || 'Échec de la mise à jour');
+  } finally {
+    setLoading(false);
+  }
+};
   const handleArchiveGestionnaire = async (id) => {
     try {
       const archived = await gestionnairesApi.archiveGestionnaire(id);
@@ -672,6 +761,57 @@ const handleSelectEvent = async (event) => {
     message.error('Erreur de chargement des détails');
   }
 };
+const gestionnaireColumns = [
+  {
+    title: 'ID',
+    dataIndex: '_id',
+    key: '_id',
+  },
+  {
+    title: 'Nom et Prénom',
+    dataIndex: 'name',
+    key: 'name',
+  },
+  {
+    title: 'Email',
+    dataIndex: 'email',
+    key: 'email',
+  },
+  {
+    title: 'Téléphone',
+    dataIndex: 'phone',
+    key: 'phone',
+  },
+  {
+    title: 'Mot de passe',
+    dataIndex: 'password',
+    key: 'password',
+    render: (text) => text // Afficher le hash
+  },
+  {
+    title: 'Actions',
+    key: 'actions',
+    render: (text, record) => (
+      <Space>
+        {showArchivedGestionnaires ? (
+          <Button icon={<UndoOutlined />} onClick={() => handleRestoreGestionnaire(record._id)} />
+        ) : (
+          <>
+            <Button icon={<EditOutlined />} onClick={() => handleEditGestionnaire(record)} />
+            <Popconfirm
+              title="Archiver ce gestionnaire ?"
+              onConfirm={() => handleArchiveGestionnaire(record._id)}
+              okText="Oui"
+              cancelText="Non"
+            >
+              <Button icon={<DeleteOutlined />} danger />
+            </Popconfirm>
+          </>
+        )}
+      </Space>
+    ),
+  },
+];
   const menuItems = [
     { key: '1', icon: <UserOutlined />, label: 'Dashboard' },
     { key: '2', icon: <CalendarOutlined />, label: 'Calendrier' },
@@ -733,6 +873,10 @@ const handleSelectEvent = async (event) => {
 
                   <Calendar
                     localizer={localizer}
+                    date={calendarDate}
+                    view={calendarView}
+                    onNavigate={(date) => setCalendarDate(date)}
+                    onView={(view) => setCalendarView(view)}
                     events={tasks.map(task => {
                       const tech = techniciens.find(t => t._id === task.technicien);
                       const veh = vehicules.find(v => v._id === task.vehicule);
@@ -941,69 +1085,42 @@ const handleSelectEvent = async (event) => {
                 <AdminRapport />
               )}
 
+{selectedMenu === '5' && (
+  <Card title="Gestion des Gestionnaires" variant="borderless">
+    <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
+      <Input
+        placeholder="Rechercher un gestionnaire"
+        prefix={<SearchOutlined />}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          handleSearchGestionnaires(e.target.value);
+        }}
+        style={{ flex: 1 }}
+      />
+      <Button
+        type={showArchivedGestionnaires ? 'default' : 'primary'}
+        onClick={() => setShowArchivedGestionnaires(!showArchivedGestionnaires)}
+      >
+        {showArchivedGestionnaires ? 'Voir Actifs' : 'Voir Archivés'}
+      </Button>
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => setIsGestionnaireModalVisible(true)}
+      >
+        Ajouter
+      </Button>
+    </div>
 
-              {selectedMenu === '5' && (
-                <Card title="Gestion des Gestionnaires" variant="borderless">
-                  <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => setIsGestionnaireModalVisible(true)}
-                    style={{ marginBottom: 16 }}
-                  >
-                    Ajouter un Gestionnaire
-                  </Button>
-
-                  <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
-                    <Input
-                      placeholder="Rechercher un gestionnaire"
-                      prefix={<SearchOutlined />}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        handleSearchGestionnaires(e.target.value);
-                      }}
-                      style={{ flex: 1 }}
-                    />
-                    <Button
-                      type={showArchivedGestionnaires ? 'default' : 'primary'}
-                      onClick={() => {
-                        setShowArchivedGestionnaires(!showArchivedGestionnaires);
-                        handleSearchGestionnaires(searchTerm);
-                      }}
-                    >
-                      {showArchivedGestionnaires ? 'Voir Actifs' : 'Voir Archivés'}
-                    </Button>
-                  </div>
-                  <List
-                    dataSource={showArchivedGestionnaires ? archivedGestionnaires : filteredGestionnaires.length > 0 ? filteredGestionnaires : gestionnaires}
-                    renderItem={(gestionnaire) => (
-                      <List.Item
-                        actions={
-                          showArchivedGestionnaires
-                            ? [
-                                <Button icon={<UndoOutlined />} onClick={() => handleRestoreGestionnaire(gestionnaire._id)} />,
-                              ]
-                            : [
-                                <Button icon={<EditOutlined />} onClick={() => handleEditGestionnaire(gestionnaire)} />,
-                                <Popconfirm
-                                  title="Êtes-vous sûr de vouloir archiver ce gestionnaire ?"
-                                  onConfirm={() => handleArchiveGestionnaire(gestionnaire._id)}
-                                  okText="Oui"
-                                  cancelText="Non"
-                                >
-                                  <Button icon={<DeleteOutlined />} danger />
-                                </Popconfirm>,
-                              ]
-                        }
-                      >
-                        <List.Item.Meta
-                          title={<>{gestionnaire.name} {showArchivedGestionnaires && <Text type="secondary">(Archivé)</Text>}</>}
-                          description={`Email: ${gestionnaire.email}`}
-                        />
-                      </List.Item>
-                    )}
-                  />
-                </Card>
-              )}
+    <Table
+      dataSource={showArchivedGestionnaires ? archivedGestionnaires : filteredGestionnaires.length > 0 ? filteredGestionnaires : gestionnaires}
+      columns={gestionnaireColumns}
+      rowKey="_id"
+      pagination={{ pageSize: 8 }}
+      scroll={{ x: 1200 }}
+    />
+  </Card>
+)}
             </>
           )}
         </Content>
@@ -1042,41 +1159,61 @@ const handleSelectEvent = async (event) => {
 
       {/* Modal pour ajouter un gestionnaire */}
       <Modal
-        title="Ajouter un Gestionnaire"
-        visible={isGestionnaireModalVisible}
-        onCancel={() => setIsGestionnaireModalVisible(false)}
-        footer={[
-          <Button key="back" onClick={() => setIsGestionnaireModalVisible(false)}>
-            Annuler
-          </Button>,
-          <Button key="submit" type="primary" onClick={handleAddGestionnaire}>
-            Créer
-          </Button>,
-        ]}
-      >
-        <form onSubmit={(e) => { e.preventDefault(); handleAddGestionnaire(); }}>
-          <Input
-            placeholder="Nom"
-            required
-            value={newGestionnaire.name}
-            onChange={(e) => setNewGestionnaire({ ...newGestionnaire, name: e.target.value })}
-          />
-          <Input
-            placeholder="Email"
-            type="email"
-            required
-            value={newGestionnaire.email}
-            onChange={(e) => setNewGestionnaire({ ...newGestionnaire, email: e.target.value })}
-          />
-          <Input.Password
-            placeholder="Mot de passe"
-            autoComplete="new-password"
-            required
-            value={newGestionnaire.password}
-            onChange={(e) => setNewGestionnaire({ ...newGestionnaire, password: e.target.value })}
-          />
-        </form>
-      </Modal>
+  title="Ajouter un Gestionnaire"
+  visible={isGestionnaireModalVisible}
+  onCancel={() => setIsGestionnaireModalVisible(false)}
+  footer={[
+    <Button key="back" onClick={() => setIsGestionnaireModalVisible(false)}>
+      Annuler
+    </Button>,
+    <Button key="submit" type="primary" onClick={handleAddGestionnaire}>
+      Créer
+    </Button>,
+  ]}
+>
+  <form>
+    <Input
+      placeholder="Nom Et Prénom"
+      value={newGestionnaire.name}
+      onChange={(e) => setNewGestionnaire({ ...newGestionnaire, name: e.target.value })}
+      status={formErrors.name ? 'error' : ''}
+    />
+    {formErrors.name && <Text type="danger" style={{ display: 'block', marginBottom: 16 }}>{formErrors.name}</Text>}
+
+    <Input
+      placeholder="Email"
+      type="email"
+      value={newGestionnaire.email}
+      onChange={(e) => setNewGestionnaire({ ...newGestionnaire, email: e.target.value })}
+      status={formErrors.email ? 'error' : ''}
+    />
+    {formErrors.email && <Text type="danger" style={{ display: 'block', marginBottom: 16 }}>{formErrors.email}</Text>}
+
+    <Input
+      placeholder="Téléphone (+21612345678)"
+      value={newGestionnaire.phone}
+      onChange={(e) => setNewGestionnaire({ ...newGestionnaire, phone: e.target.value })}
+      status={formErrors.phone ? 'error' : ''}
+    />
+    {formErrors.phone && <Text type="danger" style={{ display: 'block', marginBottom: 16 }}>{formErrors.phone}</Text>}
+
+    <Input.Password
+      placeholder="Mot de passe"
+      value={newGestionnaire.password}
+      onChange={(e) => setNewGestionnaire({ ...newGestionnaire, password: e.target.value })}
+      status={formErrors.password ? 'error' : ''}
+    />
+    {formErrors.password && <Text type="danger" style={{ display: 'block', marginBottom: 16 }}>{formErrors.password}</Text>}
+
+    <Input.Password
+      placeholder="Confirmer le mot de passe"
+      value={newGestionnaire.confirmPassword}
+      onChange={(e) => setNewGestionnaire({ ...newGestionnaire, confirmPassword: e.target.value })}
+      status={formErrors.confirmPassword ? 'error' : ''}
+    />
+    {formErrors.confirmPassword && <Text type="danger" style={{ display: 'block', marginBottom: 16 }}>{formErrors.confirmPassword}</Text>}
+  </form>
+</Modal>
 
       {/* Modal pour voir les détails du technicien */}
       <Modal
@@ -1098,28 +1235,52 @@ const handleSelectEvent = async (event) => {
 
       {/* Modal pour modifier un gestionnaire */}
       <Modal
-        title="Modifier Gestionnaire"
-        visible={isEditGestionnaireModalVisible}
-        onCancel={() => setIsEditGestionnaireModalVisible(false)}
-        onOk={handleUpdateGestionnaire}
-        confirmLoading={loading}
-      >
-        <Input
-          placeholder="Nom"
-          value={newGestionnaire.name}
-          onChange={(e) => setNewGestionnaire({ ...newGestionnaire, name: e.target.value })}
-        />
-        <Input
-          placeholder="Email"
-          type="email"
-          value={newGestionnaire.email}
-          onChange={(e) => setNewGestionnaire({ ...newGestionnaire, email: e.target.value })}
-        />
-        <Input.Password
-          placeholder="Nouveau mot de passe (laisser vide pour ne pas changer)"
-          onChange={(e) => setNewGestionnaire({ ...newGestionnaire, password: e.target.value })}
-        />
-      </Modal>
+  title="Modifier Gestionnaire"
+  visible={isEditGestionnaireModalVisible}
+  onCancel={() => setIsEditGestionnaireModalVisible(false)}
+  onOk={handleUpdateGestionnaire}
+  confirmLoading={loading}
+>
+  <Input
+    placeholder="Email"
+    type="email"
+    value={newGestionnaire.email}
+    onChange={(e) => setNewGestionnaire({ ...newGestionnaire, email: e.target.value })}
+    status={editFormErrors.email ? 'error' : ''}
+    required
+  />
+  {editFormErrors.email && <Text type="danger">{editFormErrors.email}</Text>}
+
+  <Input
+    placeholder="Téléphone (+21612345678)"
+    value={newGestionnaire.phone}
+    onChange={(e) => setNewGestionnaire({ ...newGestionnaire, phone: e.target.value })}
+    status={editFormErrors.phone ? 'error' : ''}
+    required
+    style={{ marginTop: 16 }}
+  />
+  {editFormErrors.phone && <Text type="danger">{editFormErrors.phone}</Text>}
+
+  <Input.Password
+    placeholder="Nouveau mot de passe"
+    value={newGestionnaire.password}
+    onChange={(e) => setNewGestionnaire({ ...newGestionnaire, password: e.target.value })}
+    status={editFormErrors.password ? 'error' : ''}
+    required
+    style={{ marginTop: 16 }}
+  />
+  {editFormErrors.password && <Text type="danger">{editFormErrors.password}</Text>}
+
+  <Input.Password
+    placeholder="Confirmer le nouveau mot de passe"
+    value={newGestionnaire.confirmPassword}
+    onChange={(e) => setNewGestionnaire({ ...newGestionnaire, confirmPassword: e.target.value })}
+    status={editFormErrors.confirmPassword ? 'error' : ''}
+    required
+    style={{ marginTop: 16 }}
+  />
+  {editFormErrors.confirmPassword && <Text type="danger">{editFormErrors.confirmPassword}</Text>}
+</Modal>
     </Layout>
   );
 };
