@@ -66,10 +66,15 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
   ///////editvoiture/////////
   const [editingVehicule, setEditingVehicule] = useState(null);
 const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+
 //////////////////
 const [calendarDate, setCalendarDate] = useState(new Date());
 const [calendarView, setCalendarView] = useState('month');
 
+=======
+const [editingTask, setEditingTask] = useState(null); // Pour stocker la tâche en cours de modification
+const [isTaskEditModalVisible, setIsTaskEditModalVisible] = useState(false); // Pour gérer la visibilité du modal
+>>>>>>> 6e5361276243708b0c0ee47b3f9162df82a4a12c
   
   const handleAddNote = async () => {
     if (newNote.trim()) {
@@ -433,6 +438,83 @@ useEffect(() => {
       message.error(`Échec : ${errorMessage}`);
     }
   };
+  const handleUpdateTask = async () => {
+    try {
+      // Validation des champs obligatoires
+      const requiredFields = {
+        title: 'Titre',
+        description: 'Description',
+        technicien: 'Technicien',
+        vehicule: 'Véhicule',
+        startDate: 'Date de début',
+        endDate: 'Date de fin',
+      };
+  
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key]) => !editingTask[key])
+        .map(([, value]) => value);
+  
+      if (missingFields.length > 0) {
+        return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
+      }
+  
+      // Validation des dates
+      const start = moment(editingTask.startDate);
+      const end = moment(editingTask.endDate);
+  
+      if (!start.isValid() || !end.isValid()) {
+        return message.error('Format de date invalide');
+      }
+  
+      if (end.isBefore(start)) {
+        return message.error('La date de fin doit être après la date de début');
+      }
+  
+      // Création du FormData pour la mise à jour
+      const formData = new FormData();
+      formData.append('title', editingTask.title);
+      formData.append('description', editingTask.description);
+      formData.append('client', editingTask.client);
+      formData.append('location', editingTask.location);
+      formData.append('technicien', editingTask.technicien);
+      formData.append('vehicule', editingTask.vehicule);
+      formData.append('startDate', start.toISOString());
+      formData.append('endDate', end.toISOString());
+  
+      // Ajout des fichiers (si nécessaire)
+      if (editingTask.files?.length > 0) {
+        editingTask.files.forEach((file) => {
+          formData.append('attachments', file);
+        });
+      }
+  
+      // Envoi de la requête de mise à jour
+      const response = await tasksApi.updateTask(editingTask._id, formData);
+      const updatedTask = response.data;
+  
+      // Mise à jour optimiste de l'état des tâches
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === updatedTask._id
+            ? {
+                ...updatedTask,
+                technicien: updatedTask.technicien?._id,
+                vehicule: updatedTask.vehicule?._id,
+              }
+            : task
+        )
+      );
+  
+      // Fermeture du modal
+      setIsTaskEditModalVisible(false);
+      message.success('Tâche modifiée avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la modification de la tâche:', error);
+      message.error(
+        error.response?.data?.message || 'Erreur lors de la modification de la tâche'
+      );
+    }
+  };
   const handleDeleteTask = async (id) => {
     try {
       await tasksApi.deleteTask(id);
@@ -776,6 +858,14 @@ useEffect(() => {
                       return (
                         <List.Item
                           actions={[
+                            <Button
+                              onClick={() => {
+                                setEditingTask(task);
+                                setIsTaskEditModalVisible(true);
+                              }}
+                            >
+                              Modifier
+                            </Button>,
                             <Button danger onClick={() => handleDeleteTask(task._id)}>
                               Supprimer
                             </Button>
@@ -821,6 +911,7 @@ useEffect(() => {
                       ))}
                     </div>)}
                               </div>
+                              
                             }
                           />
                         </List.Item>
@@ -829,7 +920,7 @@ useEffect(() => {
                   />
                 </Card>
               )}
-              
+
 {isEditModalVisible && (
   <Modal
     title="Modifier le véhicule"
@@ -862,6 +953,108 @@ useEffect(() => {
     </Select>
   </Modal>
 )}
+/////////////////////////////////////////////////
+{isTaskEditModalVisible && (
+  <Modal
+    title="Modifier la tâche"
+    visible={isTaskEditModalVisible}
+    onCancel={() => setIsTaskEditModalVisible(false)}
+    onOk={handleUpdateTask}
+    okText="Enregistrer"
+    cancelText="Annuler"
+  >
+    <Input
+      placeholder="Titre"
+      value={editingTask?.title || ''}
+      onChange={(e) =>
+        setEditingTask({ ...editingTask, title: e.target.value })
+      }
+      style={{ marginBottom: 16 }}
+    />
+    <Input.TextArea
+      placeholder="Description"
+      value={editingTask?.description || ''}
+      onChange={(e) =>
+        setEditingTask({ ...editingTask, description: e.target.value })
+      }
+      rows={4}
+      style={{ marginBottom: 16 }}
+    />
+    <Input
+      placeholder="Client"
+      value={editingTask?.client || ''}
+      onChange={(e) =>
+        setEditingTask({ ...editingTask, client: e.target.value })
+      }
+      style={{ marginBottom: 16 }}
+    />
+    <Input
+      placeholder="Localisation"
+      value={editingTask?.location || ''}
+      onChange={(e) =>
+        setEditingTask({ ...editingTask, location: e.target.value })
+      }
+      style={{ marginBottom: 16 }}
+    />
+    <RangePicker
+      showTime
+      format="DD/MM/YYYY HH:mm"
+      value={[
+        editingTask?.startDate ? moment(editingTask.startDate) : null,
+        editingTask?.endDate ? moment(editingTask.endDate) : null,
+      ]}
+      onChange={(dates) => {
+        setEditingTask({
+          ...editingTask,
+          startDate: dates?.[0]?.toISOString(),
+          endDate: dates?.[1]?.toISOString(),
+        });
+      }}
+      style={{ marginBottom: 16, width: '100%' }}
+    />
+    <Select
+      placeholder="Sélectionner un technicien"
+      value={editingTask?.technicien || ''}
+      onChange={(value) =>
+        setEditingTask({ ...editingTask, technicien: value })
+      }
+      style={{ width: '100%', marginBottom: 16 }}
+    >
+      {techniciens.map((tech) => (
+        <Option key={tech._id} value={tech._id}>
+          {tech.name}
+        </Option>
+      ))}
+    </Select>
+    <Select
+      placeholder="Sélectionner un véhicule"
+      value={editingTask?.vehicule || ''}
+      onChange={(value) =>
+        setEditingTask({ ...editingTask, vehicule: value })
+      }
+      style={{ width: '100%', marginBottom: 16 }}
+    >
+      {vehiculesList
+        .filter((veh) => veh.status === 'disponible') // Filtrer les véhicules disponibles
+        .map((veh) => (
+          <Option key={veh._id} value={veh._id}>
+            {veh.model} ({veh.registration})
+          </Option>
+        ))}
+    </Select>
+    {/* Ajouter le champ de sélection de fichiers */}
+    <Input
+      type="file"
+      multiple
+      onChange={(e) => {
+        const files = Array.from(e.target.files);
+        setEditingTask({ ...editingTask, files });
+      }}
+      style={{ marginBottom: 16 }}
+    />
+  </Modal>
+)}
+
               {selectedMenu === '4' && (
                 <Card title="Gestion des véhicules" bordered={false}>
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>

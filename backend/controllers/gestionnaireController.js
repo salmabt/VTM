@@ -54,7 +54,17 @@ exports.loginGestionnaire = async (req, res, next) => {
 exports.createGestionnaire = async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
+    const phoneRegex = /^\+216\d{8}$/;
+    if (!phoneRegex.test(phone)) {
+      return next(createError(400, "Format téléphone invalide (+21612345678)"));
+    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
+    if (!passwordRegex.test(password)) {
+      return next(createError(400, 
+        "Le mot de passe doit contenir : 8 caractères minimum, 1 majuscule, 1 minuscule et 1 caractère spécial (@$!%*?&)"
+      ));
+    }
     // Vérifier les champs obligatoires
     if (!name || !email || !password) {
       return next(createError(400, 'Tous les champs sont obligatoires'));
@@ -107,31 +117,52 @@ exports.getAllGestionnaires = async (req, res, next) => {
 exports.updateGestionnaire = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, email, phone ,archived } = req.body; // Ne pas inclure le mot de passe ici
+    const { email, phone, password } = req.body;
 
-    // Vérifier les champs obligatoires
-    if (!name || !email) {
-      return next(createError(400, 'Nom et email sont obligatoires'));
+    // Validation obligatoire
+    if (!email?.trim()) return next(createError(400, "L'email est obligatoire"));
+    if (!phone?.trim()) return next(createError(400, "Le téléphone est obligatoire"));
+    if (!password?.trim()) return next(createError(400, "Le mot de passe est obligatoire"));
+
+    // Validation format email
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      return next(createError(400, "Format email invalide"));
     }
 
-    // Mise à jour sélective
+    // Validation téléphone
+    if (!/^\+216\d{8}$/.test(phone)) {
+      return next(createError(400, "Format téléphone invalide (+216xxxxxxxx)"));
+    }
+
+    // Validation mot de passe
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return next(createError(400, "Le mot de passe doit contenir 8 caractères avec majuscule, minuscule et caractère spécial"));
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Mise à jour
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      { name, email, phone ,archived },
+      {
+        email,
+        phone,
+        password: hashedPassword
+      },
       { new: true, runValidators: true }
     );
 
     if (!updatedUser) return next(createError(404, 'Gestionnaire non trouvé'));
 
-    res.status(200).json({
-      status: 'success',
-      data: updatedUser
-    });
+    res.status(200).json(updatedUser);
   } catch (error) {
     next(createError(400, error.message));
   }
 };
-
 // Archiver un gestionnaire 
 
 exports.archiveGestionnaire = async (req, res, next) => {
