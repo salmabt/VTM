@@ -66,6 +66,9 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
   ///////editvoiture/////////
   const [editingVehicule, setEditingVehicule] = useState(null);
 const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+//////////////////
+const [calendarDate, setCalendarDate] = useState(new Date());
+const [calendarView, setCalendarView] = useState('month');
 
   
   const handleAddNote = async () => {
@@ -611,7 +614,12 @@ useEffect(() => {
                     />
     
                     <Calendar
+                    
                      localizer={localizer}
+                     date={calendarDate}
+                     view={calendarView}
+                     onNavigate={(date) => setCalendarDate(date)}
+                     onView={(view) => setCalendarView(view)}
                      events={tasks.map(task => {
                        const tech = techniciens.find(t => t._id === task.technicien);
                        const veh = vehicules.find(v => v._id === task.vehicule);
