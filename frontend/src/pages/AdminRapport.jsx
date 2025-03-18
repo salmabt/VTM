@@ -288,7 +288,6 @@ const handleRateChange = async (techId) => {
                 {vehicules.map((vehicle) => (
                   <Timeline.Item key={vehicle._id} color={getVehicleStatusColor(vehicle.status)}>
                     <strong>{vehicle.model} ({vehicle.registration})</strong>
-                    <div>Dernière maintenance: {vehicle.lastMaintenance}</div>
                     <div>Heures d'utilisation: {vehicle.utilisationHeures}h</div>
                   </Timeline.Item>
                 ))}
