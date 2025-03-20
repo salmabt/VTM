@@ -2,6 +2,7 @@ const Task = require('../models/Task');
 const Technicien = require('../models/users');
 const Voiture = require('../models/Voiture');
 const Report = require('../models/Report');
+const Notification = require('../models/Notification');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -47,6 +48,31 @@ exports.createTask = async (req, res) => {
     };
     // Créer la tâche
     const newTask = await Task.create(taskData);
+    // Créer la notification
+    const notificationMessage = `Nouvelle mission programmée: ${newTask.title} (${new Date(newTask.startDate).toLocaleDateString('fr-FR')})`;
+await Notification.create({
+  recipient: req.body.technicien,
+  message: notificationMessage,
+  relatedTask: newTask._id
+});
+
+console.log('Notification créée pour:', req.body.technicien);
+console.log('Clients connectés:', global.clients ? Array.from(global.clients.keys()) : 'Aucun');
+
+// Modifier l'envoi SSE :
+if (global.clients) {
+  const client = global.clients.get(req.body.technicien.toString());
+  if (client) {
+    console.log('Envoi SSE à:', req.body.technicien);
+    client.write(`event: notification\n`);
+    client.write(`data: ${JSON.stringify({
+      type: 'NEW_TASK',
+      data: notificationMessage,
+      taskId: newTask._id,
+      createdAt: new Date() // Ajout timestamp
+    })}\n\n`);
+  }
+}
     // Mise à jour du statut du véhicule après création de la tâche
     await Voiture.findByIdAndUpdate(req.body.vehicule, { status: 'réservée' });
 
@@ -449,6 +475,48 @@ exports.getTasksCountByMonth = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+// Récupérer les notifications
+exports.getNotifications = async (req, res) => {
+  try {
+    const notifications = await Notification.find({
+      recipient: req.query.userId
+    })
+    .sort({ createdAt: -1 })
+    .populate({
+      path: 'relatedTask',
+      select: 'title startDate',
+      model: 'Task' // Spécifier explicitement le modèle
+    });
+
+    res.json(notifications);
+  } catch (error) {
+    console.error('Erreur récupération notifications:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Marquer une notification comme lue
+exports.markNotificationRead = async (req, res) => {
+  try {
+    const notification = await Notification.findByIdAndUpdate(
+      req.params.id,
+      { read: true },
+      { new: true, runValidators: true }
+    );
+    
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification non trouvée' });
+    }
+
+    res.json(notification);
+  } catch (error) {
+    console.error('Erreur marquage notification:', error);
+    res.status(500).json({ 
+      message: 'Échec de la mise à jour',
+      error: error.message 
+    });
   }
 };
 
