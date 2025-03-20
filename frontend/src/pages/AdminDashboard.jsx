@@ -283,42 +283,62 @@ useEffect(() => {
   const handleEditTechnicien = (technicien) => {
     setEditTechnicien(technicien);
     setNewTechnicien({
-      name: technicien.name,
-      phone: technicien.phone,
       email: technicien.email,
-      skills: technicien.skills,
+      phone: technicien.phone,
+      password: '',
+      confirmPassword: ''
     });
     setIsEditTechnicienModalVisible(true);
   };
 
   const handleUpdateTechnicien = async () => {
+    const errors = {};
+
+     // Réinitialiser les erreurs
+  setEditFormErrors({
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  });
+
     if (!editTechnicien || !editTechnicien._id) {
       message.error('Impossible de mettre à jour : Technicien non valide.');
       return;
     }
   
-    const { email, phone, password } = newTechnicien;
-    if (!password?.trim() || !email?.trim() || !phone?.trim()) {
-      message.error("Tous les champs doivent être remplis.");
-      return;
-    }
-    if (!isValidEmail(email)) {
-      message.error("L'email n'est pas valide.");
-      return;
-    }
-    if (!isValidPhoneNumber(phone)) {
-      message.error('Le numéro de téléphone doit être composé de 8 chiffres.');
-      return;
-    }
-  
+     // Validation des champs obligatoires
+  if (!newTechnicien.email.trim()) {
+    errors.email = "L'email est obligatoire";
+  } else if (!isValidEmail(newTechnicien.email)) {
+    errors.email = "Format email invalide";
+  }
+
+  if (!newTechnicien.phone.trim()) {
+    errors.phone = 'Le téléphone est obligatoire';
+  } else if (!isValidPhoneNumber(newTechnicien.phone)) {
+    errors.phone = 'Format: +21612345678';
+  }
+
+  if (!newTechnicien.password.trim()) {
+    errors.password = 'Le mot de passe est obligatoire';
+  } else if (!isValidPassword(newTechnicien.password)) {
+    errors.password = '8 caractères avec majuscule, minuscule et caractère spécial';
+  }
+
+  if (newTechnicien.password !== newTechnicien.confirmPassword) {
+    errors.confirmPassword = 'Les mots de passe ne correspondent pas';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    setEditFormErrors(errors);
+    return;
+  }
+
     try {
       setLoading(true);
       const { data } = await techniciensApi.updateTechnicien(editTechnicien._id, newTechnicien);
-      // Si le mot de passe a été mis à jour, ne l'affichez pas en clair
-    const updatedTechnicien = {
-      ...data,
-      password: '********',  // Masquez le mot de passe
-    };
+      
       setTechniciens(techniciens.map((tech) => (tech._id === editTechnicien._id ? data : tech)));
       setEditTechnicien(null);
       setIsEditTechnicienModalVisible(false);
@@ -330,6 +350,13 @@ useEffect(() => {
       setLoading(false);
     }
   };
+
+
+
+
+
+
+
 
   const handleArchiveTechnicien = async (technicienId) => {
     try {
@@ -1137,25 +1164,48 @@ const gestionnaireColumns = [
   onOk={handleUpdateTechnicien}
 >
  
-  <Input
+<Input
     placeholder="Email"
-    value={newTechnicien.email || ''}
+    type="email"
+    value={newTechnicien.email}
     onChange={(e) => setNewTechnicien({ ...newTechnicien, email: e.target.value })}
-    style={{ marginBottom: 16 }}
+    status={editFormErrors.email ? 'error' : ''}
+    required
   />
+  {editFormErrors.email && <Text type="danger">{editFormErrors.email}</Text>}
+
   <Input
-    placeholder="Password"
-    value={newTechnicien.password || ''}
-    onChange={(e) => setNewTechnicien({ ...newTechnicien, password: e.target.value })}
-    style={{ marginBottom: 16 }}
-  />
-  <Input
-    placeholder="Téléphone"
-    value={newTechnicien.phone || ''}
+    placeholder="Téléphone (+21612345678)"
+    value={newTechnicien.phone}
     onChange={(e) => setNewTechnicien({ ...newTechnicien, phone: e.target.value })}
-    style={{ marginBottom: 16 }}
+    status={editFormErrors.phone ? 'error' : ''}
+    required
+    style={{ marginTop: 16 }}
   />
+  {editFormErrors.phone && <Text type="danger">{editFormErrors.phone}</Text>}
+
+  <Input.Password
+    placeholder="Nouveau mot de passe"
+    value={newTechnicien.password}
+    onChange={(e) => setNewTechnicien({ ...newTechnicien, password: e.target.value })}
+    status={editFormErrors.password ? 'error' : ''}
+    required
+    style={{ marginTop: 16 }}
+  />
+  {editFormErrors.password && <Text type="danger">{editFormErrors.password}</Text>}
+
+  <Input.Password
+    placeholder="Confirmer le nouveau mot de passe"
+    value={newTechnicien.confirmPassword}
+    onChange={(e) => setNewTechnicien({ ...newTechnicien, confirmPassword: e.target.value })}
+    status={editFormErrors.confirmPassword ? 'error' : ''}
+    required
+    style={{ marginTop: 16 }}
+  />
+  {editFormErrors.confirmPassword && <Text type="danger">{editFormErrors.confirmPassword}</Text>}
 </Modal>
+
+
 
       {/* Modal pour ajouter un gestionnaire */}
       <Modal

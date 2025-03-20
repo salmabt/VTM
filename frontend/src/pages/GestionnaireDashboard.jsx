@@ -74,7 +74,8 @@ const [calendarView, setCalendarView] = useState('month');
 
 const [editingTask, setEditingTask] = useState(null); // Pour stocker la tâche en cours de modification
 const [isTaskEditModalVisible, setIsTaskEditModalVisible] = useState(false); // Pour gérer la visibilité du modal
-
+const [existingAttachments, setExistingAttachments] = useState([]); // Pour les pièces jointes existantes
+const [newFiles, setNewFiles] = useState([]); // Pour les nouveaux fichiers
   
   const handleAddNote = async () => {
     if (newNote.trim()) {
@@ -439,82 +440,88 @@ useEffect(() => {
     }
   };
   const handleUpdateTask = async () => {
-    try {
-      // Validation des champs obligatoires
-      const requiredFields = {
-        title: 'Titre',
-        description: 'Description',
-        technicien: 'Technicien',
-        vehicule: 'Véhicule',
-        startDate: 'Date de début',
-        endDate: 'Date de fin',
-      };
-  
-      const missingFields = Object.entries(requiredFields)
-        .filter(([key]) => !editingTask[key])
-        .map(([, value]) => value);
-  
-      if (missingFields.length > 0) {
-        return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
-      }
-  
-      // Validation des dates
-      const start = moment(editingTask.startDate);
-      const end = moment(editingTask.endDate);
-  
-      if (!start.isValid() || !end.isValid()) {
-        return message.error('Format de date invalide');
-      }
-  
-      if (end.isBefore(start)) {
-        return message.error('La date de fin doit être après la date de début');
-      }
-  
-      // Création du FormData pour la mise à jour
-      const formData = new FormData();
-      formData.append('title', editingTask.title);
-      formData.append('description', editingTask.description);
-      formData.append('client', editingTask.client);
-      formData.append('location', editingTask.location);
-      formData.append('technicien', editingTask.technicien);
-      formData.append('vehicule', editingTask.vehicule);
-      formData.append('startDate', start.toISOString());
-      formData.append('endDate', end.toISOString());
-  
-      // Ajout des fichiers (si nécessaire)
-      if (editingTask.files?.length > 0) {
-        editingTask.files.forEach((file) => {
-          formData.append('attachments', file);
-        });
-      }
-  
-      // Envoi de la requête de mise à jour
-      const response = await tasksApi.updateTask(editingTask._id, formData);
-      const updatedTask = response.data;
-  
-      // Mise à jour optimiste de l'état des tâches
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task._id === updatedTask._id
-            ? {
-                ...updatedTask,
-                technicien: updatedTask.technicien?._id,
-                vehicule: updatedTask.vehicule?._id,
-              }
-            : task
-        )
-      );
-  
-      // Fermeture du modal
-      setIsTaskEditModalVisible(false);
-      message.success('Tâche modifiée avec succès');
-    } catch (error) {
-      console.error('Erreur lors de la modification de la tâche:', error);
-      message.error(
-        error.response?.data?.message || 'Erreur lors de la modification de la tâche'
-      );
+  try {
+    // Validation des champs obligatoires
+    const requiredFields = {
+      title: 'Titre',
+      description: 'Description',
+      technicien: 'Technicien',
+      vehicule: 'Véhicule',
+      startDate: 'Date de début',
+      endDate: 'Date de fin',
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([key]) => !editingTask[key])
+      .map(([, value]) => value);
+
+    if (missingFields.length > 0) {
+      return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
     }
-  };
+
+    // Validation des dates
+    const start = moment(editingTask.startDate);
+    const end = moment(editingTask.endDate);
+
+    if (!start.isValid() || !end.isValid()) {
+      return message.error('Format de date invalide');
+    }
+
+    if (end.isBefore(start)) {
+      return message.error('La date de fin doit être après la date de début');
+    }
+
+    // Création du FormData pour la mise à jour
+    const formData = new FormData();
+    formData.append('title', editingTask.title);
+    formData.append('description', editingTask.description);
+    formData.append('client', editingTask.client);
+    formData.append('location', editingTask.location);
+    formData.append('technicien', editingTask.technicien);
+    formData.append('vehicule', editingTask.vehicule);
+    formData.append('startDate', start.toISOString());
+    formData.append('endDate', end.toISOString());
+
+    // Ajout des nouveaux fichiers
+    if (newFiles.length > 0) {
+      newFiles.forEach((file) => {
+        formData.append('attachments', file);
+      });
+    }
+
+    // Envoi de la requête de mise à jour
+    const response = await tasksApi.updateTask(editingTask._id, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    const updatedTask = response.data;
+
+    // Mise à jour optimiste de l'état des tâches
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task._id === updatedTask._id
+          ? {
+              ...updatedTask,
+              technicien: updatedTask.technicien?._id,
+              vehicule: updatedTask.vehicule?._id,
+            }
+          : task
+      )
+    );
+
+    // Fermeture du modal et réinitialisation des états
+    setIsTaskEditModalVisible(false);
+    setExistingAttachments([]);
+    setNewFiles([]);
+    message.success('Tâche modifiée avec succès');
+  } catch (error) {
+    console.error('Erreur lors de la modification de la tâche:', error);
+    message.error(
+      error.response?.data?.message || 'Erreur lors de la modification de la tâche'
+    );
+  }
+};
   const handleDeleteTask = async (id) => {
     try {
       await tasksApi.deleteTask(id);
@@ -953,15 +960,20 @@ useEffect(() => {
     </Select>
   </Modal>
 )}
-/////////////////////////////////////////////////
+
 {isTaskEditModalVisible && (
   <Modal
     title="Modifier la tâche"
     visible={isTaskEditModalVisible}
-    onCancel={() => setIsTaskEditModalVisible(false)}
+    onCancel={() => {
+      setIsTaskEditModalVisible(false);
+      setExistingAttachments([]); // Réinitialiser les pièces jointes existantes
+      setNewFiles([]); // Réinitialiser les nouveaux fichiers
+    }}
     onOk={handleUpdateTask}
     okText="Enregistrer"
     cancelText="Annuler"
+    width={800}
   >
     <Input
       placeholder="Titre"
@@ -996,6 +1008,8 @@ useEffect(() => {
       }
       style={{ marginBottom: 16 }}
     />
+
+    {/* Gestion des dates (startDate et endDate) */}
     <RangePicker
       showTime
       format="DD/MM/YYYY HH:mm"
@@ -1012,6 +1026,7 @@ useEffect(() => {
       }}
       style={{ marginBottom: 16, width: '100%' }}
     />
+
     <Select
       placeholder="Sélectionner un technicien"
       value={editingTask?.technicien || ''}
@@ -1026,6 +1041,7 @@ useEffect(() => {
         </Option>
       ))}
     </Select>
+
     <Select
       placeholder="Sélectionner un véhicule"
       value={editingTask?.vehicule || ''}
@@ -1035,20 +1051,37 @@ useEffect(() => {
       style={{ width: '100%', marginBottom: 16 }}
     >
       {vehiculesList
-        .filter((veh) => veh.status === 'disponible') // Filtrer les véhicules disponibles
+        .filter((veh) => veh.status === 'disponible')
         .map((veh) => (
           <Option key={veh._id} value={veh._id}>
             {veh.model} ({veh.registration})
           </Option>
         ))}
     </Select>
-    {/* Ajouter le champ de sélection de fichiers */}
+
+    {/* Affichage des pièces jointes existantes */}
+    <div style={{ marginBottom: 16 }}>
+      <Text strong>Pièces jointes existantes :</Text>
+      {editingTask.attachments?.map((attachment) => (
+        <div key={attachment.filename} style={{ marginTop: 8 }}>
+          <a
+            href={`http://localhost:3000/uploads/${attachment.filename}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            📄 {attachment.originalName} ({Math.round(attachment.size / 1024)}KB)
+          </a>
+        </div>
+      ))}
+    </div>
+
+    {/* Champ pour ajouter de nouveaux fichiers */}
     <Input
       type="file"
       multiple
       onChange={(e) => {
         const files = Array.from(e.target.files);
-        setEditingTask({ ...editingTask, files });
+        setNewFiles(files); // Stocker les nouveaux fichiers
       }}
       style={{ marginBottom: 16 }}
     />
