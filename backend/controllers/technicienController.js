@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const Technicien = require('../models/users');
 const Task = require('../models/Task');
 const createError = require('../utils/appError');
-const bcrypt = require('bcryptjs'); 
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
 
 
 exports.createTechnicien = async (req, res, next) => {
@@ -101,35 +102,6 @@ exports.getAllTechniciens = async (req, res) => {
 };
 
 
-exports.updateTechnicien = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { email, password, phone, skills, archived } = req.body;
-
-    // Si un mot de passe est fourni, il faut le hacher
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 12); // Hachage du mot de passe
-      req.body.password = hashedPassword; // Remplace le mot de passe dans le body avec le haché
-    }
-
-    // Mise à jour du technicien avec les données reçues
-    const updatedTechnicien = await Technicien.findByIdAndUpdate(
-      id,
-      req.body,  // Ici, req.body contient tous les champs, y compris le mot de passe haché
-      { new: true, runValidators: true }
-    );
-    if (!updatedTechnicien) {
-      return next(createError(404, 'Technicien non trouvé'));
-    }
-
-    res.status(200).json({
-      status: 'success',
-      data: updatedTechnicien
-    });
-  } catch (error) {
-    next(createError(500, error.message));
-  }
-};
 
 
 

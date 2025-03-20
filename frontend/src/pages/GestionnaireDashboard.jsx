@@ -74,7 +74,8 @@ const [calendarView, setCalendarView] = useState('month');
 
 const [editingTask, setEditingTask] = useState(null); // Pour stocker la tâche en cours de modification
 const [isTaskEditModalVisible, setIsTaskEditModalVisible] = useState(false); // Pour gérer la visibilité du modal
-
+const [existingAttachments, setExistingAttachments] = useState([]); // Pour les pièces jointes existantes
+const [newFiles, setNewFiles] = useState([]); // Pour les nouveaux fichiers
   
   const handleAddNote = async () => {
     if (newNote.trim()) {
@@ -438,6 +439,8 @@ useEffect(() => {
       message.error(`Échec : ${errorMessage}`);
     }
   };
+
+
   const handleUpdateTask = async () => {
     try {
       // Validation des champs obligatoires
@@ -461,6 +464,8 @@ useEffect(() => {
       // Validation des dates
       const start = moment(editingTask.startDate);
       const end = moment(editingTask.endDate);
+      
+  
   
       if (!start.isValid() || !end.isValid()) {
         return message.error('Format de date invalide');
@@ -481,15 +486,21 @@ useEffect(() => {
       formData.append('startDate', start.toISOString());
       formData.append('endDate', end.toISOString());
   
-      // Ajout des fichiers (si nécessaire)
-      if (editingTask.files?.length > 0) {
-        editingTask.files.forEach((file) => {
+
+      
+      // Ajout des nouveaux fichiers
+    
+        newFiles.forEach((file) => {
           formData.append('attachments', file);
         });
-      }
+      
   
       // Envoi de la requête de mise à jour
-      const response = await tasksApi.updateTask(editingTask._id, formData);
+      const response = await tasksApi.updateTask(editingTask._id, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       const updatedTask = response.data;
   
       // Mise à jour optimiste de l'état des tâches
@@ -505,8 +516,10 @@ useEffect(() => {
         )
       );
   
-      // Fermeture du modal
+      // Fermeture du modal et réinitialisation des états
       setIsTaskEditModalVisible(false);
+      setExistingAttachments([]);
+      setNewFiles([]);
       message.success('Tâche modifiée avec succès');
     } catch (error) {
       console.error('Erreur lors de la modification de la tâche:', error);
@@ -515,6 +528,7 @@ useEffect(() => {
       );
     }
   };
+
   const handleDeleteTask = async (id) => {
     try {
       await tasksApi.deleteTask(id);
@@ -826,8 +840,8 @@ useEffect(() => {
         {veh.model} ({veh.registration}) - {veh.status}
       </Option>
     ))}
-                    </Select>
-                    <Input
+    </Select>
+    <Input
         type="file"
         multiple
         onChange={(e) => {
@@ -835,7 +849,6 @@ useEffect(() => {
           console.log(files);  // Vérifier si les fichiers sont correctement capturés
           setNewTask({...newTask, files});
         }}
-        
 
         style={{ marginBottom: 16 }}
       />
@@ -861,6 +874,8 @@ useEffect(() => {
                             <Button
                               onClick={() => {
                                 setEditingTask(task);
+                                setExistingAttachments(task.attachments || []); // Initialiser les pièces jointes existantes
+                                setNewFiles([]); // Réinitialiser les nouveaux fichiers
                                 setIsTaskEditModalVisible(true);
                               }}
                             >
@@ -953,15 +968,20 @@ useEffect(() => {
     </Select>
   </Modal>
 )}
-/////////////////////////////////////////////////
+
 {isTaskEditModalVisible && (
   <Modal
     title="Modifier la tâche"
     visible={isTaskEditModalVisible}
-    onCancel={() => setIsTaskEditModalVisible(false)}
+    onCancel={() => {
+      setIsTaskEditModalVisible(false);
+      setExistingAttachments([]); // Réinitialiser les pièces jointes existantes
+      setNewFiles([]); // Réinitialiser les nouveaux fichiers
+    }}
     onOk={handleUpdateTask}
     okText="Enregistrer"
     cancelText="Annuler"
+    width={800}
   >
     <Input
       placeholder="Titre"
@@ -996,22 +1016,19 @@ useEffect(() => {
       }
       style={{ marginBottom: 16 }}
     />
+
+    {/* Gestion des dates (startDate et endDate) */}
     <RangePicker
-      showTime
-      format="DD/MM/YYYY HH:mm"
-      value={[
-        editingTask?.startDate ? moment(editingTask.startDate) : null,
-        editingTask?.endDate ? moment(editingTask.endDate) : null,
-      ]}
-      onChange={(dates) => {
-        setEditingTask({
-          ...editingTask,
-          startDate: dates?.[0]?.toISOString(),
-          endDate: dates?.[1]?.toISOString(),
-        });
-      }}
-      style={{ marginBottom: 16, width: '100%' }}
-    />
+                      showTime
+                      format="DD/MM/YYYY HH:mm"
+                      onChange={(dates) =>setEditingTask({
+                        ...editingTask,
+                        startDate: dates[0].toISOString(),
+                        endDate: dates[1].toISOString()
+                      })}
+                    />
+   
+
     <Select
       placeholder="Sélectionner un technicien"
       value={editingTask?.technicien || ''}
@@ -1026,6 +1043,7 @@ useEffect(() => {
         </Option>
       ))}
     </Select>
+
     <Select
       placeholder="Sélectionner un véhicule"
       value={editingTask?.vehicule || ''}
@@ -1035,20 +1053,37 @@ useEffect(() => {
       style={{ width: '100%', marginBottom: 16 }}
     >
       {vehiculesList
-        .filter((veh) => veh.status === 'disponible') // Filtrer les véhicules disponibles
+        .filter((veh) => veh.status === 'disponible')
         .map((veh) => (
           <Option key={veh._id} value={veh._id}>
             {veh.model} ({veh.registration})
           </Option>
         ))}
     </Select>
-    {/* Ajouter le champ de sélection de fichiers */}
+
+    {/* Affichage des pièces jointes existantes */}
+    <div style={{ marginBottom: 16 }}>
+      <Text strong>Pièces jointes existantes :</Text>
+      {editingTask.attachments?.map((attachment) => (
+        <div key={attachment.filename} style={{ marginTop: 8 }}>
+          <a
+            href={`http://localhost:3000/uploads/${attachment.filename}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            📄 {attachment.originalName} ({Math.round(attachment.size / 1024)}KB)
+          </a>
+        </div>
+      ))}
+    </div>
+
+    {/* Champ pour ajouter de nouveaux fichiers */}
     <Input
       type="file"
       multiple
       onChange={(e) => {
         const files = Array.from(e.target.files);
-        setEditingTask({ ...editingTask, files });
+        setNewFiles(files); // Stocker les nouveaux fichiers
       }}
       style={{ marginBottom: 16 }}
     />

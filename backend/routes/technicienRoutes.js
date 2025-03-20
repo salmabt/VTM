@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const Technicien = require('../models/users');
 const Task = require('../models/Task');
 const {createTechnicien, archiveTechnicien,restoreTechnicien,getArchivedTechniciens,updateTechnicien,loginTechnicien,getTechniciensWithStats ,getAllTechniciens } = require('../controllers/technicienController');
@@ -16,12 +17,24 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    const updatedTechnicien = await Technicien.findByIdAndUpdate(id, updateData, { new: true });
+    // Si un mot de passe est fourni dans la requête, le crypter avant de mettre à jour
+    if (updateData.password) {
+      const salt = await bcrypt.genSalt(10); // Générer un salt
+      updateData.password = await bcrypt.hash(updateData.password, salt); // Crypter le mot de passe
+    }
+
+    // Mettre à jour le technicien dans la base de données
+    const updatedTechnicien = await Technicien.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true } // Retourner le document mis à jour
+    );
 
     if (!updatedTechnicien) {
       return res.status(404).json({ message: "Technicien non trouvé" });
     }
 
+    // Retourner le technicien mis à jour
     res.json(updatedTechnicien);
   } catch (error) {
     console.error("Erreur lors de la mise à jour :", error);
