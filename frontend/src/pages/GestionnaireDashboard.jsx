@@ -439,89 +439,96 @@ useEffect(() => {
       message.error(`Échec : ${errorMessage}`);
     }
   };
+
+
   const handleUpdateTask = async () => {
-  try {
-    // Validation des champs obligatoires
-    const requiredFields = {
-      title: 'Titre',
-      description: 'Description',
-      technicien: 'Technicien',
-      vehicule: 'Véhicule',
-      startDate: 'Date de début',
-      endDate: 'Date de fin',
-    };
+    try {
+      // Validation des champs obligatoires
+      const requiredFields = {
+        title: 'Titre',
+        description: 'Description',
+        technicien: 'Technicien',
+        vehicule: 'Véhicule',
+        startDate: 'Date de début',
+        endDate: 'Date de fin',
+      };
+  
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key]) => !editingTask[key])
+        .map(([, value]) => value);
+  
+      if (missingFields.length > 0) {
+        return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
+      }
+  
+      // Validation des dates
+      const start = moment(editingTask.startDate);
+      const end = moment(editingTask.endDate);
+      
+  
+  
+      if (!start.isValid() || !end.isValid()) {
+        return message.error('Format de date invalide');
+      }
+  
+      if (end.isBefore(start)) {
+        return message.error('La date de fin doit être après la date de début');
+      }
+  
+      // Création du FormData pour la mise à jour
+      const formData = new FormData();
+      formData.append('title', editingTask.title);
+      formData.append('description', editingTask.description);
+      formData.append('client', editingTask.client);
+      formData.append('location', editingTask.location);
+      formData.append('technicien', editingTask.technicien);
+      formData.append('vehicule', editingTask.vehicule);
+      formData.append('startDate', start.toISOString());
+      formData.append('endDate', end.toISOString());
+  
 
-    const missingFields = Object.entries(requiredFields)
-      .filter(([key]) => !editingTask[key])
-      .map(([, value]) => value);
-
-    if (missingFields.length > 0) {
-      return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
-    }
-
-    // Validation des dates
-    const start = moment(editingTask.startDate);
-    const end = moment(editingTask.endDate);
-
-    if (!start.isValid() || !end.isValid()) {
-      return message.error('Format de date invalide');
-    }
-
-    if (end.isBefore(start)) {
-      return message.error('La date de fin doit être après la date de début');
-    }
-
-    // Création du FormData pour la mise à jour
-    const formData = new FormData();
-    formData.append('title', editingTask.title);
-    formData.append('description', editingTask.description);
-    formData.append('client', editingTask.client);
-    formData.append('location', editingTask.location);
-    formData.append('technicien', editingTask.technicien);
-    formData.append('vehicule', editingTask.vehicule);
-    formData.append('startDate', start.toISOString());
-    formData.append('endDate', end.toISOString());
-
-    // Ajout des nouveaux fichiers
-    if (newFiles.length > 0) {
-      newFiles.forEach((file) => {
-        formData.append('attachments', file);
+      
+      // Ajout des nouveaux fichiers
+    
+        newFiles.forEach((file) => {
+          formData.append('attachments', file);
+        });
+      
+  
+      // Envoi de la requête de mise à jour
+      const response = await tasksApi.updateTask(editingTask._id, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
+      const updatedTask = response.data;
+  
+      // Mise à jour optimiste de l'état des tâches
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === updatedTask._id
+            ? {
+                ...updatedTask,
+                technicien: updatedTask.technicien?._id,
+                vehicule: updatedTask.vehicule?._id,
+              }
+            : task
+        )
+      );
+  
+      // Fermeture du modal et réinitialisation des états
+      setIsTaskEditModalVisible(false);
+      setExistingAttachments([]);
+      setNewFiles([]);
+      message.success('Tâche modifiée avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la modification de la tâche:', error);
+      message.error(
+        error.response?.data?.message || 'Erreur lors de la modification de la tâche'
+      );
     }
+  };
 
-    // Envoi de la requête de mise à jour
-    const response = await tasksApi.updateTask(editingTask._id, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    const updatedTask = response.data;
-
-    // Mise à jour optimiste de l'état des tâches
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task._id === updatedTask._id
-          ? {
-              ...updatedTask,
-              technicien: updatedTask.technicien?._id,
-              vehicule: updatedTask.vehicule?._id,
-            }
-          : task
-      )
-    );
-
-    // Fermeture du modal et réinitialisation des états
-    setIsTaskEditModalVisible(false);
-    setExistingAttachments([]);
-    setNewFiles([]);
-    message.success('Tâche modifiée avec succès');
-  } catch (error) {
-    console.error('Erreur lors de la modification de la tâche:', error);
-    message.error(
-      error.response?.data?.message || 'Erreur lors de la modification de la tâche'
-    );
-  }
-};
   const handleDeleteTask = async (id) => {
     try {
       await tasksApi.deleteTask(id);
@@ -833,8 +840,8 @@ useEffect(() => {
         {veh.model} ({veh.registration}) - {veh.status}
       </Option>
     ))}
-                    </Select>
-                    <Input
+    </Select>
+    <Input
         type="file"
         multiple
         onChange={(e) => {
@@ -842,7 +849,6 @@ useEffect(() => {
           console.log(files);  // Vérifier si les fichiers sont correctement capturés
           setNewTask({...newTask, files});
         }}
-        
 
         style={{ marginBottom: 16 }}
       />
@@ -868,6 +874,8 @@ useEffect(() => {
                             <Button
                               onClick={() => {
                                 setEditingTask(task);
+                                setExistingAttachments(task.attachments || []); // Initialiser les pièces jointes existantes
+                                setNewFiles([]); // Réinitialiser les nouveaux fichiers
                                 setIsTaskEditModalVisible(true);
                               }}
                             >
@@ -1011,21 +1019,15 @@ useEffect(() => {
 
     {/* Gestion des dates (startDate et endDate) */}
     <RangePicker
-      showTime
-      format="DD/MM/YYYY HH:mm"
-      value={[
-        editingTask?.startDate ? moment(editingTask.startDate) : null,
-        editingTask?.endDate ? moment(editingTask.endDate) : null,
-      ]}
-      onChange={(dates) => {
-        setEditingTask({
-          ...editingTask,
-          startDate: dates?.[0]?.toISOString(),
-          endDate: dates?.[1]?.toISOString(),
-        });
-      }}
-      style={{ marginBottom: 16, width: '100%' }}
-    />
+                      showTime
+                      format="DD/MM/YYYY HH:mm"
+                      onChange={(dates) =>setEditingTask({
+                        ...editingTask,
+                        startDate: dates[0].toISOString(),
+                        endDate: dates[1].toISOString()
+                      })}
+                    />
+   
 
     <Select
       placeholder="Sélectionner un technicien"
