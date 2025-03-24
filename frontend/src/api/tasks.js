@@ -1,4 +1,3 @@
-// api/tasks
 import axios from 'axios';
 
 const api = axios.create({
@@ -32,6 +31,12 @@ const tasksApi = {
   getTasksByTechnicien: (technicienId) => api.get(`/tasks/technicien/${technicienId}`),
   getTasksByVehicule: (vehiculeId) => api.get(`/tasks?vehicule=${vehiculeId}`),
   getTasksByStatus: (status) => api.get(`/tasks?status=${status}`),
+
+  // Nouvelle fonction pour récupérer les tâches par technicien et date
+  getTasksByTechnicienAndDate: (technicienId, date) =>
+    api.get('/tasks/by-technicien-and-date', {
+      params: { technicienId, date }, // Passer les paramètres technicienId et date
+    }),
 
   // Gestion des véhicules
   getVehicules: () => api.get('/vehicules'),

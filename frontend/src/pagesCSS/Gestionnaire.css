@@ -1,0 +1,47 @@
+/* Importation de la police Poppins */
+@import url('https://fonts.googleapis.com/css?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap');
+
+/* Styles de base avec Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Appliquer la police Poppins */
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Layout principal */
+.ant-layout {
+  @apply bg-pastel-gray; /* Gris pastel pour le fond */
+}
+
+.ant-layout-header {
+  @apply bg-pastel-blue shadow-md z-10; /* Bleu pastel pour le header */
+}
+
+.ant-layout-sider {
+  @apply bg-pastel-gray shadow-lg; /* Violet pastel pour le sider */
+}
+
+/* Calendrier */
+.rbc-calendar {
+  @apply min-h-[500px] bg-white rounded-lg shadow-sm;
+}
+
+.rbc-header {
+  @apply bg-pastel-blue text-white; /* Bleu pastel pour les en-têtes du calendrier */
+}
+
+.rbc-event {
+  @apply bg-pastel-purple rounded-md; /* Vert pastel pour les événements */
+}
+
+.rbc-event-content {
+  @apply text-white; /* Mauve pastel pour le texte des tâches */
+}
+
+.rbc-today {
+  @apply bg-pastel-yellow; /* Jaune pastel pour le jour actuel */
+}
+

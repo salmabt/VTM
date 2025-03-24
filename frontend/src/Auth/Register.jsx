@@ -1,8 +1,17 @@
 import React from 'react';
-import { Alert, Card, Flex, Form, Typography, Input, Spin, Button } from 'antd';
+import { Alert, Card, Flex, Form, Typography, Input, Spin, Button, Select } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import registerImage from '../assets/register.png';
 import useSignup from '../hooks/useSignup';
+
+const { Option } = Select;
+
+// Liste des villes de Tunisie (identique à celle dans TaskModal)
+const cities = [
+  'Monastir', 'Sousse', 'Sfax', 'Tunis', 'Gabès', 'Bizerte', 'Kairouan', 'Gafsa', 'Ariana', 
+  'Ben Arous', 'Nabeul', 'Zaghouan', 'Manouba', 'Mahdia', 'Kasserine', 'Tozeur', 'Kebili', 
+  'Tataouine', 'Medenine', 'Jendouba', 'Beja', 'Siliana', 'Le Kef',
+];
 
 const Register = () => {
   const { loading, error, registerUser } = useSignup();
@@ -24,6 +33,7 @@ const Register = () => {
       return;
     }
 
+    console.log('Values being sent:', values); // Vérifiez que "location" est bien présent
     // Si le rôle et les mots de passe sont valides, appeler la fonction pour enregistrer l'utilisateur
     try {
       console.log('Registering user with values:', values); // Log des données envoyées
@@ -106,20 +116,42 @@ const Register = () => {
             >
               <Input size="large" placeholder="Enter your phone number" />
             </Form.Item>
+            
+            {/* Sélection de la localisation */}
+            <Form.Item
+              label="Location"
+              name="location"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please select your location!',
+                },
+              ]}
+            >
+              <Select size="large" placeholder="Select your location">
+                {cities.map((city, index) => (
+                  <Option key={index} value={city}>
+                    {city}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
+            {/* Sélection des compétences */}
             <Form.Item
               label="Skills"
               name="skills"
               rules={[
                 {
                   required: true,
-                  message: 'Please input your skills!',
+                  message: 'Please select your skills!',
                 },
               ]}
             >
-              <Input size="large" placeholder="Enter your skills (comma-separated)" />
+              <Input 
+                size="large"
+                placeholder="Select your skills"/>
             </Form.Item>
-
 
             <Form.Item
               label="Password"

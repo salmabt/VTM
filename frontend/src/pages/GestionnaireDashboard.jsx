@@ -19,6 +19,9 @@ import notesApi from '../api/notes';
 import TaskModal from '../components/TaskModal';
 import TechniciensSection from '../components/TechniciensSection';
 
+import '../pagesCSS/Gestionnaire.css';
+
+
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -489,11 +492,11 @@ useEffect(() => {
 
       
       // Ajout des nouveaux fichiers
-    
+      if (newFiles.length > 0) {
         newFiles.forEach((file) => {
           formData.append('attachments', file);
         });
-      
+      }
   
       // Envoi de la requête de mise à jour
       const response = await tasksApi.updateTask(editingTask._id, formData, {
@@ -566,7 +569,7 @@ useEffect(() => {
       <Layout style={{ minHeight: '100vh' }}>
         <Sider collapsible theme="light">
           <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-            <Title level={4} style={{ margin: 0 }}>Dashboard</Title>
+            <Title level={4} style={{ margin: 0 }}>Gestionnaire</Title>
           </div>
           <Menu
             theme="light"
@@ -875,7 +878,7 @@ useEffect(() => {
                               onClick={() => {
                                 setEditingTask(task);
                                 setExistingAttachments(task.attachments || []); // Initialiser les pièces jointes existantes
-                                setNewFiles([]); // Réinitialiser les nouveaux fichiers
+  setNewFiles([]); // Réinitialiser les nouveaux fichiers
                                 setIsTaskEditModalVisible(true);
                               }}
                             >
