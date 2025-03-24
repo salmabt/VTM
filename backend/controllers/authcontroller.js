@@ -21,7 +21,7 @@ const transporter = nodemailer.createTransport({
 // REGISTER USER
 exports.signup = async (req, res, next) => {
   try {
-    const { name, email, password, role, phone, skills} = req.body;
+    const { name, email, password, role, phone, skills, location} = req.body;
 
     // Vérifier si l'utilisateur existe déjà dans PendingUser
     const existingPendingUser = await PendingUser.findOne({ email });
@@ -50,7 +50,7 @@ exports.signup = async (req, res, next) => {
 
 
     // Créer un nouvel utilisateur dans PendingUser
-    const newUser = await PendingUser.create({ name, email, password: hashedPassword, role, phone, skills, isApproved: false });
+    const newUser = await PendingUser.create({ name, email, password: hashedPassword, role, phone, skills, location,  isApproved: false });
 
     // Envoyer un e-mail à l'administrateur pour validation
     const adminMailOptions = {
@@ -87,6 +87,7 @@ exports.signup = async (req, res, next) => {
         role: newUser.role,
         phone: newUser.phone,
         skills: newUser.skills,
+        location: newUser.location,
       },
     });
   } catch (error) {
@@ -156,7 +157,8 @@ exports.validateUser = async (req, res, next) => {
           password: pendingUser.password,
           role: pendingUser.role,
           phone: pendingUser.phone, // Utiliser le téléphone de PendingUser
-          skills: pendingUser.skills, // Utiliser les compétences de PendingUser
+          skills: pendingUser.skills,
+          location: pendingUser.location, // Utiliser les compétences de PendingUser
           isApproved: true,
       });
 
@@ -184,6 +186,7 @@ exports.validateUser = async (req, res, next) => {
               email: approvedUser.email,
               phone: approvedUser.phone,
               skills: approvedUser.skills,
+              location: approvedUser.location,
           },
       });
   } catch (error) {

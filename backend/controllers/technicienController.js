@@ -10,7 +10,9 @@ const bcrypt = require('bcrypt');
 
 exports.createTechnicien = async (req, res, next) => {
   try {
-    const { name, email, password, phone, skills } = req.body;
+    const { name, email, password, phone, skills, location } = req.body;
+    
+    console.log('Received location:', location); 
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await Technicien.findOne({ email });
@@ -19,13 +21,24 @@ exports.createTechnicien = async (req, res, next) => {
     }
 
     // Validation des données (par exemple, si l'email et le mot de passe sont valides)
-    if (!name || !email || !password) {
-      return next(new createError('Nom, email et mot de passe sont obligatoires.', 400));
+    if (!name || !email || !password|| !location) {
+      return next(new createError('Nom, email, mot de passe et localisation sont obligatoires.', 400));
     }
 
     // Hachage du mot de passe
     const hashedPassword = await bcrypt.hash(password, 12); // Hachage avec un coût de 12
 
+     // Log pour vérifier les données avant la création
+     console.log('New technicien data:', {
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      skills,
+      role: 'technicien',
+      location, // Vérifiez que `location` est bien présent ici
+    });
+    
     // Créer un nouvel utilisateur avec le rôle "technicien"
     const newTechnicien = await Technicien.create({
       name,
@@ -33,7 +46,8 @@ exports.createTechnicien = async (req, res, next) => {
       password: hashedPassword, // Utiliser le mot de passe haché
       phone,
       skills,
-      role: 'technicien' // Assurez-vous que le rôle est défini
+      role: 'technicien', // Assurez-vous que le rôle est défini
+      location,
     });
 
     res.status(201).json({

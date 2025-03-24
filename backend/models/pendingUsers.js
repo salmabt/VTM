@@ -37,6 +37,10 @@ const PendingUser = mongoose.models.PendingUser || mongoose.model('PendingUser',
     type: [String], // Tableau de chaînes pour stocker plusieurs compétences
     required: false // Défini ici
   },
+  location: { 
+    type: String,
+   required: true
+   }, // Ajout de la localisation
   createdAt: { 
     type: Date, 
     default: Date.now 

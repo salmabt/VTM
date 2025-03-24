@@ -2,7 +2,6 @@ const Task = require('../models/Task');
 const Technicien = require('../models/users');
 const Voiture = require('../models/Voiture');
 const Report = require('../models/Report');
-const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -50,6 +49,9 @@ exports.createTask = async (req, res) => {
     const newTask = await Task.create(taskData);
     // Mise à jour du statut du véhicule après création de la tâche
     await Voiture.findByIdAndUpdate(req.body.vehicule, { status: 'réservée' });
+
+     // Mettre à jour le taskCount du technicien
+     await Technicien.findByIdAndUpdate(req.body.technicien, { $inc: { taskCount: 1 } });
 
     // Récupérer la tâche avec les données associées
     const populated = await Task.findById(newTask._id)
@@ -242,20 +244,28 @@ exports.updateTaskStatus = async (req, res) => {
       return res.status(404).json({ message: 'Tâche introuvable' });
     }
 
-    // Nouvelle logique de mise à jour du véhicule
-    if (status === 'terminé' && task.vehicule) {
-      const vehicleId = task.vehicule._id;
-      
-      // Vérifier s'il reste des tâches actives pour ce véhicule
-      const activeTasks = await Task.find({
-        vehicule: vehicleId,
-        status: { $ne: 'terminé' },
-        _id: { $ne: taskId }
-      });
+    if (status === 'terminé') {
+      // Mettre à jour le taskCount du technicien
+      await Technicien.findByIdAndUpdate(
+        task.technicien._id,
+        { $inc: { taskCount: -1 } }
+      );
 
-      if (activeTasks.length === 0) {
-        await Voiture.findByIdAndUpdate(vehicleId, { status: 'disponible' });
-        console.log(`Statut véhicule ${vehicleId} mis à jour à disponible`);
+      // Nouvelle logique de mise à jour du véhicule
+      if (task.vehicule) {
+        const vehicleId = task.vehicule._id;
+
+        // Vérifier s'il reste des tâches actives pour ce véhicule
+        const activeTasks = await Task.find({
+          vehicule: vehicleId,
+          status: { $ne: 'terminé' },
+          _id: { $ne: taskId }
+        });
+
+        if (activeTasks.length === 0) {
+          await Voiture.findByIdAndUpdate(vehicleId, { status: 'disponible' });
+          console.log(`Statut véhicule ${vehicleId} mis à jour à disponible`);
+        }
       }
     }
 
@@ -452,10 +462,6 @@ exports.getTasksCountByMonth = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
-
 
 
 

@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String ,required: false},
   isApproved: { type: Boolean, default: false },
   skills: { type: Array, default: [] },
+  location: { type: String, required: true }, // Ajout de la localisation
   archived: { type: Boolean, default: false, required: true },
   averageRating: { 
     type: Number,
@@ -24,6 +25,7 @@ const userSchema = new mongoose.Schema({
     default: 0,
     min: 0
   },
+  taskCount: { type: Number, default: 0,required: false }, // Ajouter ce champ
 }, { timestamps: true });
 
 // Middleware pour hacher le mot de passe avant de sauvegarder

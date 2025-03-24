@@ -12,7 +12,7 @@ const {
   getTaskAttachments,
   getAttachmentFile,
   getTotalTasks,
-  getTasksCountByMonth// Assurez-vous que cette fonction est importée
+  getTasksCountByMonth,// Assurez-vous que cette fonction est importée
  
 } = require('../controllers/taskscontroller');
 
@@ -27,6 +27,7 @@ router.post('/',
 );
 // Placer avant les routes paramétrées
 router.get('/count-by-month', getTasksCountByMonth);
+
 
 router.get('/', getAllTasks);
 router.get('/count', getTotalTasks); // Définissez cette route en premier
