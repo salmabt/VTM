@@ -1,5 +1,5 @@
 const Note = require('../models/Note'); // Assurez-vous que le chemin vers le modèle est correct
-const Notification = require('../models/Notification');
+
 // Créer une nouvelle notejjj
 // controllers/notescontroller.js
 exports.createNote = async (req, res) => {
@@ -11,34 +11,7 @@ exports.createNote = async (req, res) => {
       author,
       timestamp: new Date()
     });
-
-    const notification = await Notification.create({
-      role: 'gestionnaire',
-      message: `Nouvelle note de ${author}: ${content.substring(0, 30)}...`,
-      relatedNote: newNote._id,
-      senderId: userId, // Stocker l'ID de l'émetteur
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-    });
-
-    const ssePayload = JSON.stringify({
-      ...notification.toJSON(),
-      senderId: userId // Inclure l'ID de l'émetteurg
-    });
-
-    // Envoyer seulement aux autres gestionnaires
-    if (global.gestionnaireClients && Array.isArray(global.gestionnaireClients)) {
-      global.gestionnaireClients.forEach(client => {
-        if (client.userId !== userId) {
-          client.write(`event: notification\n`);
-          client.write(`data: ${ssePayload}\n\n`);
-        }
-      });
-    } else {
-      console.error('Gestionnaire clients non définis ou incorrectement initialisés');
-    }
-    
-
-    res.status(201).json(newNote);
+     res.status(201).json(newNote);
   } catch (error) {
     console.error('Erreur création note:', error);
     res.status(500).json({ message: error.message });
