@@ -19,7 +19,6 @@ import notesApi from '../api/notes';
 import TaskModal from '../components/TaskModal';
 import TechniciensSection from '../components/TechniciensSection';
 
-import '../pagesCSS/Gestionnaire.css';
 
 
 const { Header, Sider, Content } = Layout;
@@ -620,23 +619,9 @@ useEffect(() => {
     );
     return (
       <Layout style={{ minHeight: '100vh' }}>
-
-        <Sider collapsible theme="light">
-          <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-            <Title level={4} style={{ margin: 0 }}>Gestionnaire</Title>
-          </div>
-          <Menu
-            theme="light"
-            mode="inline"
-            selectedKeys={[selectedMenu]}
-            items={menuItems || []}
-            onSelect={({ key }) => setSelectedMenu(key)}
-          />
-        </Sider>
-=======
      <Sider collapsible theme="light">
   <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-    <Title level={4} style={{ margin: 0 }}>Dashboard</Title>
+    <Title level={4} style={{ margin: 0 }}>Gestionnaire</Title>
   </div>
   <Menu
     theme="light"
