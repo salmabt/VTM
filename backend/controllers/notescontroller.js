@@ -1,24 +1,34 @@
 const Note = require('../models/Note'); // Assurez-vous que le chemin vers le modèle est correct
 
-// Créer une nouvelle note
+// Créer une nouvelle notejjj
+// controllers/notescontroller.js
 exports.createNote = async (req, res) => {
   try {
-    const { content, author, timestamp } = req.body;
-    const newNote = new Note({ content, author, timestamp });
-    await newNote.save();
-    res.status(201).json(newNote);
+    const { content, author, userId } = req.body; // Ajouter userId de l'émetteur
+
+    const newNote = await Note.create({ 
+      content, 
+      author,
+      timestamp: new Date()
+    });
+     res.status(201).json(newNote);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la création de la note', error: error.message });
+    console.error('Erreur création note:', error);
+    res.status(500).json({ message: error.message });
   }
 };
-
-// Récupérer toutes les notes
+// Récupérer toutes les notesk
+// Dans votre contrôleur backend
 exports.getAllNotes = async (req, res) => {
   try {
-    const notes = await Note.find().sort({ timestamp: -1 }); // Trie les notes par date décroissante
+    const lastUpdate = req.query.lastUpdate || 0;
+    const notes = await Note.find({
+      timestamp: { $gt: new Date(lastUpdate) }
+    }).sort({ timestamp: -1 });
+    
     res.status(200).json(notes);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la récupération des notes', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 

@@ -55,7 +55,12 @@ const tasksApi = {
     return api.get(`/tasks/${taskId}/attachments/${filename}`, {
       responseType: 'blob', // Important pour télécharger des fichiers binaires
     });
-  }
+  },
+  // Récupérer les notifications
+getNotifications: (userId) => api.get(`/tasks/notifications?userId=${userId}`),
+
+// Marquer comme lue
+markNotificationRead: (id) => api.patch(`/tasks/notifications/${id}/read`),
 };
 
 // Intercepteur pour gérer les erreurs globales
@@ -79,3 +84,5 @@ api.interceptors.response.use(
 );
 
 export default tasksApi; // Export par défaut de tasksApi
+
+

@@ -1,16 +1,16 @@
+//api/note.js
 import axios from 'axios'; // Assurez-vous d'avoir installé axios (npm install axios)
 
 const API_URL = 'http://localhost:3000/api/notes'; // Remplacez par l'URL de votre backend
 
 // Créer une nouvelle note
 const createNote = async (noteData) => {
-  try {
-    const response = await axios.post(API_URL, noteData);
-    return response.data; // Retourne la note créée
-  } catch (error) {
-    console.error('Erreur lors de la création de la note:', error);
-    throw error;
-  }
+  const response = await axios.post('/api/notes', noteData, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  return response.data;
 };
 
 // Récupérer toutes les notes

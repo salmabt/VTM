@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, List, Card, Typography, Spin, message, Menu, Avatar, Button, Select, Tag, Form, Input,  Badge } from 'antd';
+import { Layout, List, Card, Typography, Spin, message, Menu, Avatar, Button, Select, Tag, Form, Input,  Badge,Col,Row,Popover,Modal } from 'antd';
 import { CalendarOutlined, LogoutOutlined, UserOutlined, FileTextOutlined, BellOutlined} from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import tasksApi from '../api/tasks';
 import vehiculesApi from '../api/vehicules';
 import reportsApi from '../api/reports'; 
+import '../styles/technicien-dashboard.css';
 
 const { Content, Sider, Header } = Layout;
 const { Title, Text } = Typography;
@@ -19,7 +20,94 @@ const TechnicienDashboard = () => {
   const [selectedMenu, setSelectedMenu] = useState('1');
   const [reports, setReports] = useState([]);  // State for reports
   const [notifications, setNotifications] = useState([]);
-  const [form] = Form.useForm();  // Form instance for the report form
+  const [form] = Form.useForm();  // Form instance for the report formù
+  const [selectedTask, setSelectedTask] = useState(null);
+  // Charger les notifications
+useEffect(() => {
+  const loadNotifications = async () => {
+    if (userData?._id) {
+      const response = await tasksApi.getNotifications(userData._id);
+      setNotifications(response.data);
+    }
+  };
+  loadNotifications();
+}, [userData?._id]);
+
+// Connexion SSE
+useEffect(() => {
+  if (userData?._id) {
+    const sse = new EventSource(`http://localhost:3000/api/tasks/notifications/sse?userId=${userData._id}`);
+    sse.onopen = () => console.log('Connexion SSE établie');
+    sse.onerror = (e) => console.error('Erreur SSE:', e);
+
+    sse.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        console.log('Notification SSE reçue:', data);
+        setNotifications(prev => [{
+          _id: Date.now().toString(), // ID temporaire
+          ...data,
+          read: false,
+          relatedTask: { _id: data.taskId },
+          createdAt: new Date(data.createdAt)
+        }, ...prev]);
+      } catch (error) {
+        console.error('Erreur parsing SSE:', error);
+      }
+    };
+
+    return () => sse.close();
+  }
+}, [userData?._id]);
+// Gestionnaire de clic de notification
+const handleNotificationClick = async (notification) => {
+  try {
+    await tasksApi.markNotificationRead(notification._id);
+    setNotifications(prev => 
+      prev.map(n => n._id === notification._id ? { ...n, read: true } : n)
+    );
+    
+    // Find the related task in the tasks list
+    const task = tasks.find(t => t._id === notification.relatedTask._id);
+    if (task) {
+      setSelectedTask(task); // Open modal with task details
+    } else {
+      message.info("La tâche associée n'est pas disponible.");
+    }
+  } catch (error) {
+    console.error('Error handling notification click:', error);
+  }
+};
+// Contenu du Popover
+// Contenu du Popover
+const notificationContent = (
+  <div style={{ maxWidth: 300, maxHeight: 400, overflowY: 'auto' }}>
+    {/* Ajoutez ces styles */}
+    <List
+      dataSource={notifications}
+      style={{ width: '100%' }} // Assurez-vous que la liste utilise toute la largeur
+      renderItem={item => (
+        <List.Item 
+          onClick={() => handleNotificationClick(item)}
+          style={{ 
+            cursor: 'pointer', 
+            backgroundColor: item.read ? '#fff' : '#f6ffed',
+            padding: '8px 16px' 
+          }}
+        >
+          <List.Item.Meta
+            title={<span style={{ fontSize: 14 }}>{item.message}</span>}
+            description={
+              <span style={{ fontSize: 12, color: '#999' }}>
+                {new Date(item.createdAt).toLocaleDateString()}
+              </span>
+            }
+          />
+        </List.Item>
+      )}
+    />
+  </div>
+);
 
   useEffect(() => {
     const loadData = async () => {
@@ -181,14 +269,20 @@ const TechnicienDashboard = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {/* Notification Button with Badge */}
-            <Badge count={notifications} style={{ marginRight: 16 }}>
-              <Button
-                icon={<BellOutlined />}
-                onClick={() => message.info('Vous avez des notifications')}
-                shape="circle"
-                style={{ fontSize: 20 }}
-              />
-            </Badge>
+           
+<Badge count={notifications.filter(n => !n.read).length}>
+  <Popover 
+    content={notificationContent} 
+    title="Notifications" 
+    trigger="click"
+  >
+    <Button
+      icon={<BellOutlined />}
+      shape="circle"
+      style={{ fontSize: 20 }}
+    />
+  </Popover>
+</Badge>
           <Button
             icon={<LogoutOutlined />}
             onClick={logout}
@@ -203,87 +297,203 @@ const TechnicienDashboard = () => {
           {loading ? (
             <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
           ) : selectedMenu === '1' ? (
-            <Card
-              title="Mes Interventions"
-              bordered={false}
-              extra={<Tag color="blue">{tasks.length} tâches</Tag>}
-            >
-              <List
-                dataSource={tasks}
-                renderItem={task => {
-                  const vehicule = task.vehicule ? vehicules.find(v => String(v._id) === String(task.vehicule._id)) : null;
-
-                  return (
-                    <List.Item
-                      key={task._id}
-                      actions={[
-                        <Select
-                          value={task.status}
-                          style={{ width: 120 }}
-                          onChange={(value) => handleStatusChange(task._id, value)}
-                        >
-                          <Option value="planifié">Planifié</Option>
-                          <Option value="en cours">En cours</Option>
-                          <Option value="terminé">Terminé</Option>
-                        </Select>
-                      ]}
-                    >
-                      <List.Item.Meta
-                        title={<Text strong style={{ fontSize: 16 }}>{task.title}</Text>}
-                        description={
-                          <div style={{ lineHeight: 1.6 }}>
-                            <Text>Description: {task.description}</Text><br />
-                            <Text>Client: {task.client}</Text><br />
-                            <Text>Localisation: {task.location}</Text><br />
-                            {task.vehicule && task.vehicule._id ? (
-                              <div style={{ margin: '8px 0' }}>
-                                <Text strong>Véhicule: </Text>
-                                <Tag color="geekblue">
-                                  {vehicule.model} ({vehicule.registration})
-                                </Tag>
-                              </div>
-                            ) : (
-                              <Text type="secondary">Aucun véhicule associé</Text>
-                            )}
-                            <div style={{ margin: '8px 0' }}>
-                              <Text strong>Date et heure de mission: </Text>
-                              <Text>
-                                {task.startDate && task.endDate && !isNaN(new Date(task.startDate).getTime()) && !isNaN(new Date(task.endDate).getTime())
-                                  ? `${new Date(task.startDate).toLocaleString()} - ${new Date(task.endDate).toLocaleString()}`
-                                  : 'Date non disponible'}
-                              </Text>
-                            </div>
-
-                            {task.attachments?.length > 0 && (
-                              <div style={{ marginTop: 8 }}>
-                                <Text strong>Pièces jointes:</Text>
-                                <ul style={{ paddingLeft: 20, marginTop: 4 }}>
-                                  {task.attachments.map((attachment, index) => (
-                                    <li key={index}>
-                                      <Button
-                                        type="link"
-                                        onClick={() => {
-                                          handleGetAttachments(task._id);
-                                          handleDownloadAttachment(task._id, attachment.filename);
-                                        }}
-                                        style={{ padding: 0 }}
-                                      >
-                                        {attachment.originalName}
-                                      </Button>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-
-                          </div>
-                        }
-                      />
-                    </List.Item>
-                  );
-                }}
+<Card
+  title="Mes Interventions"
+  bordered={false}
+  extra={<Tag color="blue">{tasks.length} tâches</Tag>}
+>
+  <div style={{ display: 'flex', gap: '16px' }}>
+    {/* Colonne Planifié */}
+    <div style={{ flex: 1, backgroundColor: '#cce5ff', padding: '10px', borderRadius: '8px' }}>
+      <Title level={4} style={{ textAlign: 'center' }}>Planifiées</Title>
+      <List
+        dataSource={tasks.filter(task => task.status === 'planifié')}
+        renderItem={task => {
+          const vehicule = task.vehicule ? vehicules.find(v => String(v._id) === String(task.vehicule._id)) : null;
+          return (
+            <List.Item key={task._id}>
+              <List.Item.Meta
+                title={<Text strong>{task.title}</Text>}
+                description={
+                  <div>
+                    <Text>Description: {task.description}</Text><br />
+                    <Text>Client: {task.client}</Text><br />
+                    <Text>Localisation: {task.location}</Text><br />
+                    {vehicule ? (
+                      <div>
+                        <Text strong>Véhicule: </Text>
+                        <Tag color="geekblue">{vehicule.model} ({vehicule.registration})</Tag>
+                      </div>
+                    ) : (
+                      <Text type="secondary">Aucun véhicule associé</Text>
+                    )}
+                    <div>
+                      <Text strong>Date et heure de mission: </Text>
+                      <Text>{new Date(task.startDate).toLocaleString()} - {new Date(task.endDate).toLocaleString()}</Text>
+                    </div>
+                    {task.attachments?.length > 0 && (
+                      <div>
+                        <Text strong>Pièces jointes: </Text>
+                        <ul>
+                          {task.attachments.map((attachment, index) => (
+                            <li key={index}>
+                              <Button
+                                type="link"
+                                onClick={() => handleDownloadAttachment(task._id, attachment.filename)}
+                              >
+                                {attachment.originalName}
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                }
               />
-            </Card>
+              <Select
+                value={task.status}
+                style={{ width: 120 }}
+                onChange={(value) => handleStatusChange(task._id, value)}
+              >
+                <Option value="planifié">Planifié</Option>
+                <Option value="en cours">En cours</Option>
+                <Option value="terminé">Terminé</Option>
+              </Select>
+            </List.Item>
+          );
+        }}
+      />
+    </div>
+
+    {/* Colonne En Cours */}
+    <div style={{ flex: 1, backgroundColor: '#d4edda', padding: '10px', borderRadius: '8px' }}>
+      <Title level={4} style={{ textAlign: 'center' }}>En Cours</Title>
+      <List
+        dataSource={tasks.filter(task => task.status === 'en cours')}
+        renderItem={task => {
+          const vehicule = task.vehicule ? vehicules.find(v => String(v._id) === String(task.vehicule._id)) : null;
+          return (
+            <List.Item key={task._id}>
+              <List.Item.Meta
+                title={<Text strong>{task.title}</Text>}
+                description={
+                  <div>
+                    <Text>Description: {task.description}</Text><br />
+                    <Text>Client: {task.client}</Text><br />
+                    <Text>Localisation: {task.location}</Text><br />
+                    {vehicule ? (
+                      <div>
+                        <Text strong>Véhicule: </Text>
+                        <Tag color="geekblue">{vehicule.model} ({vehicule.registration})</Tag>
+                      </div>
+                    ) : (
+                      <Text type="secondary">Aucun véhicule associé</Text>
+                    )}
+                    <div>
+                      <Text strong>Date et heure de mission: </Text>
+                      <Text>{new Date(task.startDate).toLocaleString()} - {new Date(task.endDate).toLocaleString()}</Text>
+                    </div>
+                    {task.attachments?.length > 0 && (
+                      <div>
+                        <Text strong>Pièces jointes: </Text>
+                        <ul>
+                          {task.attachments.map((attachment, index) => (
+                            <li key={index}>
+                              <Button
+                                type="link"
+                                onClick={() => handleDownloadAttachment(task._id, attachment.filename)}
+                              >
+                                {attachment.originalName}
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                }
+              />
+              <Select
+                value={task.status}
+                style={{ width: 120 }}
+                onChange={(value) => handleStatusChange(task._id, value)}
+              >
+                <Option value="planifié">Planifié</Option>
+                <Option value="en cours">En cours</Option>
+                <Option value="terminé">Terminé</Option>
+              </Select>
+            </List.Item>
+          );
+        }}
+      />
+    </div>
+
+    {/* Colonne Terminé */}
+    <div style={{ flex: 1, backgroundColor: '#f8d7da', padding: '10px', borderRadius: '8px' }}>
+      <Title level={4} style={{ textAlign: 'center' }}>Terminées</Title>
+      <List
+        dataSource={tasks.filter(task => task.status === 'terminé')}
+        renderItem={task => {
+          const vehicule = task.vehicule ? vehicules.find(v => String(v._id) === String(task.vehicule._id)) : null;
+          return (
+            <List.Item key={task._id}>
+              <List.Item.Meta
+                title={<Text strong>{task.title}</Text>}
+                description={
+                  <div>
+                    <Text>Description: {task.description}</Text><br />
+                    <Text>Client: {task.client}</Text><br />
+                    <Text>Localisation: {task.location}</Text><br />
+                    {vehicule ? (
+                      <div>
+                        <Text strong>Véhicule: </Text>
+                        <Tag color="geekblue">{vehicule.model} ({vehicule.registration})</Tag>
+                      </div>
+                    ) : (
+                      <Text type="secondary">Aucun véhicule associé</Text>
+                    )}
+                    <div>
+                      <Text strong>Date et heure de mission: </Text>
+                      <Text>{new Date(task.startDate).toLocaleString()} - {new Date(task.endDate).toLocaleString()}</Text>
+                    </div>
+                    {task.attachments?.length > 0 && (
+                      <div>
+                        <Text strong>Pièces jointes: </Text>
+                        <ul>
+                          {task.attachments.map((attachment, index) => (
+                            <li key={index}>
+                              <Button
+                                type="link"
+                                onClick={() => handleDownloadAttachment(task._id, attachment.filename)}
+                              >
+                                {attachment.originalName}
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                }
+              />
+              <Select
+                value={task.status}
+                style={{ width: 120 }}
+                onChange={(value) => handleStatusChange(task._id, value)}
+              >
+                <Option value="planifié">Planifié</Option>
+                <Option value="en cours">En cours</Option>
+                <Option value="terminé">Terminé</Option>
+              </Select>
+            </List.Item>
+          );
+        }}
+      />
+    </div>
+  </div>
+</Card>
+
           ) : (
             // Display reports section with form and reports list
             <>
@@ -304,13 +514,15 @@ const TechnicienDashboard = () => {
       name="taskId"
       rules={[{ required: true, message: 'Veuillez sélectionner une tâche' }]}
     >
-      <Select>
-        {tasks.map(task => (
-          <Option key={task._id} value={task._id}>
-            {task.title} ({task.status})
-          </Option>
-        ))}
-      </Select>
+  <Select>
+  {tasks
+    .filter(task => task.status === 'terminé')
+    .map(task => (
+      <Option key={task._id} value={task._id}>
+        {task.title} ({task.status})
+      </Option>
+    ))}
+</Select>
     </Form.Item>
 
     {/* Correction des noms de champs */}
@@ -384,7 +596,32 @@ const TechnicienDashboard = () => {
             </>
           )}
         </Content>
+        
       </Layout>
+     
+<Modal
+  title="Détails de la Mission"
+  open={!!selectedTask}
+  onCancel={() => setSelectedTask(null)}
+  footer={[
+    <Button key="close" onClick={() => setSelectedTask(null)}>
+      Fermer
+    </Button>
+  ]}
+>
+  {selectedTask && (
+    <div>
+      <Text strong>Titre: </Text>
+      <Text>{selectedTask.title}</Text>
+      <br />
+      <Text strong>Lieu: </Text>
+      <Text>{selectedTask.location}</Text>
+      <br />
+      <Text strong>Client: </Text>
+      <Text>{selectedTask.client}</Text>
+    </div>
+  )}
+</Modal>
     </Layout>
   );
 };

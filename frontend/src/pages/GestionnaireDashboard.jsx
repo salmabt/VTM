@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Input, DatePicker, Typography, Button, Card, List,
-  Select, message, Spin, Tag, Modal,Badge 
+  Select, message, Spin, Tag, Modal,Badge ,Popover
 } from 'antd';
 import {
   CalendarOutlined, FileTextOutlined,
@@ -66,6 +66,7 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('');
   const [notifications, setNotifications] = useState([]);
+  const [noteNotifications, setNoteNotifications] = useState([]);
   ///////editvoiture/////////
   const [editingVehicule, setEditingVehicule] = useState(null);
 const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -79,32 +80,84 @@ const [editingTask, setEditingTask] = useState(null); // Pour stocker la tâche 
 const [isTaskEditModalVisible, setIsTaskEditModalVisible] = useState(false); // Pour gérer la visibilité du modal
 const [existingAttachments, setExistingAttachments] = useState([]); // Pour les pièces jointes existantes
 const [newFiles, setNewFiles] = useState([]); // Pour les nouveaux fichiers
-  
-  const handleAddNote = async () => {
-    if (newNote.trim()) {
-      try {
-        const response = await notesApi.createNote({
-          content: newNote,
-          author: userData.name,
-          timestamp: new Date(),
-        });
-        // Ici, response est directement la note créée
-        if (response && response._id) {
-          setNotes((prevNotes) => [...(prevNotes || []), response]);
-          setNewNote('');
-          message.success('Note ajoutée avec succès');
-        } else {
-          console.error('Réponse de l\'API invalide:', response);
-          message.error('Erreur lors de l\'ajout de la note');
+useEffect(() => {
+  const unreadNotifications = noteNotifications.filter(n => !n.read);
+  setNoteNotifications(unreadNotifications);
+}, [noteNotifications]);
+useEffect(() => {
+  const loadNoteNotifications = async () => {
+    try {
+      const response = await axios.get('/api/notes/notifications', {
+        params: {
+          role: 'gestionnaire',
+          read: false
         }
-      } catch (error) {
-        console.error('Erreur lors de l\'ajout de la note:', error);
-        message.error('Erreur lors de l\'ajout de la note');
-      }
-    } else {
-      message.warning('Veuillez écrire une note avant de l\'ajouter.');
+      });
+      setNoteNotifications(response.data);
+    } catch (error) {
+      console.error('Erreur chargement notifications:', error);
     }
   };
+  loadNoteNotifications();
+}, []);
+
+// Connexion SSE
+useEffect(() => {
+  const sse = new EventSource('http://localhost:3000/api/notes/notifications/sse', {
+    withCredentials: true // Inclure les cookies d'authentification
+  });
+
+  const handleNotification = (e) => {
+    try {
+      const newNotif = JSON.parse(e.data);
+      
+      // Vérifier que la notification ne vient pas de l'utilisateur courant
+      if (newNotif.senderId !== userData._id) {
+        setNoteNotifications(prev => [
+          { 
+            ...newNotif,
+            createdAt: new Date(newNotif.createdAt),
+            read: false
+          },
+          ...prev
+        ]);
+        message.info('Nouvelle notification de note !');
+      }
+    } catch (error) {
+      console.error('Erreur parsing SSE:', error);
+    }
+  };
+
+  sse.addEventListener('notification', handleNotification);
+  
+  return () => {
+    sse.removeEventListener('notification', handleNotification);
+    sse.close();
+  };
+}, [userData._id]); // Dépendance sur l'ID utilisateur
+const handleAddNote = async () => {
+  if (newNote.trim()) {
+    try {
+      await notesApi.createNote({
+        content: newNote,
+        author: userData.name,
+        userId: userData._id
+      });
+
+      setNewNote('');
+
+      // Rafraîchir immédiatement la liste des notes après l'ajout
+      const updatedNotes = await notesApi.getAllNotes();
+      setNotes(updatedNotes);
+
+      message.success('Note ajoutée avec succès');
+    } catch (error) {
+      message.error('Erreur lors de l\'ajout de la note');
+    }
+  }
+};
+
+
   
 
 
@@ -113,22 +166,22 @@ const [newFiles, setNewFiles] = useState([]); // Pour les nouveaux fichiers
     const loadNotes = async () => {
       try {
         const response = await notesApi.getAllNotes();
-        console.log('Réponse complète de l\'API:', response);
-  
-        // Ici, response est déjà le tableau de notes
         if (Array.isArray(response)) {
           setNotes(response);
-        } else {
-          console.error('Réponse de l\'API invalide:', response);
-          message.error('Les données reçues ne sont pas valides.');
         }
       } catch (error) {
         console.error('Erreur de chargement des notes:', error);
-        message.error('Erreur de chargement des notes');
       }
     };
   
+    // Chargement initial
     loadNotes();
+  
+    // Configurer le polling toutes les 5 secondes
+    const interval = setInterval(loadNotes, 5000);
+  
+    // Nettoyer l'intervalle à la destruction du composant
+    return () => clearInterval(interval);
   }, []);
   
 
@@ -567,6 +620,7 @@ useEffect(() => {
     );
     return (
       <Layout style={{ minHeight: '100vh' }}>
+
         <Sider collapsible theme="light">
           <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
             <Title level={4} style={{ margin: 0 }}>Gestionnaire</Title>
@@ -579,6 +633,35 @@ useEffect(() => {
             onSelect={({ key }) => setSelectedMenu(key)}
           />
         </Sider>
+=======
+     <Sider collapsible theme="light">
+  <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
+    <Title level={4} style={{ margin: 0 }}>Dashboard</Title>
+  </div>
+  <Menu
+    theme="light"
+    mode="inline"
+    selectedKeys={[selectedMenu]}
+    onSelect={({ key }) => setSelectedMenu(key)}
+  >
+    <Menu.Item key="1" icon={<CalendarOutlined />}>Calendrier</Menu.Item>
+    <Menu.Item key="3" icon={<UnorderedListOutlined />}>Tâches</Menu.Item>
+    <Menu.Item key="4" icon={<CarOutlined />}>Voitures</Menu.Item>
+    <Menu.Item key="5" icon={<ClockCircleOutlined />}>
+      Chronologie
+      {notes.length > 0 && (
+        <sup style={{ 
+          color: 'red', 
+          marginLeft: '5px',
+          animation: 'blink 1s infinite',
+          fontSize: '0.8em'
+        }}>
+          {notes[0].author}
+        </sup>
+      )}
+    </Menu.Item>
+  </Menu>
+</Sider>
         {selectedTask && (
   <Modal
   title="Détails de la tâche"
@@ -680,14 +763,26 @@ useEffect(() => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {/* Notification Button with Badge */}
-            <Badge count={notifications} style={{ marginRight: 16 }}>
-              <Button
-                icon={<BellOutlined />}
-                onClick={() => message.info('Vous avez des notifications')}
-                shape="circle"
-                style={{ fontSize: 20 }}
-              />
-            </Badge>
+            <Badge count={noteNotifications.filter(n => !n.read).length}>
+  <Popover
+    title="Notifications de notes"
+    content={
+      <List
+        dataSource={noteNotifications}
+        renderItem={item => (
+          <List.Item>
+            <List.Item.Meta
+              title={item.message}
+              description={moment(item.createdAt).format('DD/MM HH:mm')}
+            />
+          </List.Item>
+        )}
+      />
+    }
+  >
+    <Button icon={<BellOutlined />} shape="circle" />
+  </Popover>
+</Badge>
            
             <Button icon={<LogoutOutlined />} onClick={logout}>Déconnexion</Button>
             </div>
@@ -1181,28 +1276,37 @@ useEffect(() => {
               {loading ? (
                 <Spin size="large" style={{ display: 'block', margin: '20px auto' }} />
               ) : (
-                <List
-                  dataSource={notes || []} // Assurez-vous que notes est toujours un tableau
-                  renderItem={note => {
-                    if (!note) return null; // Ignore les notes invalides
-                    return (
-                      <List.Item key={note._id || note.timestamp}>
-                        <List.Item.Meta
-                          title={<Text strong>{note.author}</Text>}
-                          description={
-                            <div>
-                              <Text>{note.content || 'Pas de contenu'}</Text>
-                              <br />
-                              <Text type="secondary">
-                                {new Date(note.timestamp).toLocaleString()}
-                              </Text>
-                            </div>
-                          }
-                        />
-                      </List.Item>
-                    );
-                  }}
-                />
+            
+<List
+  dataSource={notes}
+  renderItem={(note, index) => {
+    const isNew = index === 0 && Date.now() - new Date(note.timestamp).getTime() < 5000;
+    
+    return (
+      <List.Item
+        key={note._id}
+        style={{
+          animation: isNew ? 'highlight 2s ease-out' : 'none',
+          borderLeft: isNew ? '4px solid #1890ff' : 'none',
+          paddingLeft: '10px'
+        }}
+      >
+        <List.Item.Meta
+          title={<Text strong>{note.author}</Text>}
+          description={
+            <>
+              <Text>{note.content}</Text>
+              <br />
+              <Text type="secondary">
+                {moment(note.timestamp).format('DD/MM/YYYY HH:mm')}
+              </Text>
+            </>
+          }
+        />
+      </List.Item>
+    );
+  }}
+/>
               )}
             </Card>
           )}
