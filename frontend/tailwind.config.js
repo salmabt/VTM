@@ -16,6 +16,7 @@ module.exports = {
       boxShadow: {
         'xs': '0 1px 3px rgba(0,0,0,0.05)',
         'task': '0 2px 8px rgba(0,0,0,0.08)'
+        
       },
       spacing: {
         '128': '32rem'

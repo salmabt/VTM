@@ -1,7 +1,7 @@
 //onfig/technicienRegions
 export const technicienRegions = {
     nord: [
-      'Tunis', 'Ariana', 'Ben Arous', 'Manouba', 
+      'Tunis', 'Ariana', 'Ben Arous', 'La Manouba', 
       'Bizerte', 'Béja', 'Jendouba', 'Zaghouan',
       'Nabeul','Le Kef'
     ],
