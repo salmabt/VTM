@@ -183,6 +183,26 @@ exports.updateTask = async (req, res) => {
       console.warn('Tentative mise à jour ID inexistant:', req.params.id);
       return res.status(404).json({ message: 'Tâche introuvable' });
     }
+    // Créer la notification de modification
+    const notificationMessage = `Mission modifiée: ${task.title} (${new Date(task.startDate).toLocaleDateString('fr-FR')})`;
+    const notification = await Notification.create({
+      recipient: task.technicien._id,
+      message: notificationMessage,
+      relatedTask: task._id
+    });
+
+    // Envoyer la notification via SSE
+    if (global.clients && global.clients.has(task.technicien._id.toString())) {
+      const client = global.clients.get(task.technicien._id.toString());
+      client.write(`event: notification\n`);
+      client.write(`data: ${JSON.stringify({
+        type: 'TASK_UPDATED',
+        data: notificationMessage,
+        taskId: task._id,
+        createdAt: new Date()
+      })}\n\n`);
+    }
+
 
     console.log('Tâche mise à jour:', task._id);
     

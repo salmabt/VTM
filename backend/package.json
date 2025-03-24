@@ -25,6 +25,7 @@
     "nodemailer": "^6.10.0",
     "path": "^0.12.7",
     "pdfmake": "^0.2.18",
-    "recharts": "^2.15.1"
+    "recharts": "^2.15.1",
+    "socket.io": "^4.7.2"
   }
 }
