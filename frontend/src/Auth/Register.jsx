@@ -8,9 +8,10 @@ const { Option } = Select;
 
 // Liste des villes de Tunisie (identique à celle dans TaskModal)
 const cities = [
-  'Monastir', 'Sousse', 'Sfax', 'Tunis', 'Gabès', 'Bizerte', 'Kairouan', 'Gafsa', 'Ariana', 
-  'Ben Arous', 'Nabeul', 'Zaghouan', 'Manouba', 'Mahdia', 'Kasserine', 'Tozeur', 'Kebili', 
-  'Tataouine', 'Medenine', 'Jendouba', 'Beja', 'Siliana', 'Le Kef',
+  'Ariana','Beja','Ben Arous','Bizerte','Gabès','Gafsa','Jendouba','Kairouan','Kasserine','Kebili',  
+  'La Manouba','Le Kef','Mahdia','Medenine','Monastir','Nabeul',   'Sfax', 'Sidi Bouzid',
+  'Siliana' ,'Sousse','Tataouine', 'Tozeur', 'Tunis', 'Zaghouan', 
+    
 ];
 
 const Register = () => {
