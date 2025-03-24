@@ -6,7 +6,7 @@ import {
 } from 'antd';
 import {
   CalendarOutlined, FileTextOutlined,
-  UnorderedListOutlined, LogoutOutlined, CarOutlined, ClockCircleOutlined, BellOutlined 
+  UnorderedListOutlined, LogoutOutlined, CarOutlined, ClockCircleOutlined,UserOutlined, BellOutlined 
 } from '@ant-design/icons';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -18,6 +18,7 @@ import tasksApi from '../api/tasks';
 import notesApi from '../api/notes'; 
 import TaskModal from '../components/TaskModal';
 import TechniciensSection from '../components/TechniciensSection';
+import TechnicienFiltering from '../components/TechnicienFiltering';
 
 
 
@@ -599,6 +600,7 @@ useEffect(() => {
     { key: '3', icon: <UnorderedListOutlined />, label: 'Tâches' },
     { key: '4', icon: <CarOutlined />, label: 'Voitures' },
     { key: '5', icon: <ClockCircleOutlined />, label: 'Chronologie' },
+    { key: '6', icon: <UserOutlined />, label: 'Filtrage Techniciens' }
   ];
   const eventStyleGetter = (event) => {
     return {
@@ -645,6 +647,7 @@ useEffect(() => {
         </sup>
       )}
     </Menu.Item>
+    <Menu.Item key="6" icon={<UserOutlined />}>Filtrage Techniciens</Menu.Item>
   </Menu>
 </Sider>
         {selectedTask && (
@@ -1295,6 +1298,11 @@ useEffect(() => {
               )}
             </Card>
           )}
+          {selectedMenu === '6' && (
+  <Card title="Filtrage des Techniciens par Région" bordered={false}>
+    <TechnicienFiltering techniciens={techniciens} />
+  </Card>
+)}
              </>
                     )}
                     

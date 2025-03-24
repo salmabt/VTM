@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Input, Select, DatePicker, Button } from "antd";
 import tasksApi from "../api/tasks"; // Importez votre API
+import { technicienRegions, allCities } from "../config/technicienRegions";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -17,6 +18,8 @@ const TaskModal = ({
   const [files, setFiles] = useState([]);
   const [selectedTechnicien, setSelectedTechnicien] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null); // Nouvel état
+  const [selectedRegion, setSelectedRegion] = useState(null);
 
   useEffect(() => {
     // Récupérer les tâches depuis MongoDB
@@ -51,11 +54,6 @@ const TaskModal = ({
     ).length;
   };
 
-  // Trier les techniciens par ordre croissant du nombre de tâches
-  const sortedTechniciens = [...techniciens].sort((a, b) => 
-    calculateTaskCount(a._id) - calculateTaskCount(b._id)
-  );
-
   // Vérifier la disponibilité du technicien
   const isTechnicienAvailable = (technicienId, startDate, endDate) => {
     const technicien = techniciens.find(t => t._id === technicienId);
@@ -65,6 +63,25 @@ const TaskModal = ({
       new Date(task.endDate) > new Date(startDate)
     ); 
   };
+
+  // Fonction qui retourne la région basée sur la ville
+  const getRegionFromCity = (city) => {
+    for (const region in technicienRegions) {
+      if (technicienRegions[region].includes(city)) {
+        return region; // Retourne la région (par exemple, 'milieu', 'nord', etc.)
+      }
+    }
+    return null;
+  };
+
+  const filteredTechniciens = selectedRegion 
+    ? techniciens.filter(tech => technicienRegions[selectedRegion].includes(tech.location))
+    : techniciens;
+
+  // Déclarer sortedTechniciens à l'extérieur de useEffect pour éviter la redéclaration
+  const sortedTechniciens = [...filteredTechniciens].sort((a, b) => 
+    calculateTaskCount(a._id) - calculateTaskCount(b._id)
+  );
 
   return (
     <Modal
@@ -95,9 +112,32 @@ const TaskModal = ({
         style={{ marginBottom: 8 }}
       />
 
+      <Select
+        placeholder="Sélectionner une ville *"
+        onChange={(value) => {
+          console.log("Ville sélectionnée:", value);
+          setSelectedCity(value);
+          const region = getRegionFromCity(value);
+          setSelectedRegion(region); // Définir la région basée sur la ville sélectionnée
+          setNewTask({ ...newTask, location: value });
+        }}
+        style={{ marginBottom: 8, width: "100%" }}
+        showSearch
+        optionFilterProp="children"
+        filterOption={(input, option) =>
+          option.children.toLowerCase().includes(input.toLowerCase())
+        }
+      >
+        {allCities.map(city => (
+          <Option key={city} value={city}>
+            {city}
+          </Option>
+        ))}
+      </Select>
+
       {/* Sélection de l'adresse */}
       <Input
-        placeholder="Adresse *"
+        placeholder="Adresse détaillée *"
         value={newTask.location}
         onChange={(e) => setNewTask({ ...newTask, location: e.target.value })}
         style={{ marginBottom: 8, width: "100%" }}
@@ -111,6 +151,7 @@ const TaskModal = ({
           setSelectedTechnicien(value);
         }}
         style={{ marginBottom: 8, width: "100%" }}
+        disabled={!selectedCity} // Désactivé tant qu'une ville n'est pas sélectionnée
       >
         {sortedTechniciens.map(t => (
           <Option key={t._id} value={t._id}>
