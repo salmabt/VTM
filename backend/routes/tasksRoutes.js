@@ -12,41 +12,61 @@ const {
   getTaskAttachments,
   getAttachmentFile,
   getTotalTasks,
-  getTasksCountByMonth,// Assurez-vous que cette fonction est importée
- 
+  getTasksCountByMonth,
+  // Ajouter les nouvelles fonctions de notification
+  getNotifications,
+  markNotificationRead
 } = require('../controllers/taskscontroller');
+
+// Routes pour les notifications (doivent être placées en premier)
+router.get('/notifications/sse', (req, res) => {
+  const userId = req.query.userId?.toString();
+  console.log(`Connexion SSE pour user: ${userId}`);
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  // Envoyer un commentaire de maintien de connexion
+  const keepAlive = setInterval(() => res.write(':keep-alive\n\n'), 30000);
+
+  // Stocker la connexion
+  if (!global.clients) global.clients = new Map();
+  if (userId) global.clients.set(userId, res);
+
+  req.on('close', () => {
+    console.log(`Déconnexion SSE user: ${userId}`);
+    clearInterval(keepAlive);
+    if (userId) global.clients.delete(userId);
+  });
+});
+
+router.get('/notifications', getNotifications);
+router.patch('/notifications/:id/read', markNotificationRead);
 
 // Routes pour les tâches
 router.post('/', 
-  upload.array('attachments', 5), // Accepter jusqu'à 5 fichiers
+  upload.array('attachments', 5),
   (req, res, next) => {
     console.log('Fichiers reçus:', req.files);
     next();
   },
   createTask
 );
-// Placer avant les routes paramétrées
+
 router.get('/count-by-month', getTasksCountByMonth);
-
-
 router.get('/', getAllTasks);
-router.get('/count', getTotalTasks); // Définissez cette route en premier
-router.get('/:id', getTaskById); // Définissez cette route après
+router.get('/count', getTotalTasks);
+
+// Routes paramétrées (doivent être placées après les routes fixes)
+router.get('/technicien/:technicienId', getTasksByTechnicien);
+router.get('/:id', getTaskById);
 router.put('/:id', upload.array('attachments'), updateTask);
 router.delete('/:id', deleteTask);
-
-// Route pour récupérer les tâches d'un technicien spécifique
-router.get('/technicien/:technicienId', getTasksByTechnicien);
-
-// Route pour mettre à jour le statut d'une tâche
 router.patch('/:taskId/status', updateTaskStatus);
-
-// Récupérer les pièces jointes d'une tâche spécifique
 router.get('/:id/attachments', getTaskAttachments);
-
-// Télécharger une pièce jointe spécifique d'une tâche
 router.get('/:id/attachments/:filename', getAttachmentFile);
-
-
 
 module.exports = router;

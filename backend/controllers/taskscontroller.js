@@ -2,6 +2,11 @@ const Task = require('../models/Task');
 const Technicien = require('../models/users');
 const Voiture = require('../models/Voiture');
 const Report = require('../models/Report');
+
+const Notification = require('../models/Notification');
+
+const multer = require('multer');
+
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -47,11 +52,33 @@ exports.createTask = async (req, res) => {
     };
     // Créer la tâche
     const newTask = await Task.create(taskData);
+    // Créer la notification
+    const notificationMessage = `Nouvelle mission programmée: ${newTask.title} (${new Date(newTask.startDate).toLocaleDateString('fr-FR')})`;
+await Notification.create({
+  recipient: req.body.technicien,
+  message: notificationMessage,
+  relatedTask: newTask._id
+});
+
+console.log('Notification créée pour:', req.body.technicien);
+console.log('Clients connectés:', global.clients ? Array.from(global.clients.keys()) : 'Aucun');
+
+// Modifier l'envoi SSE :
+if (global.clients) {
+  const client = global.clients.get(req.body.technicien.toString());
+  if (client) {
+    console.log('Envoi SSE à:', req.body.technicien);
+    client.write(`event: notification\n`);
+    client.write(`data: ${JSON.stringify({
+      type: 'NEW_TASK',
+      data: notificationMessage,
+      taskId: newTask._id,
+      createdAt: new Date() // Ajout timestamp
+    })}\n\n`);
+  }
+}
     // Mise à jour du statut du véhicule après création de la tâche
     await Voiture.findByIdAndUpdate(req.body.vehicule, { status: 'réservée' });
-
-     // Mettre à jour le taskCount du technicien
-     await Technicien.findByIdAndUpdate(req.body.technicien, { $inc: { taskCount: 1 } });
 
     // Récupérer la tâche avec les données associées
     const populated = await Task.findById(newTask._id)
@@ -156,6 +183,26 @@ exports.updateTask = async (req, res) => {
       console.warn('Tentative mise à jour ID inexistant:', req.params.id);
       return res.status(404).json({ message: 'Tâche introuvable' });
     }
+    // Créer la notification de modification
+    const notificationMessage = `Mission modifiée: ${task.title} (${new Date(task.startDate).toLocaleDateString('fr-FR')})`;
+    const notification = await Notification.create({
+      recipient: task.technicien._id,
+      message: notificationMessage,
+      relatedTask: task._id
+    });
+
+    // Envoyer la notification via SSE
+    if (global.clients && global.clients.has(task.technicien._id.toString())) {
+      const client = global.clients.get(task.technicien._id.toString());
+      client.write(`event: notification\n`);
+      client.write(`data: ${JSON.stringify({
+        type: 'TASK_UPDATED',
+        data: notificationMessage,
+        taskId: task._id,
+        createdAt: new Date()
+      })}\n\n`);
+    }
+
 
     console.log('Tâche mise à jour:', task._id);
     
@@ -244,28 +291,20 @@ exports.updateTaskStatus = async (req, res) => {
       return res.status(404).json({ message: 'Tâche introuvable' });
     }
 
-    if (status === 'terminé') {
-      // Mettre à jour le taskCount du technicien
-      await Technicien.findByIdAndUpdate(
-        task.technicien._id,
-        { $inc: { taskCount: -1 } }
-      );
+    // Nouvelle logique de mise à jour du véhicule
+    if (status === 'terminé' && task.vehicule) {
+      const vehicleId = task.vehicule._id;
+      
+      // Vérifier s'il reste des tâches actives pour ce véhicule
+      const activeTasks = await Task.find({
+        vehicule: vehicleId,
+        status: { $ne: 'terminé' },
+        _id: { $ne: taskId }
+      });
 
-      // Nouvelle logique de mise à jour du véhicule
-      if (task.vehicule) {
-        const vehicleId = task.vehicule._id;
-
-        // Vérifier s'il reste des tâches actives pour ce véhicule
-        const activeTasks = await Task.find({
-          vehicule: vehicleId,
-          status: { $ne: 'terminé' },
-          _id: { $ne: taskId }
-        });
-
-        if (activeTasks.length === 0) {
-          await Voiture.findByIdAndUpdate(vehicleId, { status: 'disponible' });
-          console.log(`Statut véhicule ${vehicleId} mis à jour à disponible`);
-        }
+      if (activeTasks.length === 0) {
+        await Voiture.findByIdAndUpdate(vehicleId, { status: 'disponible' });
+        console.log(`Statut véhicule ${vehicleId} mis à jour à disponible`);
       }
     }
 
@@ -462,6 +501,52 @@ exports.getTasksCountByMonth = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// Récupérer les notifications
+exports.getNotifications = async (req, res) => {
+  try {
+    const notifications = await Notification.find({
+      recipient: req.query.userId
+    })
+    .sort({ createdAt: -1 })
+    .populate({
+      path: 'relatedTask',
+      select: 'title startDate',
+      model: 'Task' // Spécifier explicitement le modèle
+    });
+
+    res.json(notifications);
+  } catch (error) {
+    console.error('Erreur récupération notifications:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Marquer une notification comme lue
+exports.markNotificationRead = async (req, res) => {
+  try {
+    const notification = await Notification.findByIdAndUpdate(
+      req.params.id,
+      { read: true },
+      { new: true, runValidators: true }
+    );
+    
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification non trouvée' });
+    }
+
+    res.json(notification);
+  } catch (error) {
+    console.error('Erreur marquage notification:', error);
+    res.status(500).json({ 
+      message: 'Échec de la mise à jour',
+      error: error.message 
+    });
+  }
+};
+
+
+
+
 
 
 
