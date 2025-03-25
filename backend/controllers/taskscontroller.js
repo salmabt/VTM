@@ -128,8 +128,8 @@ exports.getAllTasks = async (req, res) => {
 exports.getTaskById = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
-      .populate('technicien')
-      .populate('vehicule');
+      .populate('technicien', 'name location') // Ajoutez les champs nécessaires
+      .populate('vehicule', 'model registration'); // Ajoutez les champs nécessaires
 
     if (!task) {
       return res.status(404).json({ message: 'Ressource non trouvée' });
@@ -157,63 +157,71 @@ exports.getTaskById = async (req, res) => {
 // Mettre à jour une tâche
 exports.updateTask = async (req, res) => {
   try {
-    if (req.body.technicien) {
-      const techExists = await Technicien.exists({ _id: req.body.technicien });
-      if (!techExists) throw new Error('Technicien référence invalide');
-    }
-
-    if (req.body.vehicule) {
-      const vehExists = await Voiture.exists({ _id: req.body.vehicule });
-      if (!vehExists) throw new Error('Véhicule référence invalide');
-    }
-
-    const task = await Task.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { 
-        new: true, 
-        runValidators: true,
-        context: 'query'
-      }
-    )
-    .populate('technicien')
-    .populate('vehicule');
-
-    if (!task) {
-      console.warn('Tentative mise à jour ID inexistant:', req.params.id);
+    // Récupérer la tâche existante
+    const existingTask = await Task.findById(req.params.id);
+    if (!existingTask) {
       return res.status(404).json({ message: 'Tâche introuvable' });
     }
-    // Créer la notification de modification
-    const notificationMessage = `Mission modifiée: ${task.title} (${new Date(task.startDate).toLocaleDateString('fr-FR')})`;
-    const notification = await Notification.create({
-      recipient: task.technicien._id,
-      message: notificationMessage,
-      relatedTask: task._id
-    });
 
-    // Envoyer la notification via SSE
-    if (global.clients && global.clients.has(task.technicien._id.toString())) {
-      const client = global.clients.get(task.technicien._id.toString());
-      client.write(`event: notification\n`);
-      client.write(`data: ${JSON.stringify({
-        type: 'TASK_UPDATED',
-        data: notificationMessage,
-        taskId: task._id,
-        createdAt: new Date()
-      })}\n\n`);
+    // Gestion des pièces jointes
+    let attachments = [];
+    
+    // Conserver les pièces jointes existantes si spécifié
+    if (req.body.existingAttachments) {
+      try {
+        attachments = JSON.parse(req.body.existingAttachments);
+      } catch (e) {
+        console.error('Erreur parsing existingAttachments', e);
+        attachments = existingTask.attachments || [];
+      }
     }
 
+    // Ajouter les nouveaux fichiers
+    if (req.files && req.files.length > 0) {
+      const newAttachments = req.files.map(file => ({
+        filename: file.filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size
+      }));
+      attachments = [...attachments, ...newAttachments];
+    }
 
-    console.log('Tâche mise à jour:', task._id);
-    
-    res.json(task);
+    // Préparer les données de mise à jour
+    const updateData = {
+      title: req.body.title,
+      description: req.body.description,
+      client: req.body.client,
+      location: req.body.location,
+      technicien: req.body.technicien,
+      vehicule: req.body.vehicule,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+      attachments
+    };
+
+    // Mettre à jour la tâche
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('technicien vehicule');
+
+    res.json(updatedTask);
 
   } catch (error) {
-    console.error('Erreur mise à jour:', error.message);
+    console.error('Erreur updateTask:', error);
+    
+    // Supprimer les fichiers uploadés en cas d'erreur
+    if (req.files) {
+      req.files.forEach(file => {
+        fs.unlinkSync(file.path);
+      });
+    }
+    
     res.status(400).json({
       message: 'Échec de la mise à jour',
-      error: error.message,
-      type: error.name
+      error: error.message
     });
   }
 };
