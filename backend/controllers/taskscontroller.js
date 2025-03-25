@@ -207,6 +207,26 @@ exports.updateTask = async (req, res) => {
       { new: true, runValidators: true }
     ).populate('technicien vehicule');
 
+    // Créer la notification de modification
+    const notificationMessage = `Mission modifiée: ${updatedTask.title} (${new Date(updatedTask.startDate).toLocaleDateString('fr-FR')})`;
+    const notification = await Notification.create({
+      recipient: updatedTask.technicien._id,
+      message: notificationMessage,
+      relatedTask: updatedTask._id
+    });
+
+    // Envoyer la notification via SSE
+    if (global.clients && global.clients.has(updatedTask.technicien._id.toString())) {
+      const client = global.clients.get(updatedTask.technicien._id.toString());
+      client.write(`event: notification\n`);
+      client.write(`data: ${JSON.stringify({
+        type: 'TASK_UPDATED',
+        data: notificationMessage,
+        taskId: updatedTask._id,
+        createdAt: new Date()
+      })}\n\n`);
+    }
+
     res.json(updatedTask);
 
   } catch (error) {
