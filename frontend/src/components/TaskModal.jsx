@@ -155,7 +155,7 @@ const TaskModal = ({
       >
         {sortedTechniciens.map(t => (
           <Option key={t._id} value={t._id}>
-            {t.name} (Tâches: {calculateTaskCount(t._id)}, Localisation: {t.location})
+            {t.name} ( {t.location},Tâches: {calculateTaskCount(t._id)})
           </Option>
         ))}
       </Select>

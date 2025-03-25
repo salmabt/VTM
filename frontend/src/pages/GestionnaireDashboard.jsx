@@ -19,8 +19,8 @@ import notesApi from '../api/notes';
 import TaskModal from '../components/TaskModal';
 import TechniciensSection from '../components/TechniciensSection';
 import TechnicienFiltering from '../components/TechnicienFiltering';
-
-
+import { technicienRegions, allCities } from '../config/technicienRegions';
+import axios from 'axios';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -80,6 +80,11 @@ const [editingTask, setEditingTask] = useState(null); // Pour stocker la tâche 
 const [isTaskEditModalVisible, setIsTaskEditModalVisible] = useState(false); // Pour gérer la visibilité du modal
 const [existingAttachments, setExistingAttachments] = useState([]); // Pour les pièces jointes existantes
 const [newFiles, setNewFiles] = useState([]); // Pour les nouveaux fichiers
+
+const [selectedCity, setSelectedCity] = useState(null);
+const [selectedRegion, setSelectedRegion] = useState(null);
+const [selectedTechnicien, setSelectedTechnicien] = useState(null);
+
 useEffect(() => {
   const unreadNotifications = noteNotifications.filter(n => !n.read);
   setNoteNotifications(unreadNotifications);
@@ -331,13 +336,11 @@ useEffect(() => {
   if (selectedTask) {
     const loadTaskDetails = async () => {
       try {
-        // Chargement direct depuis l'API sans dépendre du state tasks
         const response = await tasksApi.getTaskById(selectedTask._id);
         setSelectedTask({
           ...response.data,
-          // Garder les données locales si nécessaire
-          technicien: selectedTask.technicien, 
-          vehicule: selectedTask.vehicule
+          technicien: response.data.technicien?._id || response.data.technicien,
+          vehicule: response.data.vehicule?._id || response.data.vehicule
         });
       } catch (error) {
         message.error('Erreur de chargement des détails');
@@ -345,7 +348,8 @@ useEffect(() => {
     };
     loadTaskDetails();
   }
-}, [selectedTask?._id]); // Déclenché quand l'ID de la tâche change // Se déclenche quand la liste des tâches change
+}, [selectedTask?._id]);
+// Déclenché quand l'ID de la tâche change // Se déclenche quand la liste des tâches change
   const handleAddVehicule = async () => {
     try {
       const { data } = await vehiculesApi.createVehicule(newVehicule);
@@ -501,86 +505,84 @@ useEffect(() => {
     try {
       // Validation des champs obligatoires
       const requiredFields = {
-        title: 'Titre',
-        description: 'Description',
-        technicien: 'Technicien',
-        vehicule: 'Véhicule',
-        startDate: 'Date de début',
-        endDate: 'Date de fin',
+        title: editingTask.title,
+        description: editingTask.description,
+        technicien: editingTask.technicien,
+        vehicule: editingTask.vehicule,
+        startDate: editingTask.startDate,
+        endDate: editingTask.endDate
       };
   
       const missingFields = Object.entries(requiredFields)
-        .filter(([key]) => !editingTask[key])
-        .map(([, value]) => value);
+        .filter(([_, value]) => !value)
+        .map(([key]) => key);
   
       if (missingFields.length > 0) {
-        return message.error(`Champs requis manquants : ${missingFields.join(', ')}`);
+        return message.error(`Champs manquants: ${missingFields.join(', ')}`);
       }
   
-      // Validation des dates
-      const start = moment(editingTask.startDate);
-      const end = moment(editingTask.endDate);
-      
-  
-  
-      if (!start.isValid() || !end.isValid()) {
-        return message.error('Format de date invalide');
-      }
-  
-      if (end.isBefore(start)) {
-        return message.error('La date de fin doit être après la date de début');
-      }
-  
-      // Création du FormData pour la mise à jour
+      // Création du FormData
       const formData = new FormData();
+      
+      // Ajout des champs texte
       formData.append('title', editingTask.title);
       formData.append('description', editingTask.description);
-      formData.append('client', editingTask.client);
+      formData.append('client', editingTask.client || '');
       formData.append('location', editingTask.location);
       formData.append('technicien', editingTask.technicien);
       formData.append('vehicule', editingTask.vehicule);
-      formData.append('startDate', start.toISOString());
-      formData.append('endDate', end.toISOString());
+      formData.append('startDate', new Date(editingTask.startDate).toISOString());
+      formData.append('endDate', new Date(editingTask.endDate).toISOString());
   
-
-      
+      // Gestion des pièces jointes
+      if (existingAttachments.length > 0) {
+        formData.append('existingAttachments', JSON.stringify(existingAttachments));
+      }
+  
       // Ajout des nouveaux fichiers
       if (newFiles.length > 0) {
         newFiles.forEach((file) => {
-          formData.append('attachments', file);
+          formData.append('attachments', file, file.name);
         });
       }
   
-      // Envoi de la requête de mise à jour
-      const response = await tasksApi.updateTask(editingTask._id, formData, {
+      // Envoi de la requête
+    const response = await axios.put(
+      `/api/tasks/${editingTask._id}`,
+      formData,
+      {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+      }
+    );
+
+    // Récupérez les données à jour avec les relations peuplées
+    const updatedTask = await tasksApi.getTaskById(editingTask._id);
+  
+   // Mise à jour de l'état local avec les données peuplées
+   setTasks(prevTasks =>
+    prevTasks.map(task =>
+      task._id === editingTask._id ? {
+        ...updatedTask.data,
+        technicien: updatedTask.data.technicien?._id || updatedTask.data.technicien,
+        vehicule: updatedTask.data.vehicule?._id || updatedTask.data.vehicule
+      } : task
+    )
+  );
+
+  message.success('Tâche modifiée avec succès');
+  setIsTaskEditModalVisible(false);
+} catch (error) {
+      console.error('Erreur modification:', {
+        error: error.message,
+        response: error.response?.data,
+        config: error.config
       });
-      const updatedTask = response.data;
-  
-      // Mise à jour optimiste de l'état des tâches
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task._id === updatedTask._id
-            ? {
-                ...updatedTask,
-                technicien: updatedTask.technicien?._id,
-                vehicule: updatedTask.vehicule?._id,
-              }
-            : task
-        )
-      );
-  
-      // Fermeture du modal et réinitialisation des états
-      setIsTaskEditModalVisible(false);
-      setExistingAttachments([]);
-      setNewFiles([]);
-      message.success('Tâche modifiée avec succès');
-    } catch (error) {
-      console.error('Erreur lors de la modification de la tâche:', error);
+      
       message.error(
-        error.response?.data?.message || 'Erreur lors de la modification de la tâche'
+        error.response?.data?.message || 
+        'Erreur lors de la modification de la tâche'
       );
     }
   };
@@ -594,6 +596,49 @@ useEffect(() => {
       message.error(error.response?.data?.message || 'Erreur de suppression');
     }
   };
+
+     // Calculer le nombre de tâches "planifiées" et "en cours" pour chaque technicien
+     const calculateTaskCount = (technicienId) => {
+      return tasks.filter(task => {
+        // Gère à la fois task.technicien._id (peuplé) et task.technicien (ID brut)
+        const techId = task.technicien?._id || task.technicien;
+        return techId === technicienId && 
+               (task.status === "planifié" || task.status === "en cours");
+      }).length;
+    };
+
+    // Vérifier la disponibilité du technicien
+    const isTechnicienAvailable = (technicienId, startDate, endDate) => {
+      const technicien = techniciens.find(t => t._id === technicienId);
+      if (!technicien || !technicien.schedule) return true; // Si le technicien ou son emploi du temps n'existe pas, considérez-le comme disponible
+      return !technicien.schedule.some(task => 
+        new Date(task.startDate) < new Date(endDate) && 
+        new Date(task.endDate) > new Date(startDate)
+      ); 
+    };
+  
+    // Fonction qui retourne la région basée sur la ville
+    const getRegionFromCity = (city) => {
+      for (const region in technicienRegions) {
+        if (technicienRegions[region].includes(city)) {
+          return region; // Retourne la région (par exemple, 'milieu', 'nord', etc.)
+        }
+      }
+      return null;
+    };
+  
+    const filteredTechniciens = selectedRegion 
+      ? techniciens.filter(tech => technicienRegions[selectedRegion].includes(tech.location))
+      : techniciens;
+  
+    // Déclarer sortedTechniciens à l'extérieur de useEffect pour éviter la redéclaration
+    const sortedTechniciens = [...filteredTechniciens].sort((a, b) => 
+      calculateTaskCount(a._id) - calculateTaskCount(b._id)
+    );
+ 
+
+
+
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
     
@@ -686,14 +731,17 @@ useEffect(() => {
 
     <br/>
     <Text strong>Technicien : </Text>
-    <Text>
-      {selectedTask.technicien?.name || 'Non assigné'}
-    </Text><br/>
+      <Text>
+        {techniciens.find(t => t._id === selectedTask.technicien)?.name || 'Non assigné'}
+      </Text><br/>
     
-    <Text strong>Véhicule : </Text>
-    <Text>
-    {selectedTask.vehicule?.model || 'Non assigné'}
-    </Text><br/>
+      <Text strong>Véhicule : </Text>
+      <Text>
+        {vehicules.find(v => v._id === selectedTask.vehicule)?.model || 'Non assigné'} 
+        {selectedTask.vehicule && vehicules.find(v => v._id === selectedTask.vehicule)?.registration 
+          ? ` (${vehicules.find(v => v._id === selectedTask.vehicule).registration})` 
+          : ''}
+      </Text><br/>
     
     <Text strong>Statut : </Text>
     <Tag color={
@@ -877,29 +925,52 @@ useEffect(() => {
                       value={newTask.client}
                       onChange={(e) => setNewTask({...newTask, client: e.target.value})}
                     />
+                    {/* Sélecteur de ville avec recherche */}
+                     <Select
+                            placeholder="Sélectionner une ville *"
+                            onChange={(value) => {
+                              console.log("Ville sélectionnée:", value);
+                              setSelectedCity(value);
+                              const region = getRegionFromCity(value);
+                              setSelectedRegion(region); // Définir la région basée sur la ville sélectionnée
+                              setNewTask({ ...newTask, location: value });
+                            }}
+                            style={{ marginBottom: 8, width: "100%" }}
+                            showSearch
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                              option.children.toLowerCase().includes(input.toLowerCase())
+                            }
+                          >
+                            {allCities.map(city => (
+                              <Option key={city} value={city}>
+                                {city}
+                              </Option>
+                            ))}
+                          </Select>
+
                     <Input
-                      placeholder="Localisation"
+                      placeholder="Adresse détaillée"
                       value={newTask.location}
                       onChange={(e) => setNewTask({...newTask, location: e.target.value})}
                     />
-                    <RangePicker
-                      showTime
-                      format="DD/MM/YYYY HH:mm"
-                      onChange={(dates) => setNewTask({
-                        ...newTask,
-                        startDate: dates?.[0]?.toISOString(),
-                        endDate: dates?.[1]?.toISOString()
-                      })}
-                    />
-                    <Select
-                      placeholder="Sélectionner un technicien *"
-                      loading={!techniciens.length}
-                      options={techniciens.map(t => ({
-                        label: `${t.name}${t.skills?.length ? ` (${t.skills.join(', ')})` : ''}`,
-                        value: t._id
-                      }))}
-                      onChange={value => setNewTask({...newTask, technicien: value})}
-                          />
+                    {/* Sélecteur de technicien filtré par région */}
+                    {/* Sélectionner un technicien */}
+                          <Select
+                            placeholder="Sélectionner un technicien *"
+                            onChange={(value) => {
+                              setNewTask({ ...newTask, technicien: value });
+                              setSelectedTechnicien(value);
+                            }}
+                            style={{ marginBottom: 8, width: "100%" }}
+                            disabled={!selectedCity} // Désactivé tant qu'une ville n'est pas sélectionnée
+                          >
+                            {sortedTechniciens.map(t => (
+                              <Option key={t._id} value={t._id}>
+                               {t.name} ( {t.location},Tâches: {calculateTaskCount(t._id)})
+                              </Option>
+                            ))}
+                          </Select>
                     <Select
                       placeholder="Sélectionner un véhicule *"
                       onChange={(value) => setNewTask({...newTask, vehicule: value})}
@@ -913,38 +984,65 @@ useEffect(() => {
                       style={{ width: '100%' }}
                     >
                    {vehiculesList
-    .filter(veh => 
-      (veh.status === 'disponible' && 
-       !tasks.some(t => 
-         t.vehicule === veh._id && 
-         t.status !== 'terminé' // Nouvelle condition
-       )) || 
-      veh._id === newTask.vehicule
-    )
-    .map(veh => (
-      <Option key={veh._id} value={veh._id}>
-        {veh.model} ({veh.registration}) - {veh.status}
-      </Option>
-    ))}
-    </Select>
-    <Input
-        type="file"
-        multiple
-        onChange={(e) => {
-          const files = Array.from(e.target.files);
-          console.log(files);  // Vérifier si les fichiers sont correctement capturés
-          setNewTask({...newTask, files});
-        }}
+                  .filter(veh => 
+                    (veh.status === 'disponible' && 
+                    !tasks.some(t => 
+                      t.vehicule === veh._id && 
+                      t.status !== 'terminé' // Nouvelle condition
+                    )) || 
+                    veh._id === newTask.vehicule
+                  )
+                  .map(veh => (
+                    <Option key={veh._id} value={veh._id}>
+                      {veh.model} ({veh.registration}) - {veh.status}
+                    </Option>
+                  ))}
+                  </Select>
+                    <RangePicker
+                      showTime
+                      format="DD/MM/YYYY HH:mm"
+                      onChange={(dates) => setNewTask({
+                        ...newTask,
+                        startDate: dates?.[0]?.toISOString(),
+                        endDate: dates?.[1]?.toISOString()
+                      })}
+                    />
+                    <Input
+                        type="file"
+                        multiple
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files);
+                          console.log(files);  // Vérifier si les fichiers sont correctement capturés
+                          setNewTask({...newTask, files});
+                        }}
 
-        style={{ marginBottom: 16 }}
-      />
-                    <Button
+                        style={{ marginBottom: 16 }}
+                      />
+                      <Button
                       type="primary"
                       onClick={handleCreateTask}
-                      disabled={!newTask.title || !newTask.description || !newTask.technicien}
+                      disabled={
+                        !newTask.title || 
+                        !newTask.description || 
+                        !newTask.technicien || 
+                        !newTask.vehicule || 
+                        !newTask.startDate || 
+                        !newTask.endDate ||
+                        !isTechnicienAvailable(newTask.technicien, newTask.startDate, newTask.endDate)
+                      }
+                      block
                     >
                       Créer Tâche
                     </Button>
+                    {/* Affichage des détails du technicien sélectionné */}
+                  {selectedTechnicien && (
+                    <div style={{ marginBottom: 16 }}>
+                      <strong>Technicien sélectionné :</strong>
+                      <p>Nom: {techniciens.find(t => t._id === selectedTechnicien).name}</p>
+                      <p>Localisation: {techniciens.find(t => t._id === selectedTechnicien).location}</p>
+                      <p>Tâches planifiées et en cours: {calculateTaskCount(selectedTechnicien)}</p>
+                    </div>
+                  )}
                   </div>
 
                   <List
@@ -1094,42 +1192,61 @@ useEffect(() => {
       }
       style={{ marginBottom: 16 }}
     />
+    {/* Sélecteur de ville avec recherche */}
+    <Select
+      placeholder="Sélectionner une ville *"
+      value={editingTask?.location || ''}
+      onChange={(value) => {
+        const region = getRegionFromCity(value);
+        setSelectedRegion(region);
+        setEditingTask({ ...editingTask, location: value });
+      }}
+      style={{ marginBottom: 16, width: "100%" }}
+      showSearch
+      optionFilterProp="children"
+      filterOption={(input, option) =>
+        option.children.toLowerCase().includes(input.toLowerCase())
+      }
+    >
+      {allCities.map(city => (
+        <Option key={city} value={city}>
+          {city}
+        </Option>
+      ))}
+    </Select>
     <Input
-      placeholder="Localisation"
+      placeholder="Adresse détaillée"
       value={editingTask?.location || ''}
       onChange={(e) =>
         setEditingTask({ ...editingTask, location: e.target.value })
       }
       style={{ marginBottom: 16 }}
     />
-
-    {/* Gestion des dates (startDate et endDate) */}
-    <RangePicker
-                      showTime
-                      format="DD/MM/YYYY HH:mm"
-                      onChange={(dates) =>setEditingTask({
-                        ...editingTask,
-                        startDate: dates[0].toISOString(),
-                        endDate: dates[1].toISOString()
-                      })}
-                    />
-   
-
+    {/* Sélecteur de technicien avec comptage des tâches */}
     <Select
-      placeholder="Sélectionner un technicien"
+      placeholder="Sélectionner un technicien *"
       value={editingTask?.technicien || ''}
-      onChange={(value) =>
-        setEditingTask({ ...editingTask, technicien: value })
-      }
+      onChange={(value) => setEditingTask({ ...editingTask, technicien: value })}
       style={{ width: '100%', marginBottom: 16 }}
+      showSearch
+      optionFilterProp="children"
+      filterOption={(input, option) =>
+        option.children.toLowerCase().includes(input.toLowerCase())
+      }
     >
-      {techniciens.map((tech) => (
-        <Option key={tech._id} value={tech._id}>
-          {tech.name}
-        </Option>
-      ))}
+      {techniciens
+        .filter(tech => !selectedRegion || technicienRegions[selectedRegion]?.includes(tech.location))
+        .map(tech => ({
+          ...tech,
+          taskCount: calculateTaskCount(tech._id)
+        }))
+        .sort((a, b) => b.taskCount - a.taskCount) // Tri décroissant
+        .map(tech => (
+          <Option key={tech._id} value={tech._id}>
+            {tech.name} ({tech.location}, Tâches: {tech.taskCount})
+          </Option>
+        ))}
     </Select>
-
     <Select
       placeholder="Sélectionner un véhicule"
       value={editingTask?.vehicule || ''}
@@ -1146,33 +1263,56 @@ useEffect(() => {
           </Option>
         ))}
     </Select>
+    {/* Gestion des dates (startDate et endDate) */}
+    <RangePicker
+                      showTime
+                      format="DD/MM/YYYY HH:mm"
+                      onChange={(dates) =>setEditingTask({
+                        ...editingTask,
+                        startDate: dates[0].toISOString(),
+                        endDate: dates[1].toISOString()
+                      })}
+                    />
+   
 
-    {/* Affichage des pièces jointes existantes */}
-    <div style={{ marginBottom: 16 }}>
-      <Text strong>Pièces jointes existantes :</Text>
-      {editingTask.attachments?.map((attachment) => (
-        <div key={attachment.filename} style={{ marginTop: 8 }}>
-          <a
-            href={`http://localhost:3000/uploads/${attachment.filename}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            📄 {attachment.originalName} ({Math.round(attachment.size / 1024)}KB)
-          </a>
-        </div>
-      ))}
+   {/* Section des pièces jointes existantes */}
+<div style={{ marginBottom: 16 }}>
+  <Text strong>Pièces jointes existantes :</Text>
+  {existingAttachments.map((attachment) => (
+    <div key={attachment.filename} style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
+      <a
+        href={`http://localhost:3000/uploads/${attachment.filename}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ marginRight: 8 }}
+      >
+        📄 {attachment.originalName} ({Math.round(attachment.size / 1024)}KB)
+      </a>
+      <Button
+        danger
+        size="small"
+        onClick={() => {
+          setExistingAttachments(
+            existingAttachments.filter(a => a.filename !== attachment.filename)
+          );
+        }}
+      >
+        Supprimer
+      </Button>
     </div>
+  ))}
+</div>
 
-    {/* Champ pour ajouter de nouveaux fichiers */}
-    <Input
-      type="file"
-      multiple
-      onChange={(e) => {
-        const files = Array.from(e.target.files);
-        setNewFiles(files); // Stocker les nouveaux fichiers
-      }}
-      style={{ marginBottom: 16 }}
-    />
+{/* Champ pour nouveaux fichiers */}
+<Input
+  type="file"
+  multiple
+  onChange={(e) => {
+    const files = Array.from(e.target.files);
+    setNewFiles(files);
+  }}
+  style={{ marginBottom: 16 }}
+/>
   </Modal>
 )}
 
