@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Home from './pages/Home'; // Importez votre nouveau composant Home
+import About from './pages/About';
 import Register from './Auth/Register';
 import Login from './Auth/Login';
 import PendingApproval from './pages/PendingApproval';
@@ -37,6 +38,7 @@ const App = () => {
       <Routes>
         {/* Redirection dynamique après connexion */}
         <Route path="/" element={!isAuthenticated ? <Home /> : <Navigate to={getDashboardRoute()} />} />
+        <Route path="/about" element={<About />} />
         <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to={getDashboardRoute()} />} />
         <Route path="/pending-approval" element={<PendingApproval />} />
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={getDashboardRoute()} />} />
