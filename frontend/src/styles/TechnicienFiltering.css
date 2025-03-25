@@ -1,0 +1,80 @@
+.technicien-grid {
+    display: grid;
+    grid-template-areas: 
+        "nord milieu"
+        "sahel sud";
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* Positioning each section */
+.nord { grid-area: nord; }
+.milieu { grid-area: milieu; }
+.sahel { grid-area: sahel; }
+.sud { grid-area: sud; }
+
+/* Styling for cards */
+.technicien-card {
+    position: relative;
+    color: white;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+/* Background Image */
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.5) contrast(0.9);
+    opacity: 0.8;
+}
+
+/* Content Styling */
+.content {
+    position: relative;
+    z-index: 2;
+    padding: 16px;
+}
+
+/* Title Styling */
+.region-title {
+    text-transform: capitalize;
+    color: white;
+}
+
+/* Progress Circle */
+.progress-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+/* Increase the visibility of the progress circle */
+.ant-progress-circle path {
+    stroke-width: 12px !important; /* Make stroke thicker */
+}
+
+/* Change the number visibility inside the circle */
+.ant-progress-text {
+    font-size: 18px !important;
+    font-weight: bold;
+    color: white !important; /* Ensure contrast */
+}
+
+
+/* Technician Info */
+.tech-info {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+}
+
+/* Skills Tags */
+.skills {
+    margin-top: 8px;
+}
