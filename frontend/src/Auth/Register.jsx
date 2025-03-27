@@ -8,10 +8,9 @@ const { Option } = Select;
 
 // Liste des villes de Tunisie (identique à celle dans TaskModal)
 const cities = [
-  'Ariana','Béja','Ben Arous','Bizerte','Gabès','Gafsa','Jendouba','Kairouan','Kasserine','Kébili',  
-  'La Manouba','Le Kef','Mahdia','Médenine','Monastir','Nabeul',   'Sfax', 'Sidi Bouzid',
-  'Siliana' ,'Sousse','Tataouine', 'Tozeur', 'Tunis', 'Zaghouan', 
-    
+  'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès', 'Gafsa', 'Jendouba', 'Kairouan', 'Kasserine', 'Kébili',
+  'La Manouba', 'Le Kef', 'Mahdia', 'Médenine', 'Monastir', 'Nabeul', 'Sfax', 'Sidi Bouzid',
+  'Siliana', 'Sousse', 'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan',
 ];
 
 const Register = () => {
@@ -117,7 +116,7 @@ const Register = () => {
             >
               <Input size="large" placeholder="Enter your phone number" />
             </Form.Item>
-            
+
             {/* Sélection de la localisation */}
             <Form.Item
               label="Location"
@@ -149,9 +148,10 @@ const Register = () => {
                 },
               ]}
             >
-              <Input 
+              <Input
                 size="large"
-                placeholder="Select your skills"/>
+                placeholder="Select your skills"
+              />
             </Form.Item>
 
             <Form.Item
@@ -225,6 +225,49 @@ const Register = () => {
           <img src={registerImage} className="auth-image" />
         </Flex>
       </Flex>
+
+      {/* CSS styles */}
+      <style>
+        {`
+          .form-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+
+          .title {
+            text-align: center;
+            margin-bottom: 10px;
+          }
+
+          .slogan {
+            text-align: center;
+            margin-bottom: 30px;
+          }
+
+          .auth-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+          }
+
+          .btn {
+            width: 100%;
+            background-color: #1890ff;
+            border-color: #1890ff;
+          }
+
+          .btn:hover {
+            background-color: #40a9ff;
+            border-color: #40a9ff;
+          }
+
+          .alert {
+            margin-bottom: 20px;
+          }
+        `}
+      </style>
     </Card>
   );
 };

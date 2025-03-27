@@ -96,9 +96,80 @@ const About = () => {
         </div>
       </section>
 
-      <footer>
-        <p>© 2025 Digital Market. Tous droits réservés.</p>
-      </footer>
+     {/* Footer */}
+<footer className="main-footer">
+  <div className="footer-content">
+    {/* Colonne Solutions */}
+    <div className="footer-column">
+      <h4>SOLUTIONS</h4>
+      <ul className="footer-links">
+        <li>Création de stratégie Marketing Digital</li>
+        <li>Gestion des fiches Google My Business</li>
+        <li>Développement mobile</li>
+        <li>Contact</li>
+        <li>Optimisation De Stratégie SEO</li>
+        <li>Gestion des réseaux sociaux</li>
+        <li>Développement web</li>
+      </ul>
+    </div>
+
+    {/* Colonne Contact */}
+    <div className="footer-column">
+      <h4>NOUS CONTACTER</h4>
+      <div className="contact-info">
+        <p className="contact-text">
+          Nous sommes là pour faire grandir votre activité
+        </p>
+        <div className="contact-details">
+          <div className="contact-item">
+            <i className="fas fa-phone"></i>
+            <a href="tel:+21655619993" className="contact-link">+216 55 619 993</a>
+          </div>
+          
+          <div className="contact-item">
+            <i className="fas fa-envelope"></i>
+            <a href="mailto:contact@digital-market.fr" className="contact-link">contact@digital-market.fr</a>
+          </div>
+          
+          <div className="contact-item">
+            <i className="fas fa-map-marker-alt"></i>
+            <span>3 Digital Market, QP54+QC9, Sahline</span>
+          </div>
+          
+          <a 
+            href="https://www.google.com/maps/place/Digital+Market/@35.7600816,10.7056202,16z/data=!4m6!3m5!1s0x1302138bcd34f905:0x8db59969fef815a!8m2!3d35.7596506!4d10.705867!16s%2Fg%2F11fq8qtfmm?entry=ttu&g_ep=EgoyMDI1MDMyNC4wIKXMDSoJLDEwMjExNDU1SAFQAw%3D%3D"
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="map-link"
+          >
+            © Voir sur la carte
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {/* Réseaux sociaux */}
+    <div className="footer-column social-column">
+      <h4>SUIVEZ-NOUS</h4>
+      <div className="social-icons">
+        <a href="https://www.facebook.com/Digitalmarket.tn/" target="_blank" rel="noopener noreferrer">
+          <i className="fab fa-facebook-f"></i>
+        </a>
+        <a href="https://www.linkedin.com/company/digital-market-tn/" target="_blank" rel="noopener noreferrer">
+          <i className="fab fa-linkedin-in"></i>
+        </a>
+        <a href="https://www.instagram.com/digital.market.tn/" target="_blank" rel="noopener noreferrer">
+          <i className="fab fa-instagram"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {/* Copyright */}
+  <div className="copyright">
+    <p>© 2025 Digital Market. Tous droits réservés</p>
+  </div>
+</footer>
     </div>
   );
 };
