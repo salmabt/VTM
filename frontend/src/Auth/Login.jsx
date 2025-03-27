@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, Flex, Form, Typography, Input, Spin, Button, Alert } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import loginImage from '../assets/login.png';
+import loginImage from '../assets/sign in.png';
 import useLogin from '../hooks/useLogin';
+
 
 const Login = () => {
   const { error, loading, loginUser } = useLogin();
@@ -35,19 +36,20 @@ const Login = () => {
         {/* form */}
         <Flex vertical flex={1}>
           <Typography.Title level={3} strong className="title">
-            Sign In
+            Welcome
           </Typography.Title>
           <Typography.Text type="secondary" strong className="slogan">
-            Unlock your world.
+            Become a part of our community!
           </Typography.Text>
           <Form layout="vertical" onFinish={handleLogin} autoComplete="off">
             <Form.Item
-              label="Email"
+              label={<span style={{ color: '#666666' }}>Email</span>}
               name="email"
+              required={false}
               rules={[
                 {
                   required: true,
-                  message: 'Please input your Emailll!',
+                  message: 'Please input your Email!',
                 },
                 {
                   type: 'email',
@@ -58,8 +60,9 @@ const Login = () => {
               <Input size="large" placeholder="Enter your email" />
             </Form.Item>
             <Form.Item
-              label="Password"
+              label={<span style={{ color: '#666666' }}>Password</span>}
               name="password"
+              required={false} // Désactive l'astérisque
               rules={[
                 {
                   required: true,
@@ -90,11 +93,12 @@ const Login = () => {
               </Button>
             </Form.Item>
 
-            <Form.Item>
-              <Link to="/register">
-                <Button size="large" className="btn">
-                  Create an Account
-                </Button>
+            <Form.Item style={{ textAlign: 'center', marginTop: '16px' }}>
+              <Typography.Text style={{ color: '#666', marginRight: '8px' }}>
+                Don't have an account?
+              </Typography.Text>
+              <Link to="/register" style={{ fontWeight: 500 }}>
+                Sign up
               </Link>
             </Form.Item>
           </Form>
