@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, Card, Flex, Form, Typography, Input, Spin, Button, Select } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import registerImage from '../assets/register.png';
+import registerImage from '../assets/resized_iii.webp';
 import useSignup from '../hooks/useSignup';
 
 const { Option } = Select;
@@ -50,12 +50,13 @@ const Register = () => {
   };
 
   return (
+    <div className="page-container">
     <Card className="form-container">
-      <Flex gap="large" align="center">
+      <Flex gap="large" align="stretch" className="main-flex">
         {/* Formulaire */}
-        <Flex vertical flex={1}>
-          <Typography.Title level={3} strong className="title">
-            Create an account
+        <Flex vertical flex={1} className="form-section">
+          <Typography.Title level={2} strong className="title">
+            Sign Up
           </Typography.Title>
           <Typography.Text type="secondary" strong className="slogan">
             Join for exclusive access!
@@ -119,8 +120,8 @@ const Register = () => {
 
             {/* Sélection de la localisation */}
             <Form.Item
-              label="Location"
-              name="location"
+              label="Address"
+              name="Address"
               rules={[
                 {
                   required: true,
@@ -200,75 +201,215 @@ const Register = () => {
             )}
 
             <Form.Item>
-              <Button
-                type={`${loading ? '' : 'primary'}`}
-                htmlType="submit"
-                size="large"
-                className="btn"
-              >
-                {loading ? <Spin /> : 'Create Account'}
-              </Button>
+            <Button
+    type="primary" // Laissez-le comme "primary" pour que le bouton ait les styles par défaut d'Ant Design
+    htmlType="submit"
+    size="large"
+    className={`btn ${loading ? 'loading' : ''}`} // Ajouter une classe dynamique selon l'état de chargement
+  >
+    {loading ? <Spin /> : 'Create Account'}
+  </Button>
             </Form.Item>
 
             <Form.Item>
-              <Link to="/login">
-                <Button size="large" className="btn">
-                  Sign In
-                </Button>
-              </Link>
+             
+              <Typography.Text style={{ color: '#666', marginRight: '20px' }}>
+                            Already have an account?
+               </Typography.Text>
+              <Link to="/login" style={{ fontWeight: 500 }}>
+                              Sign in
+                            </Link>
             </Form.Item>
           </Form>
         </Flex>
 
         {/* Image */}
-        <Flex flex={1}>
-          <img src={registerImage} className="auth-image" />
-        </Flex>
+        <Flex flex={1} className="image-container" style={{ padding: 0, margin: 0 }}>
+  <div className="image-section" style={{ padding: 0, margin: 0 }}>
+    <img 
+      src={registerImage} 
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover'
+      }}
+      className="register-image"
+      alt="Inscription"
+    />
+  </div>
+</Flex>
+
       </Flex>
 
       {/* CSS styles */}
       <style>
         {`
-          .form-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
+          /* Conteneur principal */
+          .page-container {
+              border-radius: 0 !important; 
+              background-color: #a5c3e8;
+              min-height: 100vh;
+              height: 100vh;
+              padding: 0 !important;
+              margin: 0 !important;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+            
+            .form-container {
+              background-color: white;
+              width: 100%;
+              max-width: 1200px;
+              border-radius:0;
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+              padding: 0 !important;
+              margin: 0 !important;
+               max-height: 100vh;
+            }
+            
+            .main-flex {
+                height: auto; /* Remplacez 95vh par auto pour éviter de forcer une hauteur fixe */
+                margin: 0 !important;
+                min-height: 0; 
+            }
+            
+            .form-section {
+              padding: 10px;
+              max-height: calc(100vh - 40px); 
+              overflow-y: auto;
+              animation: fadeIn 0.5s ease-out;
+            }
+            .ant-form-item {
+              margin-bottom: 12px !important; /* Réduit l'espace entre les champs */
+            }
+                        
+             .title {
+        text-align: left !important;
+        font-size: 2rem !important;
+        margin-bottom: 10px !important;
+        color: #2c3e50;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+            
+       .slogan {
+              text-align: left;
+              margin-bottom: 20px;
+              display: block;
+              font-size: 1.1rem;
+              color: #7f8c8d;
+            }
+
+            /* Champs de formulaire */
+          .ant-form-item-label > label {
+            color: #34495e !important;
+            font-size: 1rem !important;
+            font-weight: 500;
           }
 
-          .title {
-            text-align: center;
-            margin-bottom: 10px;
+          .ant-input, .ant-select-selector, .ant-input-password {
+            border-radius: 6px !important;
+            padding: 10px 15px !important;
+            border: 1px solid #dfe6e9 !important;
+          }
+                    .ant-input:focus, .ant-select-focused .ant-select-selector {
+            border-color: #3498db !important;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2) !important;
+          }
+            
+            
+           .image-container {
+               position: relative;
+              flex: 1;
+              display: flex;
+              overflow: hidden;
+              background-color: #fafafa;
+              border-left: 1px solid #f0f0f0;
+               padding: 0 !important;
+               margin: 0 !important;
+            }
+          .image-section {
+             position: relative;
+            flex: 1;
+            min-width: 0;
+            min-height: 0;
+             padding: 0 !important;
+          margin: 0 !important;
+           display: flex; 
           }
 
-          .slogan {
-            text-align: center;
-            margin-bottom: 30px;
-          }
-
-          .auth-image {
+         .register-image {
             max-width: 100%;
+            max-height: 100%;
+            width: auto;
             height: auto;
-            display: block;
-            margin: 0 auto;
           }
+            /* Styles existants pour les boutons et autres éléments */
+            .btn.ant-btn-primary {
+              background-color: #ff7b9c !important;
+              border-color: #ff7b9c !important;
+                height: 45px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s;
+            }
+            
+           .btn.ant-btn-primary:hover {
+          background-color: #2980b9 !important;
+          border-color: #2980b9 !important;
+          transform: translateY(-2px);
+        }
+        .ant-typography {
+          color: #7f8c8d;
+        }
+        a {
+          color: #3498db !important;
+          font-weight: 500;
+        }
 
-          .btn {
-            width: 100%;
-            background-color: #1890ff;
-            border-color: #1890ff;
-          }
+        a:hover {
+          color: #2980b9 !important;
+          text-decoration: underline !important;
+        }
+       
+.alert {
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-          .btn:hover {
-            background-color: #40a9ff;
-            border-color: #40a9ff;
-          }
 
-          .alert {
-            margin-bottom: 20px;
-          }
+            @media (max-width: 768px) {
+              .main-flex {
+                flex-direction: column;
+              }
+              
+              .image-container {
+                border-left: none;
+                border-top: 1px solid #f0f0f0;
+                height: 300px;
+              }
+              
+              .register-image {
+                max-height: 250px;
+              }
+            }
         `}
       </style>
     </Card>
+    </div>
+
   );
 };
 
