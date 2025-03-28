@@ -1,4 +1,4 @@
-//Homejsxi
+//frontend/src/pages/Homejsxi
 import { Link } from 'react-router-dom';
 import '../styles/Home.css'; // Fichier CSS séparé (optionnel)
 import logo from  '../assets/logo-digital-market.png';
@@ -33,7 +33,7 @@ const Home = () => {
         <div className="nav-links">
           <Link to="/about">À propos</Link>
           <Link to="/login">Connexion</Link>
-          <Link to="/contact">Contactez-nous</Link>
+    
         </div>
       </nav>
       

@@ -1,8 +1,10 @@
+//frontend/src/Auth/Register.jsx
 import React from 'react';
 import { Alert, Card, Flex, Form, Typography, Input, Spin, Button, Select } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import registerImage from '../assets/resized_iii.webp';
 import useSignup from '../hooks/useSignup';
+import logo from '../assets/logo-digital-market.png'; 
 
 const { Option } = Select;
 
@@ -51,6 +53,19 @@ const Register = () => {
 
   return (
     <div className="page-container">
+         {/* Added Navbar */}
+         <nav className="navbar">
+        <div className="logo">
+          <Link to="/">
+            <img src={logo} alt="Digital Market Logo" className="logo-image" />
+          </Link>
+        </div>
+        <div className="nav-links">
+          <Link to="/about">À propos</Link>
+          <Link to="/login">Connexion</Link>
+          <Link to="/contact">Contactez-nous</Link>
+        </div>
+      </nav>
     <Card className="form-container">
       <Flex gap="large" align="stretch" className="main-flex">
         {/* Formulaire */}
@@ -121,7 +136,7 @@ const Register = () => {
             {/* Sélection de la localisation */}
             <Form.Item
               label="Address"
-              name="Address"
+              name="location"
               rules={[
                 {
                   required: true,
@@ -148,10 +163,11 @@ const Register = () => {
                   message: 'Please select your skills!',
                 },
               ]}
+               extra="Séparez les compétences par des virgules"
             >
               <Input
                 size="large"
-                placeholder="Select your skills"
+                placeholder="put your skills"
               />
             </Form.Item>
 
@@ -250,28 +266,58 @@ const Register = () => {
       <style>
         {`
           /* Conteneur principal */
+          /* Modified page-container */
           .page-container {
-              border-radius: 0 !important; 
-              background-color: #a5c3e8;
-              min-height: 100vh;
-              height: 100vh;
-              padding: 0 !important;
-              margin: 0 !important;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-            }
+            background-color: #a5c3e8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 70px 0 0;
+            margin: 0;
+          }
+
+          /* Added navbar styles */
+          .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+          }
+             .logo-image {
+            height: 50px;
+          }
+
+          .nav-links a {
+            margin-left: 2rem;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+          }
+
+          .nav-links a:hover {
+            color: #ff7b9c;
+          }
+
             
             .form-container {
               background-color: white;
-              width: 100%;
+              width: 80%;
               max-width: 1200px;
               border-radius:0;
               box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
               overflow: hidden;
               padding: 0 !important;
               margin: 0 !important;
-               max-height: 100vh;
+               max-height: 99vh;
             }
             
             .main-flex {
@@ -282,12 +328,12 @@ const Register = () => {
             
             .form-section {
               padding: 10px;
-              max-height: calc(100vh - 40px); 
+             max-height: 87vh; 
               overflow-y: auto;
               animation: fadeIn 0.5s ease-out;
             }
             .ant-form-item {
-              margin-bottom: 12px !important; /* Réduit l'espace entre les champs */
+              margin-bottom: 8px !important; /* Réduit l'espace entre les champs */
             }
                         
              .title {
@@ -316,7 +362,7 @@ const Register = () => {
 
           .ant-input, .ant-select-selector, .ant-input-password {
             border-radius: 6px !important;
-            padding: 10px 15px !important;
+            padding: 8px 12px !important;
             border: 1px solid #dfe6e9 !important;
           }
                     .ant-input:focus, .ant-select-focused .ant-select-selector {
@@ -355,8 +401,8 @@ const Register = () => {
             .btn.ant-btn-primary {
               background-color: #ff7b9c !important;
               border-color: #ff7b9c !important;
-                height: 45px;
-            font-size: 1rem;
+                height: 40px;
+            font-size: 0.9rem;
             font-weight: 500;
             border-radius: 6px;
             transition: all 0.3s;
