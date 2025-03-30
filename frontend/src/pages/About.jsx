@@ -20,19 +20,23 @@ const About = () => {
         <div className="nav-links">
           <Link to="/about">À propos</Link>
           <Link to="/login">Connexion</Link>
-          <Link to="/contact">Contactez-nous</Link>
         </div>
       </nav>
 
-      <section className="hero">
-        <div className="hero-content">
-          <h1>RESULTATS MESURABLES, VISIBILITÉ ACCRUE</h1>
+      <section className="results-section">
+        <div className="results-header">
+          <h1>RÉSULTATS MESURABLES, VISIBILITÉ ACCRUE</h1>
           <h2>Ce que vous obtenez avec Digital Market</h2>
           
           <div className="about-content">
             <p>
               Lorsque vous collaborez avec Digital Market, vous obtenez bien plus qu'un simple service de marketing digital. 
               Nous offrons une expertise personnalisée pour développer votre présence en ligne et atteindre vos objectifs commerciaux.
+            </p>
+            <p>
+              Après une analyse approfondie de vos besoins, nous proposons des solutions stratégiques adaptées à votre marché. 
+              Une équipe dédiée optimise chaque aspect de votre projet, tout en assurant un suivi régulier pour améliorer constamment 
+              vos performances et vous ajuster aux tendances du marché.
             </p>
             
             <div className="about-features">
@@ -49,11 +53,6 @@ const About = () => {
               </div>
             </div>
             
-            <p>
-              Après une analyse approfondie de vos besoins, nous proposons des solutions stratégiques adaptées à votre marché. 
-              Une équipe dédiée optimise chaque aspect de votre projet, tout en assurant un suivi régulier pour améliorer constamment 
-              vos performances et vous ajuster aux tendances du marché.
-            </p>
           </div>
         </div>
       </section>

@@ -20,7 +20,53 @@ import UIXIcon from '../assets/uiux.png';
 import EquipeIcon from '../assets/equipe.png';
 import GoogleIcon from '../assets/google-logo.png';
 import AppmobileIcon from '../assets/application-mobile.png';
+import { useState, useEffect } from 'react';
+import { Button, Dropdown, Space, Switch } from 'antd';
+import { TranslationOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { translations, languageNames } from './translations';
 const Home = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [language, setLanguage] = useState('fr');
+
+  // Dark Mode Toggle
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', newMode);
+  };
+
+  // Language Change
+  const changeLanguage = (lng) => {
+    setLanguage(lng);
+    localStorage.setItem('language', lng);
+    document.body.setAttribute('dir', lng === 'ar' ? 'rtl' : 'ltr');
+  };
+
+  // Initial load
+  useEffect(() => {
+    const savedMode = localStorage.getItem('darkMode') === 'true';
+    const savedLang = localStorage.getItem('language') || 'fr';
+    
+    setDarkMode(savedMode);
+    if (savedMode) document.body.classList.add('dark-mode');
+    setLanguage(savedLang);
+    document.body.setAttribute('dir', savedLang === 'ar' ? 'rtl' : 'ltr');
+  }, []);
+
+
+  // Items for language dropdown
+  const languageItems = [
+    { key: 'fr', label: 'Français' },
+    { key: 'en', label: 'English' },
+    { key: 'ar', label: 'العربية' },
+  ];
+
+  // Ajoutez cette fonction de traduction améliorée
+  const t = (key) => {
+    return translations[language]?.[key] || key;
+  };
+
   return (
     <div className="home-container">
       {/* Navbar */}
@@ -31,48 +77,81 @@ const Home = () => {
           </Link>
         </div>
         <div className="nav-links">
-          <Link to="/about">À propos</Link>
-          <Link to="/login">Connexion</Link>
-    
+          <Link to="/about">{t('about')}</Link>
+          <Link to="/login">{t('login')}</Link>
+
+          {/* Bouton Dark Mode */}
+          <Switch
+            checked={darkMode}
+            onChange={toggleDarkMode}
+            checkedChildren={<MoonOutlined style={{ color: '#f0f0f0' }} />}
+            unCheckedChildren={<SunOutlined style={{ color: '#ffcc00' }} />}
+            style={{ 
+              marginLeft: '15px',
+              backgroundColor: darkMode ? '#4d4d4d' : '#d9d9d9'
+            }}
+          />
+          
+          {/* Sélecteur de langue */}
+        
+          <Dropdown
+            menu={{
+              items: languageItems,
+              onClick: ({ key }) => {
+                changeLanguage(key);
+                // Recharge la page pour appliquer les changements RTL/LTR
+                if (key === 'ar' || language === 'ar') {
+                  window.location.reload();
+                }
+              },
+              style: { 
+                backgroundColor: darkMode ? '#2d2d2d' : 'white',
+                color: darkMode ? 'white' : 'black'
+              }
+            }}
+            placement="bottomRight"
+          >
+            <Button 
+              type="text" 
+              style={{ 
+                color: darkMode ? 'white' : 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <TranslationOutlined />
+              <span>{language.toUpperCase()}</span>
+            </Button>
+          </Dropdown>
         </div>
       </nav>
       
       {/* Hero Section avec mise en page similaire à l'image */}
       <section className="hero">
-        <div className="hero-content">
-          <h1>Planification rapide et facile</h1>
-          <p>
-            Nous vous proposons une gamme complète de solutions de 
-            planification adaptées à votre activité.
-          </p>
-          <p><strong>Excellente Gestion de Planning des Techniciens et des Voitures!</strong></p>
-         
-        </div>
-        <div className="hero-image">
-        <img src={home} alt="DashboardAdmin"  />
-        <img src={calander} alt="Calandrier"  />
+      <div className="hero-content">
+    <h1>{t('quickPlanning')}</h1>
+    <p className="hero-subtitle" dangerouslySetInnerHTML={{ __html: t('planningManagement') }} />
+    <p dangerouslySetInnerHTML={{ __html: t('planningText1') }} />
+    <p dangerouslySetInnerHTML={{ __html: t('planningText2') }} />
+  </div>
+  
+        <div className="hero-images">
+        <img src={home} alt="DashboardAdmin" className="large-image" />
+        <img src={calander} alt="Calandrier" className="medium-image" />
         </div>
       </section>
 
       {/* Nouvelle Section Hero avec fonctionnalités */}
-      <section className="hero">
-        <div className="hero-content">
-          <h1>La gestion du planning devient facile</h1>
-          <p>
-            Vous aviez peut-être l’habitude de faire votre planning sur Excel mais vous avez des besoins plus complexes ? 
-            Il est temps de vous tourner vers un logiciel qui vous permette de gérer le <strong>planning prévisionnel</strong> de votre société.
-          </p>
-          <p>
-            Gérez vos ressources humaines et matérielles ainsi que les congés, rendez-vous, projets, horaires etc. 
-            PlanningPME s’adapte à tous les secteurs d’activité et vous permet <strong>d’optimiser votre rentabilité</strong>.
-          </p>
-          
-          <div className="features-list">
-            <div className="feature-item">
+      <section className="hero1">
+        <div className="hero-content1">  
+        <h3>{t('features')}</h3>
+        <div className="features-list">
+          <div className="feature-item">
             <img src={planningIcon} alt="Planning" className="feature-icon" />
-              <h3>Affichage simple et précis</h3>
-              <p>Prise en main rapide et intuitive pour tous les utilisateurs.</p>
-            </div>
+            <h3>{t('simpleDisplay')}</h3>
+            <p>{t('simpleDisplayDesc')}</p>
+          </div>
             <div className="feature-item">
             <img src={alertIcon} alt="Alertes" className="feature-icon" />
               <h3>Alertes en temps réel</h3>
@@ -104,38 +183,24 @@ const Home = () => {
 
 {/* Remplacez cette section */}
 <section className="solutions-section">
-<div className="solutions-header">
-    {/* Titre à droite */}
+  <div className="solutions-header">
     <div className="solution-title-container">
-      <h5>Que Faisons-Nous?</h5>
-      <h1>Nos Solutions : Réponses Complètes à Vos Défis Digitaux</h1>
-    </div>
-    
-    {/* Paragraphe à gauche */}
-    <div className="solution-subtitle-container">
-      <p className="solutions-subtitle">
-        Notre agence transforme vos idées en succès grâce à des solutions créatives, 
-        sur-mesure et performantes. Nous boostons votre visibilité en ligne tout 
-        en vous aidant à atteindre vos objectifs de manière efficace et durable.
-      </p>
-      <Link to="/about" className="voir-plus-link">
-    VOIR PLUS
-  </Link>
+      <h1>{t('whyChooseUs')}</h1>
+      <div className="solution-subtitle-container">
+        <p className="solutions-subtitle">{t('solutionsSubtitle')}</p>
+        <Link to="/about" className="voir-plus-link">
+          {t('seeMore')}
+        </Link>
+      </div>
     </div>
   </div>
 
-    <div className="solutions-grid">
-      {/* Solution 1 */}
-      <div className="solution-card">
-        <div className="solution-number">1</div>
-        <h3>Boostez 
-        <br/>votre visibilité en ligne</h3>
-        <p>
-          Grâce à nos stratégies de marketing digital sur mesure, nous augmentons 
-          votre présence sur les moteurs de recherche et les réseaux sociaux, 
-          attirant plus de trafic qualifié vers votre site.
-        </p>
-      </div>
+  <div className="solutions-grid">
+    <div className="solution-card">
+      <div className="solution-number">1</div>
+      <h3>{t('boostVisibility')}</h3>
+      <p>{t('boostVisibilityDesc')}</p>
+    </div>
 
       {/* Solution 2 */}
       <div className="solution-card">
@@ -165,13 +230,11 @@ const Home = () => {
      {/* Remplacez la section Features par ceci */}
 <section className="capacities-section">
   <div className="capacities-header">
-    <h5>NOS CAPACITÉS</h5>
+    <h3>NOS CAPACITÉS</h3>
     <h2>Une entreprise complète, de A à Z</h2>
   </div>
 
   <div className="solutions-container">
-    <h3 className="solutions-title">NOS SOLUTIONS</h3>
-    
     <div className="solutions-grid">
 
 {/* Développement web */}
@@ -301,27 +364,24 @@ const Home = () => {
 {/* Footer */}
 <footer className="main-footer">
   <div className="footer-content">
-    {/* Colonne Solutions */}
     <div className="footer-column">
-      <h4>SOLUTIONS</h4>
+      <h4>{t('footerSolutions')}</h4>
       <ul className="footer-links">
-        <li>Création de stratégie Marketing Digital</li>
-        <li>Gestion des fiches Google My Business</li>
-        <li>Développement mobile</li>
-        <li>Contact</li>
-        <li>Optimisation De Stratégie SEO</li>
-        <li>Gestion des réseaux sociaux</li>
-        <li>Développement web</li>
+        <li>{t('digitalStrategyItem')}</li>
+        <li>{t('googleBusinessItem')}</li>
+        <li>{t('mobileDevItem')}</li>
+        <li>{t('contactItem')}</li>
+        <li>{t('seoOptimizationItem')}</li>
+        <li>{t('socialMediaItem')}</li>
+        <li>{t('webDevItem')}</li>
       </ul>
     </div>
 
     {/* Colonne Contact */}
     <div className="footer-column">
-      <h4>NOUS CONTACTER</h4>
+      <h4>{t('footerContact')}</h4>
       <div className="contact-info">
-        <p className="contact-text">
-          Nous sommes là pour faire grandir votre activité
-        </p>
+        <p className="contact-text">{t('footerGrowth')}</p>
         <div className="contact-details">
           <div className="contact-item">
             <i className="fas fa-phone"></i>
@@ -352,7 +412,7 @@ const Home = () => {
 
     {/* Réseaux sociaux */}
     <div className="footer-column social-column">
-      <h4>SUIVEZ-NOUS</h4>
+    <h4>{t('footerFollow')}</h4>
       <div className="social-icons">
         <a href="https://www.facebook.com/Digitalmarket.tn/" target="_blank" rel="noopener noreferrer">
           <i className="fab fa-facebook-f"></i>
@@ -369,7 +429,7 @@ const Home = () => {
 
   {/* Copyright */}
   <div className="copyright">
-    <p>© 2025 Digital Market. Tous droits réservés</p>
+   <p>{t('copyright')}</p>
   </div>
 </footer>
     </div>
