@@ -59,11 +59,13 @@ if (!phone || !/^\d{8}$/.test(phone)) {
       to: 'salmatekaya86@gmail.com',
       subject: 'Nouvelle inscription en attente',
       html: `
-        <p>Un nouvel utilisateur s'est inscrit :</p>
+        <p>Un nouvel technicien s'est inscrit :</p>
         <ul>
           <li>Email: ${newUser.email}</li>
-          <li>Nom: ${newUser.name}</li>
-          <li>Rôle: ${newUser.role}</li>
+          <li>Nom Et Prénom: ${newUser.name}</li>
+          <li>Phone: ${newUser.phone}</li>
+          <li>skills: ${newUser.skills}</li>
+          <li>Localisation: ${newUser.location}</li>
         </ul>
         <p>Veuillez approuver l'inscription :</p>
         <a href="http://localhost:3000/api/auth/validate/${newUser._id}">Valider</a>
