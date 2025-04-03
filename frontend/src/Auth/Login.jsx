@@ -127,7 +127,7 @@ const Login = () => {
           {`
              /* Modified page-container */
           .page-container {
-            background-color: #a5c3e8;
+            background-color:#e1deed;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -221,8 +221,8 @@ const Login = () => {
             }
 
             .btn.ant-btn-primary {
-              background-color: #ff7b9c !important;
-              border-color: #ff7b9c !important;
+              background-color: #8db7e7 !important;
+              border-color: #8db7e7 !important;
             }
           `}
         </style>
