@@ -1,128 +1,298 @@
 // frontend/src/pages/translations.js
 export const translations = {
-    fr: {
-       // Navigation
-    about: "À propos",
-    login: "Connexion",
-    solutions: "SOLUTIONS",
-    contact: "NOUS CONTACTER",
-    follow: "SUIVEZ-NOUS",
-    
-    // Hero Section
-    quickPlanning: "Planification rapide et facile",
-    planningManagement: "Excellente Gestion de Planning des Techniciens et des Voitures!",
-    planningText1: "Vous aviez peut-être l'habitude de faire votre planning sur Excel mais vous avez des besoins plus complexes ? Il est temps de vous tourner vers un logiciel qui vous permette de gérer le <strong>planning prévisionnel</strong> de votre société.",
-    planningText2: "Gérez vos ressources humaines et matérielles ainsi que les congés, rendez-vous, projets, horaires etc. PlanningPME s'adapte à tous les secteurs d'activité et vous permet <strong>d'optimiser votre rentabilité</strong>.",
-    
-    // Features Section
-    features: "NOS FONCTIONALITÉS",
-    simpleDisplay: "Affichage simple et précis",
-    simpleDisplayDesc: "Prise en main rapide et intuitive pour tous les utilisateurs.",
-    realtimeAlerts: "Alertes en temps réel",
-    realtimeAlertsDesc: "Notifications immédiates pour les modifications d'agenda.",
-    realtimeTracking: "Suivi en temps réel",
-    realtimeTrackingDesc: "Visualiser les plannings et suivre l'avancement des tâches, temps d'utilisation des véhicules...",
-    deepAnalysis: "Analyses approfondies",
-    deepAnalysisDesc: "Générez des rapports personnalisés pour suivre vos performances.",
-    availability: "Gestion de la disponibilité des techniciens",
-    availabilityDesc: "Planifier les interventions et suivre leur charge de travail.",
-    mapsIntegration: "Intégration d'un Google Maps",
-    mapsIntegrationDesc: "Cette Intégration permet de visualiser les lieux d'interventions.",
-    
-    // Solutions Section
-    whyChooseUs: "Pourquoi digital market est votre premier choix",
-    solutionsSubtitle: "Notre agence transforme vos idées en succès grâce à des solutions créatives, sur-mesure et performantes. Nous boostons votre visibilité en ligne tout en vous aidant à atteindre vos objectifs de manière efficace et durable.",
-    seeMore: "VOIR PLUS",
-    boostVisibility: "Boostez votre visibilité en ligne",
-    boostVisibilityDesc: "Grâce à nos stratégies de marketing digital sur mesure, nous augmentons votre présence sur les moteurs de recherche et les réseaux sociaux, attirant plus de trafic qualifié vers votre site.",
-    increaseRevenue: "Augmentez votre chiffre d'affaires",
-    increaseRevenueDesc: "Nos solutions de gestion publicitaire et d'optimisation SEO vous permettent de convertir vos prospects en clients, tout en maximisant votre retour sur investissement.",
-    organizeBusiness: "Organisez votre entreprise efficacement",
-    organizeBusinessDesc: "Avec notre logiciel ERP Gestioner, vous optimisez la gestion de vos opérations internes (comptabilité, CRM, gestion des stocks), pour gagner en productivité et en efficacité.",
-    
-    // Capacities Section
-    capacities: "NOS CAPACITÉS",
-    completeCompany: "Une entreprise complète, de A à Z",
-    webDev: "Développement web",
-    webDevDesc: "Créez un site web performant et optimisé pour capter l'attention de vos utilisateurs et convertir les visites en clients fidèles.",
-    seoOptimization: "Optimisation de stratégie SEO",
-    seoOptimizationDesc: "Développez une stratégie SEO solide pour améliorer votre visibilité et garantir un retour sur investissement mesurable.",
-    googleBusiness: "Gestion des fiches Google My Business",
-    googleBusinessDesc: "Optimisez vos fiches Google My Business pour renforcer votre présence locale et attirer plus de clients dans votre région.",
-    digitalStrategy: "Création de stratégie marketing digital",
-    digitalStrategyDesc: "Élaborez une stratégie marketing numérique qui maximise votre visibilité en ligne et engage efficacement votre audience cible.",
-    communityManagement: "Community Management",
-    communityManagementDesc: "Boostez votre image de marque et interagissez avec vos clients sur les réseaux sociaux grâce à des campagnes conçues spécialement pour votre entreprise.",
-    animation3D: "Animation & Design en 3D",
-    animation3DDesc: "Donnez vie à vos idées avec des animations 3D créatives et captivantes pour attirer l'attention de votre audience.",
-    graphicDesign: "Design graphique",
-    graphicDesignDesc: "Créez une identité visuelle forte avec des designs graphiques qui mettent en valeur votre marque sur tous les supports.",
-    uiuxDesign: "UI/UX Design",
-    uiuxDesignDesc: "Optimisez l'expérience utilisateur de votre site ou application pour offrir une navigation fluide et agréable, augmentant ainsi la satisfaction des utilisateurs.",
-    googleAds: "Création de campagnes Google ads",
-    googleAdsDesc: "Lancez des campagnes Google Ads efficaces pour toucher de nouveaux clients et augmenter votre retour sur investissement.",
-    mobileDev: "Développement mobile",
-    mobileDevDesc: "Concevez des applications mobiles adaptées à vos besoins pour atteindre vos utilisateurs directement sur leurs appareils mobiles.",
-    businessManagement: "Gestion d'entreprise",
-    businessManagementDesc: "Améliorez vos processus internes et votre stratégie pour une gestion d'entreprise plus efficace et axée sur la croissance.",
-    
-    // Footer
-    footerSolutions: "SOLUTIONS",
-    footerContact: "NOUS CONTACTER",
-    footerFollow: "SUIVEZ-NOUS",
-    footerGrowth: "Nous sommes là pour faire grandir votre activité",
-    viewMap: "Voir sur la carte",
-    copyright: "© 2025 Digital Market. Tous droits réservés",
-    
-    // Solutions list in footer
-    digitalStrategyItem: "Création de stratégie Marketing Digital",
-    googleBusinessItem: "Gestion des fiches Google My Business",
-    mobileDevItem: "Développement mobile",
-    contactItem: "Contact",
-    seoOptimizationItem: "Optimisation De Stratégie SEO",
-    socialMediaItem: "Gestion des réseaux sociaux",
-    webDevItem: "Développement web"
+  fr: {
+      // Navigation
+      about: "À propos",
+      login: "Connexion",
+      solutions: "SOLUTIONS",
+      contact: "NOUS CONTACTER",
+      follow: "SUIVEZ-NOUS",
+      
+      // Hero Section
+      quickPlanning: "Planification rapide et facile",
+      planningManagement: "Excellente Gestion de Planning des Techniciens et des Voitures!",
+      planningText1: "Vous aviez peut-être l'habitude de faire votre planning sur Excel mais vous avez des besoins plus complexes ? Il est temps de vous tourner vers un logiciel qui vous permette de gérer le <strong>planning prévisionnel</strong> de votre société.",
+      planningText2: "Gérez vos ressources humaines et matérielles ainsi que les congés, rendez-vous, projets, horaires etc. PlanningPME s'adapte à tous les secteurs d'activité et vous permet <strong>d'optimiser votre rentabilité</strong>.",
+      
+      // Features Section
+      features: "NOS FONCTIONALITÉS",
+      simpleDisplay: "Affichage simple et précis",
+      simpleDisplayDesc: "Prise en main rapide et intuitive pour tous les utilisateurs.",
+      realtimeAlerts: "Alertes en temps réel",
+      realtimeAlertsDesc: "Notifications immédiates pour les modifications d'agenda.",
+      realtimeTracking: "Suivi en temps réel",
+      realtimeTrackingDesc: "Visualiser les plannings et suivre l'avancement des tâches, temps d'utilisation des véhicules...",
+      deepAnalysis: "Analyses approfondies",
+      deepAnalysisDesc: "Générez des rapports personnalisés pour suivre vos performances.",
+      availability: "Gestion de la disponibilité des techniciens",
+      availabilityDesc: "Planifier les interventions et suivre leur charge de travail.",
+      mapsIntegration: "Intégration d'un Google Maps",
+      mapsIntegrationDesc: "Cette Intégration permet de visualiser les lieux d'interventions.",
+      
+      // Solutions Section
+      whyChooseUs: "Pourquoi digital market est votre premier choix",
+      solutionsSubtitle: "Notre agence transforme vos idées en succès grâce à des solutions créatives, sur-mesure et performantes. Nous boostons votre visibilité en ligne tout en vous aidant à atteindre vos objectifs de manière efficace et durable.",
+      seeMore: "VOIR PLUS",
+      boostVisibility: "Boostez votre visibilité en ligne",
+      boostVisibilityDesc: "Grâce à nos stratégies de marketing digital sur mesure, nous augmentons votre présence sur les moteurs de recherche et les réseaux sociaux, attirant plus de trafic qualifié vers votre site.",
+      increaseRevenue: "Augmentez votre chiffre d'affaires",
+      increaseRevenueDesc: "Nos solutions de gestion publicitaire et d'optimisation SEO vous permettent de convertir vos prospects en clients, tout en maximisant votre retour sur investissement.",
+      organizeBusiness: "Organisez votre entreprise efficacement",
+      organizeBusinessDesc: "Avec notre logiciel ERP Gestioner, vous optimisez la gestion de vos opérations internes (comptabilité, CRM, gestion des stocks), pour gagner en productivité et en efficacité.",
+      
+      // Capacities Section
+      capacities: "NOS CAPACITÉS",
+      completeCompany: "Une entreprise complète, de A à Z",
+      webDev: "Développement web",
+      webDevDesc: "Créez un site web performant et optimisé pour capter l'attention de vos utilisateurs et convertir les visites en clients fidèles.",
+      seoOptimization: "Optimisation de stratégie SEO",
+      seoOptimizationDesc: "Développez une stratégie SEO solide pour améliorer votre visibilité et garantir un retour sur investissement mesurable.",
+      googleBusiness: "Gestion des fiches Google My Business",
+      googleBusinessDesc: "Optimisez vos fiches Google My Business pour renforcer votre présence locale et attirer plus de clients dans votre région.",
+      digitalStrategy: "Création de stratégie marketing digital",
+      digitalStrategyDesc: "Élaborez une stratégie marketing numérique qui maximise votre visibilité en ligne et engage efficacement votre audience cible.",
+      communityManagement: "Community Management",
+      communityManagementDesc: "Boostez votre image de marque et interagissez avec vos clients sur les réseaux sociaux grâce à des campagnes conçues spécialement pour votre entreprise.",
+      animation3D: "Animation & Design en 3D",
+      animation3DDesc: "Donnez vie à vos idées avec des animations 3D créatives et captivantes pour attirer l'attention de votre audience.",
+      graphicDesign: "Design graphique",
+      graphicDesignDesc: "Créez une identité visuelle forte avec des designs graphiques qui mettent en valeur votre marque sur tous les supports.",
+      uiuxDesign: "UI/UX Design",
+      uiuxDesignDesc: "Optimisez l'expérience utilisateur de votre site ou application pour offrir une navigation fluide et agréable, augmentant ainsi la satisfaction des utilisateurs.",
+      googleAds: "Création de campagnes Google ads",
+      googleAdsDesc: "Lancez des campagnes Google Ads efficaces pour toucher de nouveaux clients et augmenter votre retour sur investissement.",
+      mobileDev: "Développement mobile",
+      mobileDevDesc: "Concevez des applications mobiles adaptées à vos besoins pour atteindre vos utilisateurs directement sur leurs appareils mobiles.",
+      businessManagement: "Gestion d'entreprise",
+      businessManagementDesc: "Améliorez vos processus internes et votre stratégie pour une gestion d'entreprise plus efficace et axée sur la croissance.",
+      
+      // Footer
+      footerSolutions: "SOLUTIONS",
+      footerContact: "NOUS CONTACTER",
+      footerFollow: "SUIVEZ-NOUS",
+      footerGrowth: "Nous sommes là pour faire grandir votre activité",
+      viewMap: "Voir sur la carte",
+      copyright: "© 2025 Digital Market. Tous droits réservés",
+      
+      // Solutions list in footer
+      digitalStrategyItem: "Création de stratégie Marketing Digital",
+      googleBusinessItem: "Gestion des fiches Google My Business",
+      mobileDevItem: "Développement mobile",
+      contactItem: "Contact",
+      seoOptimizationItem: "Optimisation De Stratégie SEO",
+      socialMediaItem: "Gestion des réseaux sociaux",
+      webDevItem: "Développement web",
+      resultsTitle: "RÉSULTATS MESURABLES, VISIBILITÉ ACCRUE",
+      resultsSubtitle: "Ce que vous obtenez avec Digital Market",
+      aboutText1: "Lorsque vous collaborez avec Digital Market, vous obtenez bien plus qu'un simple service de marketing digital. Nous offrons une expertise personnalisée pour développer votre présence en ligne et atteindre vos objectifs commerciaux.",
+      aboutText2: "Après une analyse approfondie de vos besoins, nous proposons des solutions stratégiques adaptées à votre marché. Une équipe dédiée optimise chaque aspect de votre projet, tout en assurant un suivi régulier pour améliorer constamment vos performances et vous ajuster aux tendances du marché.",
+      continuousOptimization: "Optimisation continue",
+      continuousOptimizationDesc: "Suivi régulier et ajustements aux tendances du marché",
+      ourValues: "Nos valeurs",
+      innovation: "Innovation",
+      innovationDesc: "Nous croyons fermement que l'innovation est la clé du succès dans le monde digital. Nous nous efforçons d'adopter les dernières technologies et tendances pour offrir des solutions créatives et avant-gardistes à nos clients.",
+      transparency: "Transparence",
+      transparencyDesc: "La confiance est primordiale dans toute collaboration. C'est pourquoi nous prônons une communication transparente à chaque étape de votre projet, en partageant clairement les résultats, les progrès et les ajustements nécessaires.",
+      excellence: "Excellence",
+      excellenceDesc: "L'excellence est au cœur de tout ce que nous faisons. Nous cherchons toujours à surpasser les attentes de nos clients, en assurant un service de haute qualité, basé sur une attention aux détails et un suivi rigoureux."
+
   },
-    en: {
+  en: {
+      // Navigation
       about: "About",
       login: "Login",
-      solutions: "SOLUTIONS", 
+      solutions: "SOLUTIONS",
       contact: "CONTACT US",
       follow: "FOLLOW US",
+      
+      // Hero Section
+      quickPlanning: "Quick and easy planning",
+      planningManagement: "Excellent Management of Technicians and Cars Schedule!",
+      planningText1: "You may be used to doing your scheduling in Excel but have more complex needs? It's time to turn to software that allows you to manage your company's <strong>forecast schedule</strong>.",
+      planningText2: "Manage your human and material resources as well as leave, appointments, projects, schedules etc. PlanningPME adapts to all business sectors and allows you to <strong>optimize your profitability</strong>.",
+      
+      // Features Section
       features: "OUR FEATURES",
+      simpleDisplay: "Simple and precise display",
+      simpleDisplayDesc: "Quick and intuitive for all users.",
+      realtimeAlerts: "Real-time alerts",
+      realtimeAlertsDesc: "Immediate notifications for schedule changes.",
+      realtimeTracking: "Real-time tracking",
+      realtimeTrackingDesc: "View schedules and track task progress, vehicle usage time...",
+      deepAnalysis: "In-depth analysis",
+      deepAnalysisDesc: "Generate custom reports to track your performance.",
+      availability: "Technician availability management",
+      availabilityDesc: "Schedule interventions and track their workload.",
+      mapsIntegration: "Google Maps integration",
+      mapsIntegrationDesc: "This integration allows you to visualize intervention locations.",
+      
+      // Solutions Section
       whyChooseUs: "Why digital market is your first choice",
+      solutionsSubtitle: "Our agency transforms your ideas into success through creative, customized and high-performance solutions. We boost your online visibility while helping you achieve your goals effectively and sustainably.",
       seeMore: "SEE MORE",
+      boostVisibility: "Boost your online visibility",
+      boostVisibilityDesc: "Thanks to our customized digital marketing strategies, we increase your presence on search engines and social networks, attracting more qualified traffic to your site.",
+      increaseRevenue: "Increase your revenue",
+      increaseRevenueDesc: "Our advertising management and SEO optimization solutions allow you to convert prospects into customers while maximizing your return on investment.",
+      organizeBusiness: "Organize your business efficiently",
+      organizeBusinessDesc: "With our ERP Gestioner software, you optimize the management of your internal operations (accounting, CRM, inventory management) to gain productivity and efficiency.",
+      
+      // Capacities Section
       capacities: "OUR CAPABILITIES",
       completeCompany: "A complete company, from A to Z",
-      footerSolutions: "SOLUTIONS", 
+      webDev: "Web development",
+      webDevDesc: "Create a high-performance, optimized website to capture your users' attention and convert visits into loyal customers.",
+      seoOptimization: "SEO strategy optimization",
+      seoOptimizationDesc: "Develop a solid SEO strategy to improve your visibility and guarantee measurable return on investment.",
+      googleBusiness: "Google My Business listings management",
+      googleBusinessDesc: "Optimize your Google My Business listings to strengthen your local presence and attract more customers in your area.",
+      digitalStrategy: "Digital marketing strategy creation",
+      digitalStrategyDesc: "Develop a digital marketing strategy that maximizes your online visibility and effectively engages your target audience.",
+      communityManagement: "Community Management",
+      communityManagementDesc: "Boost your brand image and interact with your customers on social networks through campaigns designed specifically for your business.",
+      animation3D: "3D Animation & Design",
+      animation3DDesc: "Bring your ideas to life with creative and captivating 3D animations to attract your audience's attention.",
+      graphicDesign: "Graphic design",
+      graphicDesignDesc: "Create a strong visual identity with graphic designs that showcase your brand across all media.",
+      uiuxDesign: "UI/UX Design",
+      uiuxDesignDesc: "Optimize the user experience of your website or application to offer smooth and pleasant navigation, thus increasing user satisfaction.",
+      googleAds: "Google Ads campaigns creation",
+      googleAdsDesc: "Launch effective Google Ads campaigns to reach new customers and increase your return on investment.",
+      mobileDev: "Mobile development",
+      mobileDevDesc: "Design mobile applications tailored to your needs to reach your users directly on their mobile devices.",
+      businessManagement: "Business management",
+      businessManagementDesc: "Improve your internal processes and strategy for more effective business management focused on growth.",
+      
+      // Footer
+      footerSolutions: "SOLUTIONS",
       footerContact: "CONTACT US",
       footerFollow: "FOLLOW US",
       footerGrowth: "We're here to grow your business",
+      viewMap: "View on map",
       copyright: "© 2025 Digital Market. All rights reserved",
-      // ...
-    },
-    ar: {
+      
+      // Solutions list in footer
+      digitalStrategyItem: "Digital Marketing Strategy Creation",
+      googleBusinessItem: "Google My Business Listings Management",
+      mobileDevItem: "Mobile Development",
+      contactItem: "Contact",
+      seoOptimizationItem: "SEO Strategy Optimization",
+      socialMediaItem: "Social Media Management",
+      webDevItem: "Web Development",
+      resultsTitle: "MEASURABLE RESULTS, INCREASED VISIBILITY",
+      resultsSubtitle: "What you get with Digital Market",
+      aboutText1: "When you collaborate with Digital Market, you get much more than just a digital marketing service. We offer personalized expertise to develop your online presence and achieve your business goals.",
+      aboutText2: "After a thorough analysis of your needs, we propose strategic solutions tailored to your market. A dedicated team optimizes every aspect of your project, while ensuring regular follow-up to constantly improve your performance and adjust to market trends.",
+      continuousOptimization: "Continuous optimization",
+      continuousOptimizationDesc: "Regular monitoring and adjustments to market trends",
+      ourValues: "Our values",
+      innovation: "Innovation",
+      innovationDesc: "We firmly believe that innovation is the key to success in the digital world. We strive to adopt the latest technologies and trends to provide creative and cutting-edge solutions to our clients.",
+      transparency: "Transparency",
+      transparencyDesc: "Trust is essential in any collaboration. That's why we advocate transparent communication at every stage of your project, clearly sharing results, progress and necessary adjustments.",
+      excellence: "Excellence",
+      excellenceDesc: "Excellence is at the heart of everything we do. We always strive to exceed our clients' expectations, ensuring high-quality service based on attention to detail and rigorous follow-up."
+  },
+  ar: {
+      // Navigation
       about: "معلومات عنا",
       login: "تسجيل الدخول",
       solutions: "الحلول",
       contact: "اتصل بنا",
       follow: "تابعنا",
+      
+      // Hero Section
+      quickPlanning: "تخطيط سريع وسهل",
+      planningManagement: "إدارة ممتازة لجدولة الفنيين والسيارات!",
+      planningText1: "قد تكون معتادًا على إجراء جدولتك في Excel ولكن لديك احتياجات أكثر تعقيدًا؟ حان الوقت للتحول إلى برنامج يتيح لك إدارة <strong>الجدولة التقديرية</strong> لشركتك.",
+      planningText2: "قم بإدارة مواردك البشرية والمادية بالإضافة إلى الإجازات والمواعيد والمشاريع والجداول الزمنية وما إلى ذلك. يتكيف PlanningPME مع جميع قطاعات الأعمال ويتيح لك <strong>تحسين ربحيتك</strong>.",
+      
+      // Features Section
       features: "ميزاتنا",
+      simpleDisplay: "عرض بسيط ودقيق",
+      simpleDisplayDesc: "سهل وسريع لجميع المستخدمين.",
+      realtimeAlerts: "تنبيهات في الوقت الحقيقي",
+      realtimeAlertsDesc: "إشعارات فورية لتغييرات الجدولة.",
+      realtimeTracking: "تتبع في الوقت الحقيقي",
+      realtimeTrackingDesc: "عرض الجداول ومتابعة تقدم المهام ووقت استخدام المركبات...",
+      deepAnalysis: "تحليلات متعمقة",
+      deepAnalysisDesc: "إنشاء تقارير مخصصة لمتابعة أدائك.",
+      availability: "إدارة توافر الفنيين",
+      availabilityDesc: "جدولة التدخلات ومتابعة عبء العمل لديهم.",
+      mapsIntegration: "تكامل خرائط جوجل",
+      mapsIntegrationDesc: "يسمح هذا التكامل بتصور مواقع التدخلات.",
+      
+      // Solutions Section
       whyChooseUs: "لماذا ديجيتال ماركت هي اختيارك الأول",
+      solutionsSubtitle: "تحول وكالتنا أفكارك إلى نجاح من خلال حلول إبداعية ومخصصة وعالية الأداء. نحن نعزز ظهورك على الإنترنت مع مساعدتك في تحقيق أهدافك بشكل فعال ومستدام.",
       seeMore: "شاهد المزيد",
+      boostVisibility: "عزز ظهورك على الإنترنت",
+      boostVisibilityDesc: "بفضل استراتيجياتنا المخصصة للتسويق الرقمي، نزيد من وجودك على محركات البحث ووسائل التواصل الاجتماعي، لجذب المزيد من الزوار المؤهلين إلى موقعك.",
+      increaseRevenue: "زِد إيراداتك",
+      increaseRevenueDesc: "تتيح لك حلولنا لإدارة الإعلانات وتحسين محركات البحث تحويل العملاء المحتملين إلى عملاء، مع تعظيم عائد استثمارك.",
+      organizeBusiness: "نظم عملك بكفاءة",
+      organizeBusinessDesc: "باستخدام برنامجنا ERP Gestioner، يمكنك تحسين إدارة عملياتك الداخلية (المحاسبة، CRM، إدارة المخزون) لتحقيق المزيد من الإنتاجية والكفاءة.",
+      
+      // Capacities Section
       capacities: "قدراتنا",
       completeCompany: "شركة متكاملة من الألف إلى الياء",
+      webDev: "تطوير الويب",
+      webDevDesc: "أنشئ موقع ويب عالي الأداء ومُحسّن لجذب انتباه المستخدمين وتحويل الزيارات إلى عملاء مخلصين.",
+      seoOptimization: "تحسين استراتيجية SEO",
+      seoOptimizationDesc: "طور استراتيجية SEO قوية لتحسين ظهورك وضمان عائد استثمار قابل للقياس.",
+      googleBusiness: "إدارة قوائم Google My Business",
+      googleBusinessDesc: "حسّن قوائم Google My Business لتعزيز وجودك المحلي وجذب المزيد من العملاء في منطقتك.",
+      digitalStrategy: "إنشاء استراتيجية التسويق الرقمي",
+      digitalStrategyDesc: "ضع استراتيجية تسويق رقمي تعزز ظهورك على الإنترنت وتجذب جمهورك المستهدف بشكل فعال.",
+      communityManagement: "إدارة المجتمع",
+      communityManagementDesc: "عزز صورة علامتك التجارية وتفاعل مع عملائك على وسائل التواصل الاجتماعي من خلال حملات مصممة خصيصًا لعملك.",
+      animation3D: "الرسوم المتحركة والتصميم ثلاثي الأبعاد",
+      animation3DDesc: "أحْيِ أفكارك برسوم متحركة إبداعية وجذابة ثلاثية الأبعاد لجذب انتباه جمهورك.",
+      graphicDesign: "التصميم الجرافيكي",
+      graphicDesignDesc: "أنشئ هوية بصرية قوية بتصاميم جرافيكية تبرز علامتك التجارية على جميع الوسائط.",
+      uiuxDesign: "تصميم واجهة المستخدم/تجربة المستخدم",
+      uiuxDesignDesc: "حسّن تجربة المستخدم لموقعك أو تطبيقك لتقديم تصفح سلس وممتع، مما يزيد من رضا المستخدمين.",
+      googleAds: "إنشاء حملات Google Ads",
+      googleAdsDesc: "أطلق حملات Google Ads فعالة للوصول إلى عملاء جدد وزيادة عائد استثمارك.",
+      mobileDev: "تطوير الجوال",
+      mobileDevDesc: "صمم تطبيقات جوال مخصصة لاحتياجاتك للوصول إلى مستخدميك مباشرة على أجهزتهم المحمولة.",
+      businessManagement: "إدارة الأعمال",
+      businessManagementDesc: "حسّن عملياتك الداخلية واستراتيجيتك لإدارة أعمال أكثر فعالية تركز على النمو.",
+      
+      // Footer
       footerSolutions: "الحلول",
       footerContact: "اتصل بنا",
       footerFollow: "تابعنا",
       footerGrowth: "نحن هنا لتنمية عملك",
+      viewMap: "عرض على الخريطة",
       copyright: "© 2025 ديجيتال ماركت. جميع الحقوق محفوظة",
-      // ...
-    }
-  };
-  
-  export const languageNames = {
-    fr: "Français",
-    en: "English",
-    ar: "العربية"
-  };
+      
+      // Solutions list in footer
+      digitalStrategyItem: "إنشاء استراتيجية التسويق الرقمي",
+      googleBusinessItem: "إدارة قوائم Google My Business",
+      mobileDevItem: "تطوير الجوال",
+      contactItem: "اتصال",
+      seoOptimizationItem: "تحسين استراتيجية SEO",
+      socialMediaItem: "إدارة وسائل التواصل الاجتماعي",
+      webDevItem: "تطوير الويب",
+      resultsTitle: "نتائج قابلة للقياس، زيادة في الظهور",
+      resultsSubtitle: "ما تحصل عليه مع ديجيتال ماركت",
+      aboutText1: "عندما تتعاون مع ديجيتال ماركت، تحصل على أكثر من مجرد خدمة تسويق رقمي. نقدم خبرة مخصصة لتطوير وجودك على الإنترنت وتحقيق أهدافك التجارية.",
+      aboutText2: "بعد تحليل دقيق لاحتياجاتك، نقترح حلولًا استراتيجية مصممة خصيصًا لسوقك. يقوم فريق مخصص بتحسين كل جانب من جوانب مشروعك، مع ضمان متابعة منتظمة لتحسين أدائك باستمرار والتكيف مع اتجاهات السوق.",
+      continuousOptimization: "تحسين مستمر",
+      continuousOptimizationDesc: "متابعة منتظمة وتعديلات وفقًا لاتجاهات السوق",
+      ourValues: "قيمنا",
+      innovation: "الابتكار",
+      innovationDesc: "نؤمن إيمانًا راسخًا بأن الابتكار هو مفتاح النجاح في العالم الرقمي. نسعى جاهدين لاعتماد أحدث التقنيات والاتجاهات لتقديم حلول إبداعية وحديثة لعملائنا.",
+      transparency: "الشفافية",
+      transparencyDesc: "الثقة ضرورية في أي تعاون. لهذا السبب ندعو إلى التواصل الشفاف في كل مرحلة من مراحل مشروعك، مع مشاركة النتائج والتقدم والتعديلات اللازمة بوضوح.",
+      excellence: "التميز",
+      excellenceDesc: "التميز هو جوهر كل ما نقوم به. نسعى دائمًا لتجاوز توقعات عملائنا، مع ضمان خدمة عالية الجودة تعتمد على الاهتمام بالتفاصيل والمتابعة الدقيقة."
+  }
+};
+
+export const languageNames = {
+  fr: "Français",
+  en: "English",
+  ar: "العربية"
+};

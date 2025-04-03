@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber, Table } from 'antd';
-import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined, MoonOutlined, SunOutlined  } from '@ant-design/icons';
 import { BarChart ,PieChart, CartesianGrid, XAxis, YAxis, Bar,Legend ,Pie,Cell } from 'recharts'; 
 
 import { useAuth } from '../contexts/AuthContext';
@@ -22,6 +22,41 @@ const localizer = momentLocalizer(moment);
 moment.locale('fr');
 
 const AdminDashboard = () => {
+
+  const [darkMode, setDarkMode] = useState(false);
+  // Appliquer les styles en fonction du mode
+  const themeStyles = {
+    light: {
+      backgroundColor: '#fff',
+      textColor: '#000',
+      cardBackground: '#f0f2f5',
+      headerBackground: '#001529',
+      headerText: '#fff'
+    },
+    dark: {
+      backgroundColor: '#1f1f1f',
+      textColor: '#fff',
+      cardBackground: '#2a2a2a',
+      headerBackground: '#141414',
+      headerText: '#fff'
+    }
+  };
+
+  const currentTheme = darkMode ? themeStyles.dark : themeStyles.light;
+  // Dark Mode Toggle
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem('adminDarkMode', newMode);
+  };
+
+  // Initial load
+  useEffect(() => {
+    const savedMode = localStorage.getItem('adminDarkMode') === 'true';
+    setDarkMode(savedMode);
+  }, []);
+
+
   const isValidEmail = (email) => {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     return regex.test(email);
@@ -854,13 +889,21 @@ const gestionnaireColumns = [
     </div>
     );
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible theme="light">
+    <div className={`admin-container ${darkMode ? 'dark-mode' : ''}`}>
+    <Layout style={{ minHeight: '100vh',
+      backgroundColor: currentTheme.backgroundColor,
+      color: currentTheme.textColor
+    }}>
+      <Sider 
+        collapsible 
+        theme={darkMode ? 'dark' : 'light'}
+        style={{ backgroundColor: darkMode ? '#141414' : '#fff' }}
+      >
         <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-          <Title level={4} style={{ margin: 0 }}>Admin Dashboard</Title>
+          <Title level={4} style={{ margin: 0, color: darkMode ? '#fff' : '#000' }}>Admin Dashboard</Title>
         </div>
         <Menu
-          theme="light"
+          theme={darkMode ? 'dark' : 'light'}
           mode="inline"
           selectedKeys={[selectedMenu]}
           items={menuItems}
@@ -869,12 +912,31 @@ const gestionnaireColumns = [
       </Sider>
 
       <Layout>
-        <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Text strong>Connecté en tant que : {userData?.name}</Text>
-          </div>
-          <Button icon={<UserOutlined />} onClick={logout}>Déconnexion</Button>
-        </Header>
+       <Header style={{ background: darkMode ? '#141414' : '#001529',
+            padding: '0 24px', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            borderBottom: darkMode ? '1px solid #303030' : '1px solid #f0f0f0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <Text strong>Connecté en tant que : {userData?.name}</Text>
+        </div>
+        
+        <Space>
+          {/* Bouton Dark Mode */}
+          <Tooltip title={darkMode ? "Mode clair" : "Mode sombre"}>
+            <Button 
+              icon={darkMode ? <SunOutlined /> : <MoonOutlined />} 
+              onClick={toggleDarkMode}
+              style={{ marginRight: 8 }}
+            />
+          </Tooltip>
+          
+          <Button icon={<UserOutlined />} onClick={logout}>
+            Déconnexion
+          </Button>
+        </Space>
+      </Header>
 
         <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
           {loading ? (
@@ -882,10 +944,22 @@ const gestionnaireColumns = [
           ) : (
             <>
             {selectedMenu === '1' && (
-            <HomeDashboard /> // Affichez le tableau de bord d'accueil si l'option est sélectionnée
+            <HomeDashboard  darkMode={darkMode} /> // Affichez le tableau de bord d'accueil si l'option est sélectionnée
           )}
               {selectedMenu === '2' && (
-                <Card title="Calendrier des interventions" bordered={false}>
+              <Card 
+              title="Calendrier des interventions" 
+              bordered={false}
+              headStyle={{ 
+                backgroundColor: darkMode ? '#2a2a2a' : '#fafafa',
+                color: darkMode ? '#fff' : '#000',
+                borderBottom: darkMode ? '1px solid #303030' : '1px solid #f0f0f0'
+              }}
+              bodyStyle={{ 
+                backgroundColor: darkMode ? '#2a2a2a' : '#fff',
+                color: darkMode ? '#fff' : '#000'
+              }}
+            >
                   <TechniciensSection
                     techniciens={techniciens}
                     tasks={tasks}
@@ -896,6 +970,7 @@ const gestionnaireColumns = [
                     onTasksUpdate={setTechTasks}
                     assignedVehicles={assignedVehicles}
                     onVehiclesUpdate={setAssignedVehicles}
+                    darkMode={darkMode}
                   />
 
                   <Calendar
@@ -1332,6 +1407,7 @@ const gestionnaireColumns = [
   {editFormErrors.confirmPassword && <Text type="danger">{editFormErrors.confirmPassword}</Text>}
 </Modal>
     </Layout>
+    </div>
   );
 };
 

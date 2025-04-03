@@ -121,6 +121,49 @@
     .modal-enter {
       animation: modalEnter 0.3s ease-out;
     }
+
+   /* Styles Light Mode par défaut */
+.admin-container {
+  --bg-color: #f8fafc;
+  --header-bg: #dddbed;
+  --sider-bg: #f0f8f3;
+  --text-color: #333;
+  --card-bg: #fff;
+}
+
+/* Styles Dark Mode */
+.admin-container.dark-mode {
+  --bg-color: #1f1f1f;
+  --header-bg: #1a1a1a;
+  --sider-bg: #1a1a1a;
+  --text-color: #f0f0f0;
+  --card-bg: #2d2d2d;
+}
+
+/* Application des variables */
+.admin-container .ant-layout {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.admin-container .ant-layout-header {
+  background: var(--header-bg) !important;
+  color: var(--text-color);
+}
+
+.admin-container .ant-layout-sider {
+  background: var(--sider-bg) !important;
+}
+
+.admin-container .ant-card {
+  background: var(--card-bg);
+  color: var(--text-color);
+}
+
+.admin-container .ant-menu {
+  background: transparent;
+  color: var(--text-color);
+}
     
     /* Responsive */
     @media (max-width: 768px) {

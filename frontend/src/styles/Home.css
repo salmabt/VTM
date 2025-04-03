@@ -577,79 +577,13 @@
 
 /* Ajoutez ces styles à la fin de votre fichier Home.css */
 
-/* Dark Mode - Améliorations */
-body.dark-mode {
-  --primary-color: #4dabf7;
-  --secondary-color: #1a1a1a;
-  --text-color: #f0f0f0;
-  --light-text: #b0b0b0;
-  --bg-light: #2d2d2d;
-  --bg-dark: #1a1a1a;
-  --card-bg: #2d2d2d;
-  --border-color: #444;
-}
 
-body.dark-mode .home-container {
-  background-color: var(--secondary-color);
-  color: var(--text-color);
-}
-
-body.dark-mode .navbar {
-  background-color: var(--bg-dark);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .nav-links a {
-  color: var(--text-color);
-}
-
-body.dark-mode .hero {
-  background: linear-gradient(135deg, var(--bg-light) 0%, var(--card-bg) 100%);
-}
-
-body.dark-mode .hero h1,
-body.dark-mode .hero p,
-body.dark-mode .features h2,
-body.dark-mode .solution-card h3,
-body.dark-mode .solution-card p {
-  color: var(--text-color);
-}
-
-body.dark-mode .feature-card,
-body.dark-mode .feature-item,
-body.dark-mode .solution-card,
-body.dark-mode .value-item {
-  background: var(--card-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-body.dark-mode .solution-number {
-  background: var(--primary-color);
-}
-
-body.dark-mode .footer-links a,
-body.dark-mode .contact-link,
-body.dark-mode .map-link {
-  color: var(--text-color) !important;
-}
-
-body.dark-mode .footer-links a:hover,
-body.dark-mode .contact-link:hover {
-  color: var(--primary-color) !important;
-}
-
-body.dark-mode .main-footer {
-  background-color: var(--bg-dark);
-  border-top: 1px solid var(--border-color);
-}
 /* Ajoutez ces transitions */
 body, .navbar, .hero, .feature-card, .solution-card, .footer-column {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Transition pour le bouton Dark Mode */
+
 .ant-switch {
   transition: all 0.3s ease !important;
 }

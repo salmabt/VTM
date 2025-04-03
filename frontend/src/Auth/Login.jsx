@@ -36,7 +36,6 @@ const Login = () => {
         <div className="nav-links">
           <Link to="/about">À propos</Link>
           <Link to="/login">Connexion</Link>
-          <Link to="/contact">Contactez-nous</Link>
         </div>
       </nav>
       <Card className="form-container">
@@ -137,35 +136,42 @@ const Login = () => {
             margin: 0;
           }
 
-          /* Added navbar styles */
-          .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 5%;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+         /* Navbar styles */
+           .navbar {
+          position: fixed; /* Garde la navbar fixe en haut */
+          top: 0;
+          left: 0;
+          width: 98%; /* Occupe toute la largeur */
+          z-index: 1000; /* Assure qu'elle passe au-dessus du contenu */
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 30px;
+          background-color: white;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        } .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
           }
-           .logo-image {
-            height: 50px;
-          }
-
+           .nav-links {
+          display: flex;
+          gap: 5px;
+          align-items: center;
+        }
           .nav-links a {
-            margin-left: 2rem;
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: color 0.3s;
+              text-decoration: none;
+              color: #2c3e50;
+              font-weight: 500;
+              transition: color 0.3s;
+              padding: 10px 15px; /* Ajoute un peu d'espace autour des liens */
           }
 
           .nav-links a:hover {
             color: #ff7b9c;
           }
+
+
             .form-container {
               background-color: white;
               width: 80%;
@@ -176,6 +182,7 @@ const Login = () => {
               padding: 0;
               margin: 0;
             }
+              
 
             .main-flex {
               height: 100%;
