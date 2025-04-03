@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import registerImage from '../assets/resized_iii.webp';
 import useSignup from '../hooks/useSignup';
 import logo from '../assets/logo-digital-market.png'; 
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
@@ -16,10 +17,19 @@ const cities = [
 ];
 
 const Register = () => {
+  const [form] = Form.useForm(); 
   const { loading, error, registerUser } = useSignup();
   const navigate = useNavigate();
 
   const handleRegister = async (values) => {
+    // Ajouter le préfixe +216 avant l'envoi
+    const cleanPhone = values.phone.replace(/\D/g, '');
+  
+    const formattedValues = {
+      ...values,
+      phone: cleanPhone // Garantir le format international
+    };
+   
     const validRoles = ['technicien']; // Liste des rôles valides
     const { role, password, passwordConfirm } = values;
 
@@ -38,8 +48,9 @@ const Register = () => {
     console.log('Values being sent:', values); // Vérifiez que "location" est bien présent
     // Si le rôle et les mots de passe sont valides, appeler la fonction pour enregistrer l'utilisateur
     try {
+     
       console.log('Registering user with values:', values); // Log des données envoyées
-      const result = await registerUser(values); // Attendre que l'enregistrement soit terminé
+      const result = await registerUser(formattedValues); // Attendre que l'enregistrement soit terminé
 
       // Redirection vers la page d'attente après une inscription réussie
       if (result.success) {
@@ -63,7 +74,7 @@ const Register = () => {
         <div className="nav-links">
           <Link to="/about">À propos</Link>
           <Link to="/login">Connexion</Link>
-          <Link to="/contact">Contactez-nous</Link>
+          
         </div>
       </nav>
     <Card className="form-container">
@@ -76,7 +87,7 @@ const Register = () => {
           <Typography.Text type="secondary" strong className="slogan">
             Join for exclusive access!
           </Typography.Text>
-          <Form layout="vertical" onFinish={handleRegister} autoComplete="off">
+          <Form layout="vertical" onFinish={handleRegister} autoComplete="off" form={form}>
             <Form.Item
               label="Full Name"
               name="name"
@@ -90,48 +101,68 @@ const Register = () => {
               <Input size="large" placeholder="Enter your full name" />
             </Form.Item>
 
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your Email!',
-                },
-                {
-                  type: 'email',
-                  message: 'The input is not valid Email!',
-                },
-              ]}
-            >
-              <Input size="large" placeholder="Enter your email" />
-            </Form.Item>
+         
+<Form.Item
+  label="Email"
+  name="email"
+  rules={[
+    {
+      required: true,
+      message: 'Veuillez saisir votre email !',
+    },
+    {
+      type: 'email',
+      message: 'Format email invalide !',
+    },
+    {
+      pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+      message: 'Adresse email non valide !'
+    }
+  ]}
+>
+  <Input size="large" placeholder="exemple@domaine.com" />
+</Form.Item>
 
-            <Form.Item
-              label="Role"
-              name="role"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your Role!',
-                },
-              ]}
-            >
-              <Input size="large" placeholder="Enter your role" />
-            </Form.Item>
 
-            <Form.Item
-              label="Phone"
-              name="phone"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your phone number!',
-                },
-              ]}
-            >
-              <Input size="large" placeholder="Enter your phone number" />
-            </Form.Item>
+<Form.Item
+  label="Role"
+  name="role"
+  initialValue="technicien"
+  rules={[
+    {
+      required: true,
+      message: 'Veuillez sélectionner votre rôle !',
+    },
+  ]}
+>
+  <Select size="large" disabled>
+    <Option value="technicien">Technicien</Option>
+  </Select>
+</Form.Item>
+
+<Form.Item
+          label="Phone"
+          name="phone"
+          rules={[
+            { required: true, message: 'Veuillez saisir votre numéro de téléphone !' },
+            { pattern: /^\d{8}$/, message: '8 chiffres requis (ex: 23123502)' }
+          ]}
+        >
+          <Input 
+            size="large"
+            placeholder="23123502"
+            addonBefore="+216"
+            maxLength={8}
+            type="tel"
+            onKeyPress={(e) => {
+              if (!/[0-9]/.test(e.key)) e.preventDefault();
+            }}
+            onChange={(e) => {
+              const cleanedValue = e.target.value.replace(/\D/g, '');
+              form.setFieldsValue({ phone: cleanedValue });
+            }}
+          />
+        </Form.Item>
 
             {/* Sélection de la localisation */}
             <Form.Item
@@ -163,7 +194,11 @@ const Register = () => {
                   message: 'Please select your skills!',
                 },
               ]}
-               extra="Séparez les compétences par des virgules"
+              extra={
+  <div style={{ fontSize: '0.8rem', color: '#666', marginTop: 5 }}>
+    <InfoCircleOutlined /> Séparez les compétences par des virgules (ex: Plomberie, Électricité)
+  </div>
+}
             >
               <Input
                 size="large"
@@ -171,18 +206,29 @@ const Register = () => {
               />
             </Form.Item>
 
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your Password!',
-                },
-              ]}
-            >
-              <Input.Password size="large" placeholder="Enter your password" />
-            </Form.Item>
+           
+<Form.Item
+  label="Password"
+  name="password"
+  rules={[
+    {
+      required: true,
+      message: 'Please input your Password!',
+    },
+    () => ({
+      validator(_, value) {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!value || passwordRegex.test(value)) {
+          return Promise.resolve();
+        }
+        return Promise.reject(new Error('Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial !'));
+      },
+    }),
+  ]}
+  help="Minimum 8 caractères avec majuscule, minuscule, chiffre et caractère spécial"
+>
+  <Input.Password size="large" placeholder="Entrez votre mot de passe" />
+</Form.Item>
 
             <Form.Item
               label="Confirm Password"
