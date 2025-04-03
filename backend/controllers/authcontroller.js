@@ -39,9 +39,10 @@ exports.signup = async (req, res, next) => {
     }
 
     // Vérification du téléphone
-    if (!phone || !/^\d{8}$/.test(phone)) {
-      return next(new createError('Invalid phone number format (ex: 12345678).', 400));
-  }
+  // Remplacer la validation existante du téléphone
+if (!phone || !/^\d{8}$/.test(phone)) {
+  return next(new createError('Format de téléphone invalide (8 chiffres requis)', 400));
+}
 
     // Hachage du mot de passe
     const hashedPassword = await bcrypt.hash(password, 12);

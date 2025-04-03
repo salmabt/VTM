@@ -19,7 +19,7 @@ exports.createTechnicien = async (req, res, next) => {
     if (existingUser) {
       return next(new createError('Un utilisateur avec cet email existe déjà.', 400));
     }
-
+   
     // Validation des données (par exemple, si l'email et le mot de passe sont valides)
     if (!name || !email || !password|| !location) {
       return next(new createError('Nom, email, mot de passe et localisation sont obligatoires.', 400));

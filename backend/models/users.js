@@ -6,10 +6,10 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['admin', 'gestionnaire', 'technicien'], default: 'technicien' },
-  phone: { type: String ,required: false},
+  phone: { type: String ,required: true},
   isApproved: { type: Boolean, default: false },
   skills: { type: Array, default: [] },
-  location: { type: String, required: true }, // Ajout de la localisation
+  location: { type: String, required: false }, // Ajout de la localisation
   archived: { type: Boolean, default: false, required: true },
   averageRating: { 
     type: Number,
