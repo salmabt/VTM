@@ -84,6 +84,17 @@ const [newFiles, setNewFiles] = useState([]); // Pour les nouveaux fichiers
 const [selectedCity, setSelectedCity] = useState(null);
 const [selectedRegion, setSelectedRegion] = useState(null);
 const [selectedTechnicien, setSelectedTechnicien] = useState(null);
+// pagination et search de voiture
+const [currentPage, setCurrentPage] = useState(1);
+const [pageSize, setPageSize] = useState(4);
+const [searchTerm, setSearchTerm] = useState('');
+// pagination et search de taches
+const [currentTaskPage, setCurrentTaskPage] = useState(1);
+const [taskPageSize, setTaskPageSize] = useState(4);
+const [taskSearchTerm, setTaskSearchTerm] = useState('');
+// pagination de note
+const [currentNotePage, setCurrentNotePage] = useState(1);
+const [notePageSize, setNotePageSize] = useState(4);
 
 useEffect(() => {
   const unreadNotifications = noteNotifications.filter(n => !n.read);
@@ -907,6 +918,16 @@ useEffect(() => {
                                 
                               {selectedMenu === '3' && (
                 <Card title="Gestion des tâches" bordered={false}>
+                    {/* Ajouter la barre de recherche */}
+    <Input.Search
+      placeholder="Rechercher par titre,localisation,Technicien ou Véhicule..."
+      onChange={(e) => {
+        setTaskSearchTerm(e.target.value);
+        setCurrentTaskPage(1);
+      }}
+      style={{ marginBottom: 16, width: 300 }}
+      allowClear
+    />
                   <div style={{ marginBottom: 16, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
                     {/* Les champs de formulaire restent inchangés */}
                     <Input
@@ -1046,7 +1067,40 @@ useEffect(() => {
                   </div>
 
                   <List
-                    dataSource={tasks}
+                    dataSource={tasks
+                      .filter(task => {
+                        const tech = techniciens.find(t => t._id === task.technicien);
+                        const veh = vehicules.find(v => v._id === task.vehicule);
+                        
+                        return (
+                          task.title.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+                          task.location?.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+                          tech?.name.toLowerCase().includes(taskSearchTerm.toLowerCase()) || // Recherche par nom technicien
+                          veh?.model.toLowerCase().includes(taskSearchTerm.toLowerCase()) || // Recherche par modèle véhicule
+                          veh?.registration.toLowerCase().includes(taskSearchTerm.toLowerCase()) // Recherche par immatriculation
+                        );
+                      })
+                    
+                      .slice((currentTaskPage - 1) * taskPageSize, currentTaskPage * taskPageSize)
+                    }
+                    pagination={{
+                      pageSize: taskPageSize,
+                      current: currentTaskPage,
+                      total: tasks.filter(task => 
+                        task.title.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+                        task.technicien?.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+                        task.location?.toLowerCase().includes(taskSearchTerm.toLowerCase())||
+                        task.vehicule?.toLowerCase().includes(taskSearchTerm.toLowerCase())
+                        
+                      ).length,
+                      onChange: (page, pageSize) => {
+                        setCurrentTaskPage(page);
+                        setTaskPageSize(pageSize);
+                      },
+                      showSizeChanger: true,
+                      pageSizeOptions: ['4', '8', '12'],
+                      showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total} tâches`,
+                    }}
                     renderItem={task => {
                       // Ajout des constantes ici
                       const assignedTechnicien = techniciens.find(t => t._id === task.technicien);
@@ -1318,6 +1372,16 @@ useEffect(() => {
 
               {selectedMenu === '4' && (
                 <Card title="Gestion des véhicules" bordered={false}>
+                    {/* Ajouter la barre de recherche */}
+    <Input.Search 
+      placeholder="Rechercher par modèle ou immatriculation"
+      onChange={(e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); // Reset à la première page lors d'une nouvelle recherche
+      }}
+      style={{ marginBottom: 16, width: 300 }}
+      allowClear
+    />
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <Input
                       placeholder="Immatriculation *"
@@ -1350,7 +1414,28 @@ useEffect(() => {
                     </Button>
                   </div>
                   <List
-                    dataSource={vehicules}
+                    dataSource={vehicules
+                      .filter(vehicule => 
+                        vehicule.model.toLowerCase().includes(searchTerm.toLowerCase())||
+                        vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                    }
+                    pagination={{
+                      pageSize: pageSize,
+                      current: currentPage,
+                      total: vehicules.filter(vehicule => 
+                        vehicule.model.toLowerCase().includes(searchTerm.toLowerCase())||
+                        vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase())
+                      ).length,
+                      onChange: (page, pageSize) => {
+                        setCurrentPage(page);
+                        setPageSize(pageSize);
+                      },
+                      showSizeChanger: true,
+                      pageSizeOptions: ['4', '8', '12'],
+                      showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total} véhicules`,
+                    }}
                     renderItem={vehicule => (
                       <List.Item
                       actions={[
@@ -1406,7 +1491,22 @@ useEffect(() => {
               ) : (
             
 <List
-  dataSource={notes}
+  dataSource={notes.slice(
+    (currentNotePage - 1) * notePageSize,
+    currentNotePage * notePageSize
+  )}
+  pagination={{
+    pageSize: notePageSize,
+    current: currentNotePage,
+    total: notes.length,
+    onChange: (page, pageSize) => {
+      setCurrentNotePage(page);
+      setNotePageSize(pageSize);
+    },
+    showSizeChanger: true,
+    pageSizeOptions: ['4', '8', '12'],
+    showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total} notes`,
+  }}
   renderItem={(note, index) => {
     const isNew = index === 0 && Date.now() - new Date(note.timestamp).getTime() < 5000;
     
