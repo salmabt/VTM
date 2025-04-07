@@ -499,6 +499,7 @@ const Register = () => {
             }
         `}
       </style>
+      
     </Card>
     </div>
 
