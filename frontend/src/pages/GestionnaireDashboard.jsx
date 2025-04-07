@@ -29,6 +29,35 @@ const { Option } = Select;
 const localizer = momentLocalizer(moment);
 moment.locale('fr');
 
+// Déclaration de la fonction avant le JSX
+const eventStyleGetter = (event) => {
+  let backgroundColor = '#b3cde0'; // Planifié par défaut (bleu clair)
+
+  switch (event.status) {
+    case 'terminé':
+      backgroundColor = '#f8d7da'; // Rouge clair
+      break;
+    case 'en cours':
+      backgroundColor = '#d4edda'; // Vert clair
+      break;
+    case 'planifié':
+      backgroundColor = '#dbe9f4'; // Bleu clair
+      break;
+    default:
+      backgroundColor = '#e2e3e5'; // Gris clair
+  }
+
+  return {
+    style: {
+      backgroundColor,
+      color: '#000',
+      borderRadius: '4px',
+      border: 'none',
+      padding: '4px 8px',
+    },
+  };
+};
+
 const GestionnaireDashboard = () => {
   const { userData, logout } = useAuth();
   const [selectedMenu, setSelectedMenu] = useState('1');
@@ -658,16 +687,7 @@ useEffect(() => {
     { key: '5', icon: <ClockCircleOutlined />, label: 'Chronologie' },
     { key: '6', icon: <UserOutlined />, label: 'Filtrage Techniciens' }
   ];
-  const eventStyleGetter = (event) => {
-    return {
-      style: {
-        backgroundColor: '#f0f0f', // Couleur de fond
-        border: '1px solid #ccc', // Bordure
-        borderRadius: '4px', // Coins arrondis
-        padding: '4px', // Espacement interne
-      },
-    };
-  };
+  
   // Composant personnalisé pour afficher les événements
   const CustomEvent = ({ event }) => (
     <div>
@@ -869,9 +889,11 @@ useEffect(() => {
                          start: new Date(task.startDate),
                          end: new Date(task.endDate),
                          allDay: false,
+                         status: task.status,
                          resource: { ...task, technicien: tech, vehicule: veh }
                        };
                      })}
+                     eventPropGetter={eventStyleGetter} // ✅ Appliquer le style personnalisé
                      onSelectEvent={(event) => setSelectedTask(event.resource)}
                               startAccessor="start"
                               endAccessor="end"
