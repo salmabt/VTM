@@ -21,6 +21,36 @@ const { Title, Text } = Typography;
 const localizer = momentLocalizer(moment);
 moment.locale('fr');
 
+// Déclaration de la fonction avant le JSX
+const eventStyleGetter = (event) => {
+  let backgroundColor = '#b3cde0'; // Planifié par défaut (bleu clair)
+
+  switch (event.status) {
+    case 'terminé':
+      backgroundColor = '#f8d7da'; // Rouge clair
+      break;
+    case 'en cours':
+      backgroundColor = '#d4edda'; // Vert clair
+      break;
+    case 'planifié':
+      backgroundColor = '#dbe9f4'; // Bleu clair
+      break;
+    default:
+      backgroundColor = '#e2e3e5'; // Gris clair
+  }
+
+  return {
+    style: {
+      backgroundColor,
+      color: '#000',
+      borderRadius: '4px',
+      border: 'none',
+      padding: '4px 8px',
+    },
+  };
+};
+
+
 const AdminDashboard = () => {
 
   const [darkMode, setDarkMode] = useState(false);
@@ -300,20 +330,21 @@ useEffect(() => {
 
   
 
-  const handleSearchUsers = (value) => {
-    const searchValue = value.trim().toLowerCase();
-    if (searchValue === "") {
-      setFilteredUsers([]); // Vide la liste si l'entrée est vide
-      return;
+const handleSearchUsers = (value) => {
+  const searchValue = value.trim().toLowerCase();
+  setSearchTerm(searchValue);
+
+  if (searchValue === "") {
+    setFilteredUsers([]);
+    return;
   }
 
-    const filtered = techniciens.filter((user) =>
-      user.name.toLowerCase().startsWith(searchValue) 
-    );
+    const filtered = (showArchived ? archivedTechniciens : techniciens).filter((user) =>
+    user.name.toLowerCase().startsWith(searchValue)
+  );
 
-    setFilteredUsers(filtered.length > 0 ? filtered : []); 
-  };
-
+  setFilteredUsers(filtered);
+};
 
   const handleEditTechnicien = (technicien) => {
     setEditTechnicien(technicien);
@@ -661,14 +692,15 @@ const handleUpdateGestionnaire = async () => {
 
   const handleSearchGestionnaires = (value) => {
     const searchValue = value.trim().toLowerCase();
+    setSearchTerm(searchValue);
     if (searchValue === "") {
-      setFilteredGestionnaires([]); // Vide la liste si l'entrée est vide
+      setFilteredGestionnaires([]); 
       return;
   }
-    const filtered = gestionnaires.filter(g =>
+    const filtered =(showArchivedGestionnaires ? archivedGestionnaires : gestionnaires).filter(g =>
       g.name.toLowerCase().startsWith(searchValue) 
     );
-    setFilteredGestionnaires(filtered.length > 0 ? filtered : []); 
+    setFilteredGestionnaires(filtered); 
 };
 
 
@@ -972,7 +1004,8 @@ const gestionnaireColumns = [
                     onVehiclesUpdate={setAssignedVehicles}
                     darkMode={darkMode}
                   />
-
+                  
+                  
                   <Calendar
                     localizer={localizer}
                     date={calendarDate}
@@ -987,11 +1020,12 @@ const gestionnaireColumns = [
                         start: new Date(task.startDate),
                         end: new Date(task.endDate),
                         allDay: false,
+                        status: task.status,
                         resource: { ...task, technicien: tech, vehicule: veh },
                       };
                     })}
 
-                    
+                    eventPropGetter={eventStyleGetter} // ✅ Appliquer le style personnalisé
                     components={{
                       event: CustomEvent, // Utilisez le composant personnalisé ici
                     }}
@@ -1142,14 +1176,15 @@ const gestionnaireColumns = [
                       type={showArchived ? 'default' : 'primary'}
                       onClick={() => {
                         setShowArchived(!showArchived);
-                        handleSearchUsers(searchTerm);
+                        setSearchTerm(''); // Réinitialiser la recherche quand on change de vue
+                        setFilteredUsers([]);
                       }}
                     >
                       {showArchived ? 'Voir Actifs' : 'Voir Archivés'}
                     </Button>
                   </div>
                   <Table
-                    dataSource={showArchived ? archivedTechniciens : techniciens}
+                    dataSource={searchTerm ? filteredUsers : (showArchived ? archivedTechniciens : techniciens)}
                     columns={columns}
                     rowKey="_id"
                     renderItem={(tech) => (
@@ -1201,8 +1236,12 @@ const gestionnaireColumns = [
       />
       <Button
         type={showArchivedGestionnaires ? 'default' : 'primary'}
-        onClick={() => setShowArchivedGestionnaires(!showArchivedGestionnaires)}
+        onClick={() => {
+          setShowArchivedGestionnaires(!showArchivedGestionnaires);
+          setSearchTerm(''); // Réinitialiser la recherche quand on change de vue
+          setFilteredGestionnaires([]);}}
       >
+       
         {showArchivedGestionnaires ? 'Voir Actifs' : 'Voir Archivés'}
       </Button>
       <Button
@@ -1215,7 +1254,7 @@ const gestionnaireColumns = [
     </div>
 
     <Table
-      dataSource={showArchivedGestionnaires ? archivedGestionnaires : filteredGestionnaires.length > 0 ? filteredGestionnaires : gestionnaires}
+      dataSource={searchTerm ? filteredGestionnaires : (showArchivedGestionnaires ? archivedGestionnaires  : gestionnaires)}
       columns={gestionnaireColumns}
       rowKey="_id"
       pagination={{ pageSize: 8 }}
