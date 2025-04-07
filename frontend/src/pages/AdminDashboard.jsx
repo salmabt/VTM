@@ -1236,7 +1236,22 @@ const gestionnaireColumns = [
     setIsEditTechnicienModalVisible(false);
     setEditTechnicien(null);
   }}
-  onOk={handleUpdateTechnicien}
+  footer={[
+    <Button key="cancel" onClick={() => {
+      setIsEditTechnicienModalVisible(false);
+      setEditTechnicien(null);
+    }}>
+      Annuler
+    </Button>,
+    <Button 
+      key="save" 
+      type="primary" 
+      onClick={handleUpdateTechnicien}
+      loading={loading}
+    >
+      Enregistrer
+    </Button>,
+  ]}
 >
  
 <Input
@@ -1363,7 +1378,22 @@ const gestionnaireColumns = [
   title="Modifier Gestionnaire"
   visible={isEditGestionnaireModalVisible}
   onCancel={() => setIsEditGestionnaireModalVisible(false)}
-  onOk={handleUpdateGestionnaire}
+  footer={[
+    <Button 
+      key="cancel" 
+      onClick={() => setIsEditGestionnaireModalVisible(false)}
+    >
+      Annuler
+    </Button>,
+    <Button 
+      key="save" 
+      type="primary" 
+      onClick={handleUpdateGestionnaire}
+      loading={loading}
+    >
+      Enregistrer
+    </Button>,
+  ]}
   confirmLoading={loading}
 >
   <Input
