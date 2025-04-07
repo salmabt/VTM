@@ -44,7 +44,7 @@
 /* Title Styling */
 .region-title {
     text-transform: capitalize;
-    color: white;
+    color: white !important;
 }
 
 /* Progress Circle */
