@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const gestionnaireController = require('../controllers/gestionnaireController');
+//const auth = require('../middleware/auth'); // Chemin vers ton middleware JWT
+
 
 
 router.post('/login', gestionnaireController.loginGestionnaire);
