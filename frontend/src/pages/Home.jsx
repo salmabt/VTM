@@ -22,11 +22,13 @@ import GoogleIcon from '../assets/google-logo.png';
 import AppmobileIcon from '../assets/application-mobile.png';
 import { useState, useEffect } from 'react';
 import { Button, Dropdown, Space } from 'antd';
-import { TranslationOutlined } from '@ant-design/icons';
+import { TranslationOutlined ,MessageOutlined } from '@ant-design/icons';
 import { translations, languageNames } from './translations';
+import Chatbot from '../components/Chatbot';
 
 const Home = () => {
   const [language, setLanguage] = useState('fr');
+  const [showChat, setShowChat] = useState(false);
 
   // Language Change
   const changeLanguage = (lng) => {
@@ -56,6 +58,17 @@ const Home = () => {
 
   return (
     <div className="home-container">
+      {/* Icône de chat flottante */}
+      <div className="floating-chat-icon" onClick={() => setShowChat(!showChat)}>
+        <MessageOutlined style={{ fontSize: '24px', color: 'white' }} />
+      </div>
+
+      {/* Chatbot conditionnel */}
+      {showChat && (
+        <div className="chatbot-wrapper">
+          <Chatbot onClose={() => setShowChat(false)} />
+        </div>
+      )}
       {/* Navbar */}
       <nav className="navbar">
         <div className="logo">
@@ -271,7 +284,7 @@ const Home = () => {
           </div>
         </div>
       </section>
-
+      
       {/* Footer */}
       <footer className="main-footer">
         <div className="footer-content">

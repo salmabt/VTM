@@ -94,7 +94,8 @@ export const translations = {
       transparency: "Transparence",
       transparencyDesc: "La confiance est primordiale dans toute collaboration. C'est pourquoi nous prônons une communication transparente à chaque étape de votre projet, en partageant clairement les résultats, les progrès et les ajustements nécessaires.",
       excellence: "Excellence",
-      excellenceDesc: "L'excellence est au cœur de tout ce que nous faisons. Nous cherchons toujours à surpasser les attentes de nos clients, en assurant un service de haute qualité, basé sur une attention aux détails et un suivi rigoureux."
+      excellenceDesc: "L'excellence est au cœur de tout ce que nous faisons. Nous cherchons toujours à surpasser les attentes de nos clients, en assurant un service de haute qualité, basé sur une attention aux détails et un suivi rigoureux.",
+      needHelp: "Besoin d'aide ? Parlez à notre assistant virtuel"
 
   },
   en: {
@@ -191,7 +192,8 @@ export const translations = {
       transparency: "Transparency",
       transparencyDesc: "Trust is essential in any collaboration. That's why we advocate transparent communication at every stage of your project, clearly sharing results, progress and necessary adjustments.",
       excellence: "Excellence",
-      excellenceDesc: "Excellence is at the heart of everything we do. We always strive to exceed our clients' expectations, ensuring high-quality service based on attention to detail and rigorous follow-up."
+      excellenceDesc: "Excellence is at the heart of everything we do. We always strive to exceed our clients' expectations, ensuring high-quality service based on attention to detail and rigorous follow-up.",
+      needHelp: "Need help? Talk to our virtual assistant",
   },
   ar: {
       // Navigation
@@ -287,7 +289,8 @@ export const translations = {
       transparency: "الشفافية",
       transparencyDesc: "الثقة ضرورية في أي تعاون. لهذا السبب ندعو إلى التواصل الشفاف في كل مرحلة من مراحل مشروعك، مع مشاركة النتائج والتقدم والتعديلات اللازمة بوضوح.",
       excellence: "التميز",
-      excellenceDesc: "التميز هو جوهر كل ما نقوم به. نسعى دائمًا لتجاوز توقعات عملائنا، مع ضمان خدمة عالية الجودة تعتمد على الاهتمام بالتفاصيل والمتابعة الدقيقة."
+      excellenceDesc: "التميز هو جوهر كل ما نقوم به. نسعى دائمًا لتجاوز توقعات عملائنا، مع ضمان خدمة عالية الجودة تعتمد على الاهتمام بالتفاصيل والمتابعة الدقيقة.",
+      needHelp: "بحاجة إلى مساعدة؟ تحدث مع مساعدنا الافتراضي",
   }
 };
 
