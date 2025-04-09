@@ -22,7 +22,8 @@ import GoogleIcon from '../assets/google-logo.png';
 import AppmobileIcon from '../assets/application-mobile.png';
 import { useState, useEffect } from 'react';
 import { Button, Dropdown, Space } from 'antd';
-import { TranslationOutlined ,MessageOutlined } from '@ant-design/icons';
+import { TranslationOutlined } from '@ant-design/icons';
+import { FaRobot } from 'react-icons/fa';
 import { translations, languageNames } from './translations';
 import Chatbot from '../components/Chatbot';
 
@@ -60,7 +61,7 @@ const Home = () => {
     <div className="home-container">
       {/* Icône de chat flottante */}
       <div className="floating-chat-icon" onClick={() => setShowChat(!showChat)}>
-        <MessageOutlined style={{ fontSize: '24px', color: 'white' }} />
+        <FaRobot  style={{ fontSize: '24px', color: 'white' }} />
       </div>
 
       {/* Chatbot conditionnel */}

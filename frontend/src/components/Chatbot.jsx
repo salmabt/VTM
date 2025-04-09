@@ -1,8 +1,10 @@
 //frontend/components/Chatbot.jsx
 import React, { useState } from 'react';
 import { sendMessageToChatbot } from '../api/chatbotApi'; // 🔁 Import de la fonction
+import '../styles/Chatbot.css';
 
-const Chatbot = () => {
+
+const Chatbot = ({ onClose }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
 
@@ -29,9 +31,8 @@ const Chatbot = () => {
     <div className="chatbot-container">
         {/* En-tête avec bouton de fermeture */}
       <div className="chat-header">
-        <h3>Assistant Virtuel</h3>
-        
-
+        <h3>Digital Market Bot</h3>
+        <button className="close-btn" onClick={onClose}>×</button>
       </div>
       <div className="chat-messages">
         {messages.map((msg, index) => (
