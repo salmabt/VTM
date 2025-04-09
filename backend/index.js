@@ -1,4 +1,4 @@
-//index.js
+//backend/index.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -11,17 +11,20 @@ const notesRouter = require('./routes/notesRoute');
 const gestionnairesRoutes = require('./routes/gestionnaireRoute');
 const { upload } = require('./config/multer');
 const reportRoutes = require('./routes/reportRoutes');
+const chatRouter = require('./routes/chatRoute');
 const path = require('path'); 
 const app = express();
 
 
 // Middleware
+app.use(express.json());
 app.use(cors({
   origin: 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
-app.use(express.json());
+
 // Base de données
 connectDB();
 
@@ -34,6 +37,7 @@ app.use('/api/notes', notesRouter);
 app.use('/api/gestionnaires', gestionnairesRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/reports', reportRoutes);
+app.use('/api/chat', chatRouter);
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {
