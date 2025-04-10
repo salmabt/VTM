@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const interactionRouter = require('./routes/interactions');
 const authRouter = require('./routes/authRoute');
 const taskRouter = require('./routes/tasksRoutes');
 const voitureRouter = require('./routes/voitureRoutes');
@@ -38,6 +39,7 @@ app.use('/api/gestionnaires', gestionnairesRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/reports', reportRoutes);
 app.use('/api/chat', chatRouter);
+app.use('/api/interactions', interactionRouter);
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {
