@@ -1,3 +1,4 @@
+
 /* Animation de l'icône flottante */
 @keyframes pulse {
   0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.7); }
@@ -12,7 +13,7 @@
   right: 30px;
   width: 60px;
   height: 60px;
-  background: #1890ff;
+  background: #ba58b4;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -26,7 +27,7 @@
 
 .floating-chat-icon:hover {
   transform: scale(1.1) rotate(10deg);
-  background: #147bd1;
+  background: #852e72;
 }
 
 /* Conteneur du chatbot */
@@ -64,7 +65,7 @@
 /* En-tête */
 .chat-header {
   padding: 16px 20px;
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  background: linear-gradient(135deg, #b57fcd 0%, #5d64b2 100%);
   color: white;
   display: flex;
   justify-content: space-between;
@@ -118,7 +119,7 @@
 
 /* Bulles de message */
 .message {
-  max-width: 80%;
+  max-width: calc(100% - 60px);
   padding: 12px 16px;
   border-radius: 18px;
   font-size: 19px;
@@ -134,14 +135,14 @@
 }
 
 .user {
-  background: #1890ff;
+  background: #c28ecc;
   color: white;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
 }
 
 .bot {
-  background: white;
+  background: rgb(218, 211, 217);
   color: #333;
   align-self: flex-start;
   border-bottom-left-radius: 4px;
@@ -175,7 +176,7 @@
   font-size: 17px;
   margin-left: 10px;
   padding: 0 20px;
-  background: #1890ff;
+  background: #ac76af;
   color: white;
   border: none;
   border-radius: 24px;
@@ -207,4 +208,48 @@
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
+}
+/* frontend/styles/Chatbot.css */
+/* Ajoutez ces styles */
+
+.message-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  max-width: 80%;
+  margin-bottom: 12px;
+}
+
+.message-container.bot {
+  align-self: flex-start;
+  flex-direction: row;
+}
+
+
+
+.message-avatar {
+  flex-shrink: 0;
+}
+
+.avatar-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+
+/* Animation supplémentaire pour les icônes */
+@keyframes iconBounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+.avatar-icon {
+  animation: iconBounce 0.5s ease;
 }

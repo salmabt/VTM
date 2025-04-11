@@ -1,8 +1,10 @@
 // frontend/components/Chatbot.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import { saveInteraction } from '../api/services'; 
 import { sendMessageToChatbot } from '../api/chatbotApi';
 import '../styles/Chatbot.css';
+import botIcon from '../assets/bot-icon.png'; 
+import userIcon from '../assets/user-icon.png'; 
 
 const Chatbot = ({ onClose }) => {
   const [input, setInput] = useState('');
@@ -15,6 +17,7 @@ const Chatbot = ({ onClose }) => {
     title_de_livraison: '',
     description: ''
   });
+  const initialMessageAdded = useRef(false);
 
   // Déclencher la sauvegarde quand tous les champs sont remplis
   useEffect(() => {
@@ -24,6 +27,18 @@ const Chatbot = ({ onClose }) => {
         .catch(err => console.error('Erreur:', err));
     }
   }, [formData]);
+  useEffect(() => {
+    if (!initialMessageAdded.current) {
+      setMessages(prev => [
+        ...prev,
+        { 
+          text: "Bonjour ! Je suis l'assistant virtuel de Digital Market. Comment puis-je vous aider ?", 
+          isBot: true 
+        }
+      ]);
+      initialMessageAdded.current = true;
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,12 +75,21 @@ const Chatbot = ({ onClose }) => {
         <button className="close-btn" onClick={onClose}>×</button>
       </div>
       <div className="chat-messages">
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.isBot ? 'bot' : 'user'}`}>
-            {msg.text}
-          </div>
-        ))}
+  {messages.map((msg, index) => (
+    <div key={index} className={`message-container ${msg.isBot ? 'bot' : 'user'}`}>
+      <div className="message-avatar">
+        <img 
+          src={msg.isBot ? botIcon : userIcon} 
+          alt={msg.isBot ? "Bot" : "Utilisateur"}
+          className="avatar-icon"
+        />
       </div>
+      <div className={`message ${msg.isBot ? 'bot' : 'user'}`}>
+        {msg.text}
+      </div>
+    </div>
+  ))}
+</div>
       <form onSubmit={handleSubmit} className="chat-input">
         <input
           type="text"
