@@ -1,3 +1,4 @@
+// frontend/components/Chatbot.jsx
 import React, { useState, useEffect } from 'react';
 import { saveInteraction } from '../api/services'; 
 import { sendMessageToChatbot } from '../api/chatbotApi';
@@ -15,52 +16,33 @@ const Chatbot = ({ onClose }) => {
     description: ''
   });
 
-  // Message de bienvenue au chargement
+  // Déclencher la sauvegarde quand tous les champs sont remplis
   useEffect(() => {
-    const loadWelcomeMessage = async () => {
-      const response = await sendMessageToChatbot('__WELCOME__');
-      setMessages([{
-        text: response.reply,
-        isBot: true,
-        richContent: response.richContent
-      }]);
-    };
-    loadWelcomeMessage();
-  }, []);
+    if (Object.values(formData).every(field => field !== '')) {
+      saveInteraction(formData)
+        .then(() => console.log('Données sauvegardées !'))
+        .catch(err => console.error('Erreur:', err));
+    }
+  }, [formData]);
 
-  const handleChipClick = (chipText) => {
-    setInput(chipText);
-    // Créer un événement factice pour soumettre le formulaire
-    handleSubmit({ preventDefault: () => {} }, chipText);
-  };
-
-  const handleSubmit = async (e, customInput) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const userInput = customInput || input;
-    if (!userInput.trim()) return;
-
-    // Ajouter le message utilisateur
-    setMessages(prev => [...prev, { 
-      text: userInput, 
-      isBot: false 
-    }]);
-    
-    if (!customInput) setInput('');
-
+    if (!input.trim()) return;
+  
+    // Ajouter le message utilisateur immédiatement
+    setMessages(prev => [...prev, { text: input, isBot: false }]);
+    setInput('');
+  
     try {
-      const { reply, entities, richContent } = await sendMessageToChatbot(userInput);
+      const { reply, entities } = await sendMessageToChatbot(input);
       
       // Mettre à jour les données si des entités existent
       if (Object.values(entities).some(val => val)) {
         setFormData(prev => ({ ...prev, ...entities }));
       }
-
+  
       // Ajouter la réponse du bot
-      setMessages(prev => [...prev, { 
-        text: reply, 
-        isBot: true,
-        richContent: richContent 
-      }]);
+      setMessages(prev => [...prev, { text: reply, isBot: true }]);
       
     } catch (error) {
       setMessages(prev => [...prev, { 
@@ -72,6 +54,7 @@ const Chatbot = ({ onClose }) => {
 
   return (
     <div className="chatbot-container">
+        {/* En-tête avec bouton de fermeture */}
       <div className="chat-header">
         <h3>Digital Market Bot</h3>
         <button className="close-btn" onClick={onClose}>×</button>
@@ -80,19 +63,6 @@ const Chatbot = ({ onClose }) => {
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.isBot ? 'bot' : 'user'}`}>
             {msg.text}
-            {msg.richContent && msg.richContent[0]?.options && (
-              <div className="chips-container">
-                {msg.richContent[0].options.map((option, i) => (
-                  <button 
-                    key={i}
-                    className="chip"
-                    onClick={() => handleChipClick(option.text)}
-                  >
-                    {option.text}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         ))}
       </div>
