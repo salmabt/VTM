@@ -1,4 +1,3 @@
-// frontend/components/Chatbot.jsx
 import React, { useState, useEffect } from 'react';
 import { saveInteraction } from '../api/services'; 
 import { sendMessageToChatbot } from '../api/chatbotApi';
@@ -16,56 +15,63 @@ const Chatbot = ({ onClose }) => {
     description: ''
   });
 
-  // Déclencher la sauvegarde quand tous les champs sont remplis
+  // Message de bienvenue au chargement
   useEffect(() => {
-    if (Object.values(formData).every(field => field !== '')) {
-      saveInteraction(formData)
-        .then(() => console.log('Données sauvegardées !'))
-        .catch(err => console.error('Erreur:', err));
-    }
-  }, [formData]);
+    const loadWelcomeMessage = async () => {
+      const response = await sendMessageToChatbot('__WELCOME__');
+      setMessages([{
+        text: response.reply,
+        isBot: true,
+        richContent: response.richContent
+      }]);
+    };
+    loadWelcomeMessage();
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const handleChipClick = (chipText) => {
+    setInput(chipText);
+    // Créer un événement factice pour soumettre le formulaire
+    handleSubmit({ preventDefault: () => {} }, chipText);
+  };
+
+  const handleSubmit = async (e, customInput) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    const userInput = customInput || input;
+    if (!userInput.trim()) return;
+
+    // Ajouter le message utilisateur
+    setMessages(prev => [...prev, { 
+      text: userInput, 
+      isBot: false 
+    }]);
+    
+    if (!customInput) setInput('');
 
     try {
-      // 1. Envoyer le message au chatbot
-      const chatbotResponse = await sendMessageToChatbot(input);
-
-      if (!chatbotResponse?.entities) {
-        throw new Error("Format de réponse du chatbot invalide");
-      }
+      const { reply, entities, richContent } = await sendMessageToChatbot(userInput);
       
-      // 2. Extraire les entités de la réponse
-      const extractedData = {
-        nom_client: chatbotResponse.entities.nom_client|| '',
-        email: chatbotResponse.entities.email || '',
-        service: chatbotResponse.entities.service || '',
-        phone: chatbotResponse.entities.phone || '',
-        title_de_livraison: chatbotResponse.entities.title_de_livraison || '',
-        description: chatbotResponse.entities.description || ''
-      };
-     
-      // 3. Mettre à jour les données du formulaire
-      setFormData(prev => ({ ...prev, ...extractedData }));
+      // Mettre à jour les données si des entités existent
+      if (Object.values(entities).some(val => val)) {
+        setFormData(prev => ({ ...prev, ...entities }));
+      }
 
-      // 4. Mettre à jour l'interface
-      setMessages(prev => [
-        ...prev,
-        { text: input, isBot: false },
-        { text: chatbotResponse.reply, isBot: true }
-      ]);
-
-      setInput('');
+      // Ajouter la réponse du bot
+      setMessages(prev => [...prev, { 
+        text: reply, 
+        isBot: true,
+        richContent: richContent 
+      }]);
+      
     } catch (error) {
-      console.error('Erreur:', error);
+      setMessages(prev => [...prev, { 
+        text: "Erreur de communication avec le chatbot", 
+        isBot: true 
+      }]);
     }
   };
 
   return (
     <div className="chatbot-container">
-        {/* En-tête avec bouton de fermeture */}
       <div className="chat-header">
         <h3>Digital Market Bot</h3>
         <button className="close-btn" onClick={onClose}>×</button>
@@ -74,6 +80,19 @@ const Chatbot = ({ onClose }) => {
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.isBot ? 'bot' : 'user'}`}>
             {msg.text}
+            {msg.richContent && msg.richContent[0]?.options && (
+              <div className="chips-container">
+                {msg.richContent[0].options.map((option, i) => (
+                  <button 
+                    key={i}
+                    className="chip"
+                    onClick={() => handleChipClick(option.text)}
+                  >
+                    {option.text}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
