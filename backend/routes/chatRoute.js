@@ -35,26 +35,10 @@ router.post('/', async (req, res) => {
       });
     }
 
-   // Extraction des options (chips)
-    let richContent = null;
-    result.fulfillmentMessages?.forEach(msg => {
-      if (msg.payload) {
-        try {
-          const payload = JSON.parse(JSON.stringify(msg.payload)); // Conversion sécurisée
-          if (payload.richContent) {
-            richContent = payload.richContent;
-          }
-        } catch (e) {
-          console.error('Erreur de parsing du payload:', e);
-        }
-      }
-    });
-  
     res.json({ 
       reply: result.fulfillmentText || "Je n'ai pas compris",
       entities,
-      intent: result.intent?.displayName || 'unknown',
-      richContent: richContent 
+      intent: result.intent?.displayName || 'unknown'
     });
 
   } catch (error) {
