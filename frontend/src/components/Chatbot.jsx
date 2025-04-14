@@ -15,7 +15,8 @@ const Chatbot = ({ onClose }) => {
     service: '',
     phone: '',
     title_de_livraison: '',
-    description: ''
+    description: '',
+    address: ''
   });
   const initialMessageAdded = useRef(false);
 
