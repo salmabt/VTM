@@ -546,17 +546,17 @@ useEffect(() => {
       setIsModalVisible(false);
       message.success('Tâche créée avec succès !');
       // Après la création de la tâche
-      if (selectedInteraction) {
-        await axios.patch(`/api/interactions/${selectedInteraction._id}`, {
-          relatedTask: savedTask._id
-        });
-        
-        // Rafraîchir les interactions
-        const response = await axios.get('/api/interactions');
-        setInteractions(response.data);
-        
-        setSelectedInteraction(null);
-      }
+     // Dans handleCreateTask, remplacer cette partie :
+if (selectedInteraction) {
+  await axios.patch(`/api/interactions/${selectedInteraction._id}`, {
+    relatedTask: createdTask._id // Utiliser createdTask qui existe
+  });
+  
+  const response = await axios.get('/api/interactions');
+  setInteractions(response.data);
+  
+  setSelectedInteraction(null);
+}
   
       // Rafraîchir les données des véhicules depuis le backend
       const updatedVehiculesResponse = await vehiculesApi.getAllVehicules();
