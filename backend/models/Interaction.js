@@ -6,8 +6,9 @@ const InteractionSchema = new mongoose.Schema({
   description: String,
   nom_client: String,
   phone: String,
-  email: String, // Ajouté pour correspondre au front
-  service: String // Ajouté pour correspondre au front
+  email: String, 
+  service: String ,
+  address: String
 });
 
 module.exports = mongoose.model("Interaction", InteractionSchema);
