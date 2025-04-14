@@ -15,9 +15,20 @@ const Chatbot = ({ onClose }) => {
     service: '',
     phone: '',
     title_de_livraison: '',
-    description: ''
+    description: '',
+    address: ''
   });
   const initialMessageAdded = useRef(false);
+
+  const messagesEndRef = useRef(null);
+
+const scrollToBottom = () => {
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+};
+
+useEffect(() => {
+  scrollToBottom();
+}, [messages]);
 
   // Déclencher la sauvegarde quand tous les champs sont remplis
   useEffect(() => {
@@ -126,7 +137,8 @@ const Chatbot = ({ onClose }) => {
       </div>
     </div>
   ))}
-</div>
+  <div ref={messagesEndRef} />
+</div >
       <form onSubmit={handleSubmit} className="chat-input">
         <input
           type="text"
