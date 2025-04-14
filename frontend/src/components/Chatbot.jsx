@@ -33,12 +33,36 @@ const Chatbot = ({ onClose }) => {
         ...prev,
         { 
           text: "Bonjour ! Je suis l'assistant virtuel de Digital Market. Comment puis-je vous aider ?", 
-          isBot: true 
+          isBot: true,
+          suggestions: [ // Add suggestions array
+            "Information sur Digital Market",
+            "Information sur VTM",
+            "Tu vais faire une livraison"
+          ]
         }
       ]);
       initialMessageAdded.current = true;
     }
   }, []);
+  const handleSuggestionClick = async (suggestion) => {
+    setMessages(prev => [...prev, { text: suggestion, isBot: false }]);
+    
+    try {
+      const { reply, entities } = await sendMessageToChatbot(suggestion);
+      
+      if (Object.values(entities).some(val => val)) {
+        setFormData(prev => ({ ...prev, ...entities }));
+      }
+
+      setMessages(prev => [...prev, { text: reply, isBot: true }]);
+      
+    } catch (error) {
+      setMessages(prev => [...prev, { 
+        text: "Erreur de communication avec le chatbot", 
+        isBot: true 
+      }]);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,6 +110,19 @@ const Chatbot = ({ onClose }) => {
       </div>
       <div className={`message ${msg.isBot ? 'bot' : 'user'}`}>
         {msg.text}
+        {msg.suggestions && (
+                <div className="suggestions">
+                  {msg.suggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      className="suggestion-btn"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
       </div>
     </div>
   ))}

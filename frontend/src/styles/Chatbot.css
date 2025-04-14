@@ -253,3 +253,65 @@
 .avatar-icon {
   animation: iconBounce 0.5s ease;
 }
+/* Add to existing styles */
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.suggestion-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e0d0de;
+  border-radius: 20px;
+  padding: 12px 18px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  font-size: 16px;
+  color: #6b4f6d;
+  backdrop-filter: blur(4px);
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.suggestion-btn:hover {
+  background: #f5e9f4;
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.message.bot {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 18px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 85%;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(6px);
+}
+
+/* Ajustement pour l'alignement des messages */
+.message-container.bot .message {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Animation des suggestions */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.suggestions {
+  animation: slideIn 0.4s ease-out forwards;
+}
