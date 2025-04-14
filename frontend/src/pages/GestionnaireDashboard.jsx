@@ -125,6 +125,10 @@ const [taskSearchTerm, setTaskSearchTerm] = useState('');
 const [currentNotePage, setCurrentNotePage] = useState(1);
 const [notePageSize, setNotePageSize] = useState(4);
 
+//interaction chatbot
+const [interactions, setInteractions] = useState([]);
+const [selectedInteraction, setSelectedInteraction] = useState(null);
+
 useEffect(() => {
   const unreadNotifications = noteNotifications.filter(n => !n.read);
   setNoteNotifications(unreadNotifications);
@@ -389,6 +393,23 @@ useEffect(() => {
     loadTaskDetails();
   }
 }, [selectedTask?._id]);
+
+/////////client
+// Ajouter dans les useEffect
+useEffect(() => {
+  const loadInteractions = async () => {
+    try {
+      const response = await axios.get('/api/interactions');
+      setInteractions(response.data);
+    } catch (error) {
+      console.error('Erreur de chargement des interactions:', error);
+    }
+  };
+  
+  if (selectedMenu === '2') {
+    loadInteractions();
+  }
+}, [selectedMenu]);
 // Déclenché quand l'ID de la tâche change // Se déclenche quand la liste des tâches change
   const handleAddVehicule = async () => {
     try {
@@ -522,6 +543,13 @@ useEffect(() => {
   
       setIsModalVisible(false);
       message.success('Tâche créée avec succès !');
+      // Après la création de la tâche
+    if (selectedInteraction) {
+      await axios.patch(`/api/interactions/${selectedInteraction._id}`, {
+        relatedTask: savedTask._id
+      });
+      setSelectedInteraction(null);
+    }
   
       // Rafraîchir les données des véhicules depuis le backend
       const updatedVehiculesResponse = await vehiculesApi.getAllVehicules();
@@ -681,7 +709,7 @@ useEffect(() => {
 
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
-    
+    { key: '2', icon: <BellOutlined />, label: 'Demandes clients' },
     { key: '3', icon: <UnorderedListOutlined />, label: 'Tâches' },
     { key: '4', icon: <CarOutlined />, label: 'Voitures' },
     { key: '5', icon: <ClockCircleOutlined />, label: 'Chronologie' },
@@ -708,6 +736,7 @@ useEffect(() => {
     onSelect={({ key }) => setSelectedMenu(key)}
   >
     <Menu.Item key="1" icon={<CalendarOutlined />}>Calendrier</Menu.Item>
+    <Menu.Item key="2" icon={<BellOutlined />}>Demandes clients</Menu.Item>
     <Menu.Item key="3" icon={<UnorderedListOutlined />}>Tâches</Menu.Item>
     <Menu.Item key="4" icon={<CarOutlined />}>Voitures</Menu.Item>
     <Menu.Item key="5" icon={<ClockCircleOutlined />}>
@@ -927,6 +956,55 @@ useEffect(() => {
                             />
                             </Card>
                             )}
+                            {selectedMenu === '2' && (
+  <Card title="Demandes clients" bordered={false}>
+    <List
+      dataSource={interactions}
+      renderItem={interaction => (
+        <List.Item
+          actions={[
+            <Button 
+              type="primary" 
+              onClick={() => {
+                setNewTask({
+                  ...newTask,
+                  title: interaction.title_de_livraison,
+                  description: interaction.description,
+                  client: interaction.nom_client,
+                  location: interaction.address,
+                  phone: interaction.phone,
+                  email: interaction.email
+                });
+                setIsModalVisible(true);
+                setSelectedInteraction(interaction);
+              }}
+            >
+              Créer Tâche
+            </Button>
+          ]}
+        >
+          <List.Item.Meta
+            title={`${interaction.nom_client} - ${interaction.service}`}
+            description={
+              <>
+                <Text strong>Titre: </Text>{interaction.title_de_livraison}<br/>
+                <Text strong>Description: </Text>{interaction.description}<br/>
+                <Text strong>Adresse: </Text>{interaction.address}<br/>
+                <Text strong>Contact: </Text>
+                {interaction.phone} - {interaction.email}
+              </>
+            }
+          />
+        </List.Item>
+      )}
+    />
+  </Card>
+  
+)}
+
+
+
+                            
                             {/* Affichage du modal pour ajouter une tâche */}
                               <TaskModal
                                 isModalVisible={isModalVisible}
