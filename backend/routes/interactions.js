@@ -23,6 +23,27 @@ router.post("/save-interaction", async (req, res) => {
       res.status(500).json({ error: "Erreur lors de l'enregistrement: " + error.message });
     }
   });
+  router.get('/', async (req, res) => {
+    try {
+      const interactions = await Interaction.find().sort({ createdAt: -1 });
+      res.json(interactions);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  router.patch('/:id', async (req, res) => {
+    try {
+      const interaction = await Interaction.findByIdAndUpdate(
+        req.params.id,
+        { relatedTask: req.body.relatedTask },
+        { new: true }
+      );
+      res.json(interaction);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  });
   
 
 module.exports = router;

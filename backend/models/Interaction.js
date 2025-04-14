@@ -8,7 +8,11 @@ const InteractionSchema = new mongoose.Schema({
   phone: String,
   email: String, 
   service: String ,
-  address: String
+  address: String,
+  relatedTask: { 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Task'
+  }
 });
 
 module.exports = mongoose.model("Interaction", InteractionSchema);
