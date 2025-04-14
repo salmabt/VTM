@@ -128,6 +128,8 @@ const [notePageSize, setNotePageSize] = useState(4);
 //interaction chatbot
 const [interactions, setInteractions] = useState([]);
 const [selectedInteraction, setSelectedInteraction] = useState(null);
+//filtrer des traitement de chatbot
+const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'treated', 'untreated'
 
 useEffect(() => {
   const unreadNotifications = noteNotifications.filter(n => !n.read);
@@ -544,12 +546,17 @@ useEffect(() => {
       setIsModalVisible(false);
       message.success('Tâche créée avec succès !');
       // Après la création de la tâche
-    if (selectedInteraction) {
-      await axios.patch(`/api/interactions/${selectedInteraction._id}`, {
-        relatedTask: savedTask._id
-      });
-      setSelectedInteraction(null);
-    }
+      if (selectedInteraction) {
+        await axios.patch(`/api/interactions/${selectedInteraction._id}`, {
+          relatedTask: savedTask._id
+        });
+        
+        // Rafraîchir les interactions
+        const response = await axios.get('/api/interactions');
+        setInteractions(response.data);
+        
+        setSelectedInteraction(null);
+      }
   
       // Rafraîchir les données des véhicules depuis le backend
       const updatedVehiculesResponse = await vehiculesApi.getAllVehicules();
@@ -956,12 +963,38 @@ useEffect(() => {
                             />
                             </Card>
                             )}
-                            {selectedMenu === '2' && (
-  <Card title="Demandes clients" bordered={false}>
+                          {selectedMenu === '2' && (
+  <Card 
+    title={
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>Demandes clients</span>
+        <Select
+          defaultValue="all"
+          style={{ width: 200 }}
+          onChange={(value) => setFilterStatus(value)}
+        >
+          <Option value="all">Toutes les demandes</Option>
+          <Option value="treated">Traités</Option>
+          <Option value="untreated">Non traités</Option>
+        </Select>
+      </div>
+    } 
+    bordered={false}
+  >
     <List
-      dataSource={interactions}
+      dataSource={interactions.filter(interaction => {
+        if (filterStatus === 'treated') return interaction.relatedTask;
+        if (filterStatus === 'untreated') return !interaction.relatedTask;
+        return true;
+      })}
       renderItem={interaction => (
         <List.Item
+          style={{ 
+            backgroundColor: interaction.relatedTask ? '#f6ffed' : '#fff1f0',
+            marginBottom: 8,
+            borderRadius: 4,
+            padding: '8px 16px'
+          }}
           actions={[
             <Button 
               type="primary" 
@@ -978,13 +1011,21 @@ useEffect(() => {
                 setIsModalVisible(true);
                 setSelectedInteraction(interaction);
               }}
+              disabled={!!interaction.relatedTask}
             >
-              Créer Tâche
+              {interaction.relatedTask ? 'Déjà traitée' : 'Créer Tâche'}
             </Button>
           ]}
         >
           <List.Item.Meta
-            title={`${interaction.nom_client} - ${interaction.service}`}
+            title={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Text strong>{interaction.nom_client} - {interaction.service}</Text>
+                <Tag color={interaction.relatedTask ? "green" : "red"}>
+                  {interaction.relatedTask ? "Traité" : "Non traité"}
+                </Tag>
+              </div>
+            }
             description={
               <>
                 <Text strong>Titre: </Text>{interaction.title_de_livraison}<br/>
@@ -992,6 +1033,12 @@ useEffect(() => {
                 <Text strong>Adresse: </Text>{interaction.address}<br/>
                 <Text strong>Contact: </Text>
                 {interaction.phone} - {interaction.email}
+                {interaction.relatedTask && (
+                  <>
+                    <br/><Text strong>Tâche associée: </Text>
+                    <Text code>{interaction.relatedTask}</Text>
+                  </>
+                )}
               </>
             }
           />
@@ -999,7 +1046,6 @@ useEffect(() => {
       )}
     />
   </Card>
-  
 )}
 
 
