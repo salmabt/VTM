@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Input, DatePicker, Typography, Button, Card, List,
-  Select, message, Spin, Tag, Modal,Badge ,Popover
+  Select, message, Spin, Tag, Modal,Badge ,Popover, Pagination
 } from 'antd';
 import {
   CalendarOutlined, FileTextOutlined,
-  UnorderedListOutlined, LogoutOutlined, CarOutlined, ClockCircleOutlined,UserOutlined, BellOutlined, MoonOutlined, SunOutlined 
+  UnorderedListOutlined, LogoutOutlined, CarOutlined, ClockCircleOutlined,UserOutlined,
+   BellOutlined, PhoneOutlined, MailOutlined, PaperClipOutlined
 } from '@ant-design/icons';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -963,7 +964,8 @@ if (selectedInteraction) {
                             />
                             </Card>
                             )}
-                          {selectedMenu === '2' && (
+                          
+{selectedMenu === '2' && (
   <Card 
     title={
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -981,70 +983,94 @@ if (selectedInteraction) {
     } 
     bordered={false}
   >
-    <List
-      dataSource={interactions.filter(interaction => {
-        if (filterStatus === 'treated') return interaction.relatedTask;
-        if (filterStatus === 'untreated') return !interaction.relatedTask;
-        return true;
-      })}
-      renderItem={interaction => (
-        <List.Item
-          style={{ 
-            backgroundColor: interaction.relatedTask ? '#f6ffed' : '#fff1f0',
-            marginBottom: 8,
-            borderRadius: 4,
-            padding: '8px 16px'
-          }}
-          actions={[
-            <Button 
-              type="primary" 
-              onClick={() => {
-                setNewTask({
-                  ...newTask,
-                  title: interaction.title_de_livraison,
-                  description: interaction.description,
-                  client: interaction.nom_client,
-                  location: interaction.address,
-                  phone: interaction.phone,
-                  email: interaction.email
-                });
-                setIsModalVisible(true);
-                setSelectedInteraction(interaction);
-              }}
-              disabled={!!interaction.relatedTask}
-            >
-              {interaction.relatedTask ? 'Déjà traitée' : 'Créer Tâche'}
-            </Button>
-          ]}
-        >
-          <List.Item.Meta
-            title={
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Text strong>{interaction.nom_client} - {interaction.service}</Text>
-                <Tag color={interaction.relatedTask ? "green" : "red"}>
-                  {interaction.relatedTask ? "Traité" : "Non traité"}
-                </Tag>
-              </div>
-            }
-            description={
-              <>
-                <Text strong>Titre: </Text>{interaction.title_de_livraison}<br/>
-                <Text strong>Description: </Text>{interaction.description}<br/>
-                <Text strong>Adresse: </Text>{interaction.address}<br/>
-                <Text strong>Contact: </Text>
-                {interaction.phone} - {interaction.email}
-                {interaction.relatedTask && (
-                  <>
-                    <br/><Text strong>Tâche associée: </Text>
-                    <Text code>{interaction.relatedTask}</Text>
-                  </>
-                )}
-              </>
-            }
-          />
-        </List.Item>
-      )}
-    />
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '70%', borderCollapse: 'collapse', minWidth: '800px' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#f0f0f0' }}>
+            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Nom</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Contact</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Service</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Titre</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Description</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Adresse</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Statut</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {interactions
+            .filter(interaction => {
+              if (filterStatus === 'treated') return interaction.relatedTask;
+              if (filterStatus === 'untreated') return !interaction.relatedTask;
+              return true;
+            })
+            .map(interaction => (
+              <tr 
+                key={interaction._id}
+                style={{ 
+                  borderBottom: '1px solid #ddd',
+                  backgroundColor: interaction.relatedTask ? '#f6ffed' : '#fff1f0'
+                }}
+              >
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <Text strong>{interaction.nom_client}</Text>
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <div><PhoneOutlined /> {interaction.phone}</div>
+                  <div><MailOutlined /> {interaction.email}</div>
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  {interaction.service}
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  {interaction.title_de_livraison}
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <Text ellipsis={{ tooltip: interaction.description }}>
+                    {interaction.description}
+                  </Text>
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  {interaction.address}
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <Tag color={interaction.relatedTask ? "green" : "red"}>
+                    {interaction.relatedTask ? "Traité" : "Non traité"}
+                  </Tag>
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <Button 
+                    type="primary" 
+                    onClick={() => {
+                      setNewTask({
+                        ...newTask,
+                        title: interaction.title_de_livraison,
+                        description: interaction.description,
+                        client: interaction.nom_client,
+                        location: interaction.address,
+                        phone: interaction.phone,
+                        email: interaction.email
+                      });
+                      setIsModalVisible(true);
+                      setSelectedInteraction(interaction);
+                    }}
+                    disabled={!!interaction.relatedTask}
+                    style={{ marginBottom: '8px' }}
+                    block
+                  >
+                    {interaction.relatedTask ? 'Déjà traité' : 'Créer Tâche'}
+                  </Button>
+                  {interaction.relatedTask && (
+                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                      Tâche #{interaction.relatedTask}
+                    </Text>
+                  )}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
   </Card>
 )}
 
@@ -1062,11 +1088,11 @@ if (selectedInteraction) {
                                 vehiculesList={vehiculesList}
                               />
                                 
-                              {selectedMenu === '3' && (
-                <Card title="Gestion des tâches" bordered={false}>
-                    {/* Ajouter la barre de recherche */}
+                                {selectedMenu === '3' && (
+  <Card title="Gestion des tâches" bordered={false}>
+    {/* Barre de recherche */}
     <Input.Search
-      placeholder="Rechercher par titre,localisation,Technicien ou Véhicule..."
+      placeholder="Rechercher par titre, localisation, Technicien ou Véhicule..."
       onChange={(e) => {
         setTaskSearchTerm(e.target.value);
         setCurrentTaskPage(1);
@@ -1074,251 +1100,281 @@ if (selectedInteraction) {
       style={{ marginBottom: 16, width: 300 }}
       allowClear
     />
-                  <div style={{ marginBottom: 16, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
-                    {/* Les champs de formulaire restent inchangés */}
-                    <Input
-                      placeholder="Titre *"
-                      value={newTask.title}
-                      onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                    />
-                    <Input.TextArea
-                      placeholder="Description détaillée *"
-                      value={newTask.description}
-                      onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-                      rows={3}
-                    />
-                    <Input
-                      placeholder="Client *"
-                      value={newTask.client}
-                      onChange={(e) => setNewTask({...newTask, client: e.target.value})}
-                    />
-                    {/* Sélecteur de ville avec recherche */}
-                     <Select
-                            placeholder="Sélectionner une ville *"
-                            onChange={(value) => {
-                              console.log("Ville sélectionnée:", value);
-                              setSelectedCity(value);
-                              const region = getRegionFromCity(value);
-                              setSelectedRegion(region); // Définir la région basée sur la ville sélectionnée
-                              setNewTask({ ...newTask, location: value });
-                            }}
-                            style={{ marginBottom: 8, width: "100%" }}
-                            showSearch
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                              option.children.toLowerCase().includes(input.toLowerCase())
-                            }
-                          >
-                            {allCities.map(city => (
-                              <Option key={city} value={city}>
-                                {city}
-                              </Option>
-                            ))}
-                          </Select>
 
-                    <Input
-                      placeholder="Adresse détaillée"
-                      value={newTask.location}
-                      onChange={(e) => setNewTask({...newTask, location: e.target.value})}
-                    />
-                    {/* Sélecteur de technicien filtré par région */}
-                    {/* Sélectionner un technicien */}
-                          <Select
-                            placeholder="Sélectionner un technicien *"
-                            onChange={(value) => {
-                              setNewTask({ ...newTask, technicien: value });
-                              setSelectedTechnicien(value);
-                            }}
-                            style={{ marginBottom: 8, width: "100%" }}
-                            disabled={!selectedCity} // Désactivé tant qu'une ville n'est pas sélectionnée
-                          >
-                            {sortedTechniciens.map(t => (
-                              <Option key={t._id} value={t._id}>
-                               {t.name} ( {t.location},Tâches: {calculateTaskCount(t._id)})
-                              </Option>
-                            ))}
-                          </Select>
-                    <Select
-                      placeholder="Sélectionner un véhicule *"
-                      onChange={(value) => setNewTask({...newTask, vehicule: value})}
-                      value={newTask.vehicule}
-                      showSearch
-                      optionFilterProp="children"
-                      filterOption={(input, option) => 
-                        option.children.toLowerCase().includes(input.toLowerCase())
-                      }
-                      allowClear
-                      style={{ width: '100%' }}
-                    >
-                   {vehiculesList
-                  .filter(veh => 
-                    (veh.status === 'disponible' && 
-                    !tasks.some(t => 
-                      t.vehicule === veh._id && 
-                      t.status !== 'terminé' // Nouvelle condition
-                    )) || 
-                    veh._id === newTask.vehicule
-                  )
-                  .map(veh => (
-                    <Option key={veh._id} value={veh._id}>
-                      {veh.model} ({veh.registration}) - {veh.status}
-                    </Option>
-                  ))}
-                  </Select>
-                    <RangePicker
-                      showTime
-                      format="DD/MM/YYYY HH:mm"
-                      onChange={(dates) => setNewTask({
-                        ...newTask,
-                        startDate: dates?.[0]?.toISOString(),
-                        endDate: dates?.[1]?.toISOString()
-                      })}
-                    />
-                    <Input
-                        type="file"
-                        multiple
-                        onChange={(e) => {
-                          const files = Array.from(e.target.files);
-                          console.log(files);  // Vérifier si les fichiers sont correctement capturés
-                          setNewTask({...newTask, files});
-                        }}
+    {/* Formulaire de création de tâche */}
+    <div style={{ marginBottom: 16, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
+      <Input
+        placeholder="Titre *"
+        value={newTask.title}
+        onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+      />
+      <Input.TextArea
+        placeholder="Description détaillée *"
+        value={newTask.description}
+        onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+        rows={3}
+      />
+      <Input
+        placeholder="Client *"
+        value={newTask.client}
+        onChange={(e) => setNewTask({...newTask, client: e.target.value})}
+      />
+      <Select
+        placeholder="Sélectionner une ville *"
+        onChange={(value) => {
+          setSelectedCity(value);
+          const region = getRegionFromCity(value);
+          setSelectedRegion(region);
+          setNewTask({ ...newTask, location: value });
+        }}
+        style={{ marginBottom: 8, width: "100%" }}
+        showSearch
+        optionFilterProp="children"
+        filterOption={(input, option) =>
+          option.children.toLowerCase().includes(input.toLowerCase())
+        }
+      >
+        {allCities.map(city => (
+          <Option key={city} value={city}>{city}</Option>
+        ))}
+      </Select>
+      <Input
+        placeholder="Adresse détaillée"
+        value={newTask.location}
+        onChange={(e) => setNewTask({...newTask, location: e.target.value})}
+      />
+      <Select
+        placeholder="Sélectionner un technicien *"
+        onChange={(value) => {
+          setNewTask({ ...newTask, technicien: value });
+          setSelectedTechnicien(value);
+        }}
+        style={{ marginBottom: 8, width: "100%" }}
+        disabled={!selectedCity}
+      >
+        {sortedTechniciens.map(t => (
+          <Option key={t._id} value={t._id}>
+            {t.name} ({t.location}, Tâches: {calculateTaskCount(t._id)})
+          </Option>
+        ))}
+      </Select>
+      <Select
+        placeholder="Sélectionner un véhicule *"
+        onChange={(value) => setNewTask({...newTask, vehicule: value})}
+        value={newTask.vehicule}
+        showSearch
+        optionFilterProp="children"
+        filterOption={(input, option) => 
+          option.children.toLowerCase().includes(input.toLowerCase())
+        }
+        allowClear
+        style={{ width: '100%' }}
+      >
+        {vehiculesList
+          .filter(veh => 
+            (veh.status === 'disponible' && 
+            !tasks.some(t => 
+              t.vehicule === veh._id && 
+              t.status !== 'terminé'
+            )) || 
+            veh._id === newTask.vehicule
+          )
+          .map(veh => (
+            <Option key={veh._id} value={veh._id}>
+              {veh.model} ({veh.registration}) - {veh.status}
+            </Option>
+          ))}
+      </Select>
+      <RangePicker
+        showTime
+        format="DD/MM/YYYY HH:mm"
+        onChange={(dates) => setNewTask({
+          ...newTask,
+          startDate: dates?.[0]?.toISOString(),
+          endDate: dates?.[1]?.toISOString()
+        })}
+      />
+      <Input
+        type="file"
+        multiple
+        onChange={(e) => {
+          const files = Array.from(e.target.files);
+          setNewTask({...newTask, files});
+        }}
+        style={{ marginBottom: 16 }}
+      />
+      <Button
+        type="primary"
+        onClick={handleCreateTask}
+        disabled={
+          !newTask.title || 
+          !newTask.description || 
+          !newTask.technicien || 
+          !newTask.vehicule || 
+          !newTask.startDate || 
+          !newTask.endDate ||
+          !isTechnicienAvailable(newTask.technicien, newTask.startDate, newTask.endDate)
+        }
+        block
+      >
+        Créer Tâche
+      </Button>
+      {selectedTechnicien && (
+        <div style={{ marginBottom: 16 }}>
+          <strong>Technicien sélectionné :</strong>
+          <p>Nom: {techniciens.find(t => t._id === selectedTechnicien).name}</p>
+          <p>Localisation: {techniciens.find(t => t._id === selectedTechnicien).location}</p>
+          <p>Tâches planifiées et en cours: {calculateTaskCount(selectedTechnicien)}</p>
+        </div>
+      )}
+    </div>
 
-                        style={{ marginBottom: 16 }}
-                      />
-                      <Button
-                      type="primary"
-                      onClick={handleCreateTask}
-                      disabled={
-                        !newTask.title || 
-                        !newTask.description || 
-                        !newTask.technicien || 
-                        !newTask.vehicule || 
-                        !newTask.startDate || 
-                        !newTask.endDate ||
-                        !isTechnicienAvailable(newTask.technicien, newTask.startDate, newTask.endDate)
-                      }
-                      block
-                    >
-                      Créer Tâche
-                    </Button>
-                    {/* Affichage des détails du technicien sélectionné */}
-                  {selectedTechnicien && (
-                    <div style={{ marginBottom: 16 }}>
-                      <strong>Technicien sélectionné :</strong>
-                      <p>Nom: {techniciens.find(t => t._id === selectedTechnicien).name}</p>
-                      <p>Localisation: {techniciens.find(t => t._id === selectedTechnicien).location}</p>
-                      <p>Tâches planifiées et en cours: {calculateTaskCount(selectedTechnicien)}</p>
-                    </div>
-                  )}
-                  </div>
+    {/* Tableau des tâches */}
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#f0f0f0' }}>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Titre</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Client</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Localisation</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Statut</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Période</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Technicien</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Véhicule</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Pièces jointes</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks
+            .filter(task => {
+              const tech = techniciens.find(t => t._id === task.technicien);
+              const veh = vehicules.find(v => v._id === task.vehicule);
+              
+              return (
+                task.title.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+                task.location?.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+                (tech?.name?.toLowerCase().includes(taskSearchTerm.toLowerCase())) ||
+                (veh?.model?.toLowerCase().includes(taskSearchTerm.toLowerCase())) ||
+                (veh?.registration?.toLowerCase().includes(taskSearchTerm.toLowerCase()))
+              );
+            })
+            .slice((currentTaskPage - 1) * taskPageSize, currentTaskPage * taskPageSize)
+            .map(task => {
+              const assignedTechnicien = techniciens.find(t => t._id === task.technicien);
+              const assignedVehicule = vehicules.find(v => v._id === task.vehicule);
 
-                  <List
-                    dataSource={tasks
-                      .filter(task => {
-                        const tech = techniciens.find(t => t._id === task.technicien);
-                        const veh = vehicules.find(v => v._id === task.vehicule);
-                        
-                        return (
-                          task.title.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                          task.location?.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                          tech?.name.toLowerCase().includes(taskSearchTerm.toLowerCase()) || // Recherche par nom technicien
-                          veh?.model.toLowerCase().includes(taskSearchTerm.toLowerCase()) || // Recherche par modèle véhicule
-                          veh?.registration.toLowerCase().includes(taskSearchTerm.toLowerCase()) // Recherche par immatriculation
-                        );
-                      })
-                    
-                      .slice((currentTaskPage - 1) * taskPageSize, currentTaskPage * taskPageSize)
-                    }
-                    pagination={{
-                      pageSize: taskPageSize,
-                      current: currentTaskPage,
-                      total: tasks.filter(task => 
-                        task.title.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                        task.technicien?.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
-                        task.location?.toLowerCase().includes(taskSearchTerm.toLowerCase())||
-                        task.vehicule?.toLowerCase().includes(taskSearchTerm.toLowerCase())
-                        
-                      ).length,
-                      onChange: (page, pageSize) => {
-                        setCurrentTaskPage(page);
-                        setTaskPageSize(pageSize);
-                      },
-                      showSizeChanger: true,
-                      pageSizeOptions: ['4', '8', '12'],
-                      showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total} tâches`,
-                    }}
-                    renderItem={task => {
-                      // Ajout des constantes ici
-                      const assignedTechnicien = techniciens.find(t => t._id === task.technicien);
-                      const assignedVehicule = vehicules.find(v => v._id === task.vehicule);
-
-                      return (
-                        <List.Item
-                          actions={[
-                            <Button
-                              onClick={() => {
-                                setEditingTask(task);
-                                setExistingAttachments(task.attachments || []); // Initialiser les pièces jointes existantes
-  setNewFiles([]); // Réinitialiser les nouveaux fichiers
-                                setIsTaskEditModalVisible(true);
-                              }}
-                            >
-                              Modifier
-                            </Button>,
-                            <Button danger onClick={() => handleDeleteTask(task._id)}>
-                              Supprimer
-                            </Button>
-                          ]}
-                        >
-                          <List.Item.Meta
-                            title={<Text strong>{task.title}</Text>}
-                            description={
-                              <div>
-                                <Text>Client: {task.client}</Text><br />
-                                <Text>Localisation: {task.location}</Text><br />
-                                <Text>Statut: <Tag color={
-                                  task.status === 'planifié' ? 'blue' :
-                                  task.status === 'en cours' ? 'orange' : 'green'
-                                }>{task.status}</Tag></Text><br />
-                                <Text>Période: {moment(task.startDate).format('DD/MM HH:mm')} - {moment(task.endDate).format('DD/MM HH:mm')}</Text><br />
-                                {/* Modification ici */}
-                                <Text>Technicien: {assignedTechnicien?.name || 'Non assigné'}</Text><br />
-                                {/* Et ici */}
-                                <Text>Véhicule: {assignedVehicule?.model} ({assignedVehicule?.registration || 'N/A'})</Text>
-                                {task.report && (
-                                  <div style={{ marginTop: 10, padding: 10, background: '#F6F6F6', borderRadius: 4 }}>
-                                    <Text strong>Rapport d'intervention:</Text><br />
-                                    <Text>Temps passé: {task.report.timeSpent}h</Text><br />
-                                    <Text>Problèmes: {task.report.issues}</Text><br />
-                                    <Text>Résolution: {task.report.resolution}</Text>
-                                  </div>
-                                )}
-                                  {task.attachments?.length > 0 && (
-                    <div style={{ marginTop: 8 }}>
-                      <Text strong>Pièces jointes :</Text>
+              return (
+                <tr key={task._id} style={{ borderBottom: '1px solid #ddd' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    <Text strong>{task.title}</Text>
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    {task.client}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    {task.location}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    <Tag color={
+                      task.status === 'planifié' ? 'blue' :
+                      task.status === 'en cours' ? 'orange' : 'green'
+                    }>
+                      {task.status}
+                    </Tag>
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    {moment(task.startDate).format('DD/MM HH:mm')} - {moment(task.endDate).format('DD/MM HH:mm')}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    {assignedTechnicien?.name || 'Non assigné'}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    {assignedVehicule?.model} ({assignedVehicule?.registration || 'N/A'})
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+              {task.attachments?.length > 0 ? (
+                <Popover
+                  title="Pièces jointes"
+                  content={
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {task.attachments.map(attachment => (
-                        <div key={attachment.filename}>
-                          <a
-                            href={`http://localhost:3000/uploads/${attachment.filename}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ display: 'block' }}
-                          >
-                            📎 {attachment.originalName} ({Math.round(attachment.size/1024)}KB)
-                          </a>
-                        </div>
+                        <a
+                          key={attachment.filename}
+                          href={`http://localhost:3000/uploads/${attachment.filename}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                        >
+                          <FileTextOutlined />
+                          <div>
+                            <div>{attachment.originalName}</div>
+                            <Text type="secondary">{Math.round(attachment.size/1024)} KB</Text>
+                          </div>
+                        </a>
                       ))}
-                    </div>)}
-                              </div>
-                              
-                            }
-                          />
-                        </List.Item>
-                      );
-                    }}
-                  />
-                </Card>
+                    </div>
+                  }
+                >
+                  <Button type="link" icon={<PaperClipOutlined />}>
+                    {task.attachments.length} fichier(s)
+                  </Button>
+                </Popover>
+              ) : (
+                <Text type="secondary">Aucun</Text>
               )}
+            </td>
+
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    <Button
+                      onClick={() => {
+                        setEditingTask(task);
+                        setExistingAttachments(task.attachments || []);
+                        setNewFiles([]);
+                        setIsTaskEditModalVisible(true);
+                      }}
+                      style={{ marginRight: 4, marginBottom: 4 }}
+                    >
+                      Modifier
+                    </Button>
+                    <Button danger onClick={() => handleDeleteTask(task._id)}>
+                      Supprimer
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
+        </tbody>
+      </table>
+    </div>
+
+    {/* Pagination */}
+    <div style={{ marginTop: 16, textAlign: 'right' }}>
+      <Pagination
+        current={currentTaskPage}
+        pageSize={taskPageSize}
+        total={tasks.filter(task => {
+          const tech = techniciens.find(t => t._id === task.technicien);
+          const veh = vehicules.find(v => v._id === task.vehicule);
+          return (
+            task.title.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+            task.location?.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+            (tech?.name?.toLowerCase().includes(taskSearchTerm.toLowerCase())) ||
+            (veh?.model?.toLowerCase().includes(taskSearchTerm.toLowerCase())) ||
+            (veh?.registration?.toLowerCase().includes(taskSearchTerm.toLowerCase()))
+          );
+        }).length}
+        onChange={(page, pageSize) => {
+          setCurrentTaskPage(page);
+          setTaskPageSize(pageSize);
+        }}
+        showSizeChanger
+        pageSizeOptions={['4', '8', '12']}
+        showTotal={(total, range) => `${range[0]}-${range[1]} sur ${total} tâches`}
+      />
+    </div>
+  </Card>
+)}
 
 {isEditModalVisible && (
   <Modal
