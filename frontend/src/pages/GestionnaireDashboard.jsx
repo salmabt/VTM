@@ -95,8 +95,6 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('');
-  const [notifications, setNotifications] = useState([]);
-  const [noteNotifications, setNoteNotifications] = useState([]);
   ///////editvoiture/////////
   const [editingVehicule, setEditingVehicule] = useState(null);
 const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -132,61 +130,6 @@ const [selectedInteraction, setSelectedInteraction] = useState(null);
 //filtrer des traitement de chatbot
 const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'treated', 'untreated'
 
-useEffect(() => {
-  const unreadNotifications = noteNotifications.filter(n => !n.read);
-  setNoteNotifications(unreadNotifications);
-}, [noteNotifications]);
-useEffect(() => {
-  const loadNoteNotifications = async () => {
-    try {
-      const response = await axios.get('/api/notes/notifications', {
-        params: {
-          role: 'gestionnaire',
-          read: false
-        }
-      });
-      setNoteNotifications(response.data);
-    } catch (error) {
-      console.error('Erreur chargement notifications:', error);
-    }
-  };
-  loadNoteNotifications();
-}, []);
-
-// Connexion SSE
-useEffect(() => {
-  const sse = new EventSource('http://localhost:3000/api/notes/notifications/sse', {
-    withCredentials: true // Inclure les cookies d'authentification
-  });
-
-  const handleNotification = (e) => {
-    try {
-      const newNotif = JSON.parse(e.data);
-      
-      // Vérifier que la notification ne vient pas de l'utilisateur courant
-      if (newNotif.senderId !== userData._id) {
-        setNoteNotifications(prev => [
-          { 
-            ...newNotif,
-            createdAt: new Date(newNotif.createdAt),
-            read: false
-          },
-          ...prev
-        ]);
-        message.info('Nouvelle notification de note !');
-      }
-    } catch (error) {
-      console.error('Erreur parsing SSE:', error);
-    }
-  };
-
-  sse.addEventListener('notification', handleNotification);
-  
-  return () => {
-    sse.removeEventListener('notification', handleNotification);
-    sse.close();
-  };
-}, [userData._id]); // Dépendance sur l'ID utilisateur
 const handleAddNote = async () => {
   if (newNote.trim()) {
     try {
@@ -866,28 +809,6 @@ if (selectedInteraction) {
               <Text strong>Connecté en tant que : {userData?.name}</Text>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            {/* Notification Button with Badge */}
-            <Badge count={noteNotifications.filter(n => !n.read).length}>
-  <Popover
-    title="Notifications de notes"
-    content={
-      <List
-        dataSource={noteNotifications}
-        renderItem={item => (
-          <List.Item>
-            <List.Item.Meta
-              title={item.message}
-              description={moment(item.createdAt).format('DD/MM HH:mm')}
-            />
-          </List.Item>
-        )}
-      />
-    }
-  >
-    <Button icon={<BellOutlined />} shape="circle" />
-  </Popover>
-</Badge>
-           
             <Button icon={<LogoutOutlined />} onClick={logout}>Déconnexion</Button>
             </div>
           </Header>
@@ -1088,7 +1009,7 @@ if (selectedInteraction) {
                                 vehiculesList={vehiculesList}
                               />
                                 
-                                {selectedMenu === '3' && (
+  {selectedMenu === '3' && (
   <Card title="Gestion des tâches" bordered={false}>
     {/* Barre de recherche */}
     <Input.Search
@@ -1101,133 +1022,212 @@ if (selectedInteraction) {
       allowClear
     />
 
-    {/* Formulaire de création de tâche */}
-    <div style={{ marginBottom: 16, display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
-      <Input
-        placeholder="Titre *"
-        value={newTask.title}
-        onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-      />
-      <Input.TextArea
-        placeholder="Description détaillée *"
-        value={newTask.description}
-        onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-        rows={3}
-      />
-      <Input
-        placeholder="Client *"
-        value={newTask.client}
-        onChange={(e) => setNewTask({...newTask, client: e.target.value})}
-      />
-      <Select
-        placeholder="Sélectionner une ville *"
-        onChange={(value) => {
-          setSelectedCity(value);
-          const region = getRegionFromCity(value);
-          setSelectedRegion(region);
-          setNewTask({ ...newTask, location: value });
-        }}
-        style={{ marginBottom: 8, width: "100%" }}
-        showSearch
-        optionFilterProp="children"
-        filterOption={(input, option) =>
-          option.children.toLowerCase().includes(input.toLowerCase())
-        }
-      >
-        {allCities.map(city => (
-          <Option key={city} value={city}>{city}</Option>
-        ))}
-      </Select>
-      <Input
-        placeholder="Adresse détaillée"
-        value={newTask.location}
-        onChange={(e) => setNewTask({...newTask, location: e.target.value})}
-      />
-      <Select
-        placeholder="Sélectionner un technicien *"
-        onChange={(value) => {
-          setNewTask({ ...newTask, technicien: value });
-          setSelectedTechnicien(value);
-        }}
-        style={{ marginBottom: 8, width: "100%" }}
-        disabled={!selectedCity}
-      >
-        {sortedTechniciens.map(t => (
-          <Option key={t._id} value={t._id}>
-            {t.name} ({t.location}, Tâches: {calculateTaskCount(t._id)})
-          </Option>
-        ))}
-      </Select>
-      <Select
-        placeholder="Sélectionner un véhicule *"
-        onChange={(value) => setNewTask({...newTask, vehicule: value})}
-        value={newTask.vehicule}
-        showSearch
-        optionFilterProp="children"
-        filterOption={(input, option) => 
-          option.children.toLowerCase().includes(input.toLowerCase())
-        }
-        allowClear
-        style={{ width: '100%' }}
-      >
-        {vehiculesList
-          .filter(veh => 
-            (veh.status === 'disponible' && 
-            !tasks.some(t => 
-              t.vehicule === veh._id && 
-              t.status !== 'terminé'
-            )) || 
-            veh._id === newTask.vehicule
-          )
-          .map(veh => (
-            <Option key={veh._id} value={veh._id}>
-              {veh.model} ({veh.registration}) - {veh.status}
-            </Option>
-          ))}
-      </Select>
-      <RangePicker
-        showTime
-        format="DD/MM/YYYY HH:mm"
-        onChange={(dates) => setNewTask({
-          ...newTask,
-          startDate: dates?.[0]?.toISOString(),
-          endDate: dates?.[1]?.toISOString()
-        })}
-      />
-      <Input
-        type="file"
-        multiple
-        onChange={(e) => {
-          const files = Array.from(e.target.files);
-          setNewTask({...newTask, files});
-        }}
-        style={{ marginBottom: 16 }}
-      />
-      <Button
-        type="primary"
-        onClick={handleCreateTask}
-        disabled={
-          !newTask.title || 
-          !newTask.description || 
-          !newTask.technicien || 
-          !newTask.vehicule || 
-          !newTask.startDate || 
-          !newTask.endDate ||
-          !isTechnicienAvailable(newTask.technicien, newTask.startDate, newTask.endDate)
-        }
-        block
-      >
-        Créer Tâche
-      </Button>
-      {selectedTechnicien && (
-        <div style={{ marginBottom: 16 }}>
-          <strong>Technicien sélectionné :</strong>
-          <p>Nom: {techniciens.find(t => t._id === selectedTechnicien).name}</p>
-          <p>Localisation: {techniciens.find(t => t._id === selectedTechnicien).location}</p>
-          <p>Tâches planifiées et en cours: {calculateTaskCount(selectedTechnicien)}</p>
+     {/* Nouveau formulaire de création de tâche - version structurée */}
+     <Card 
+      title="Création de nouvelle tâche" 
+      bordered={false} 
+      style={{ marginBottom: 24, backgroundColor: '#f9f9f9' }}
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+        {/* Colonne 1 - Informations de base */}
+        <div>
+          <h4 style={{ marginBottom: 16 }}>Informations de base</h4>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Titre *</Text>
+            <Input
+              placeholder="Titre de la tâche"
+              value={newTask.title}
+              onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+            />
+          </div>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Description détaillée *</Text>
+            <Input.TextArea
+              placeholder="Description complète de la tâche"
+              value={newTask.description}
+              onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+              rows={4}
+            />
+          </div>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Client *</Text>
+            <Input
+              placeholder="Nom du client"
+              value={newTask.client}
+              onChange={(e) => setNewTask({...newTask, client: e.target.value})}
+            />
+          </div>
         </div>
-      )}
-    </div>
+
+        {/* Colonne 2 - Localisation et planning */}
+        <div>
+          <h4 style={{ marginBottom: 16 }}>Localisation et planning</h4>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Ville *</Text>
+            <Select
+              placeholder="Sélectionner une ville"
+              onChange={(value) => {
+                setSelectedCity(value);
+                const region = getRegionFromCity(value);
+                setSelectedRegion(region);
+                setNewTask({ ...newTask, location: value });
+              }}
+              style={{ width: '100%' }}
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {allCities.map(city => (
+                <Option key={city} value={city}>{city}</Option>
+              ))}
+            </Select>
+          </div>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Adresse détaillée</Text>
+            <Input
+              placeholder="Adresse complète"
+              value={newTask.location}
+              onChange={(e) => setNewTask({...newTask, location: e.target.value})}
+            />
+          </div>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Période *</Text>
+            <RangePicker
+              showTime
+              format="DD/MM/YYYY HH:mm"
+              onChange={(dates) => setNewTask({
+                ...newTask,
+                startDate: dates?.[0]?.toISOString(),
+                endDate: dates?.[1]?.toISOString()
+              })}
+              style={{ width: '100%' }}
+            />
+          </div>
+        </div>
+
+        {/* Colonne 3 - Ressources */}
+        <div>
+          <h4 style={{ marginBottom: 16 }}>Ressources</h4>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Technicien *</Text>
+            <Select
+              placeholder="Sélectionner un technicien"
+              onChange={(value) => {
+                setNewTask({ ...newTask, technicien: value });
+                setSelectedTechnicien(value);
+              }}
+              style={{ width: '100%' }}
+              disabled={!selectedCity}
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {sortedTechniciens.map(t => (
+                <Option key={t._id} value={t._id}>
+                  {t.name} ({t.location}, Tâches: {calculateTaskCount(t._id)})
+                </Option>
+              ))}
+            </Select>
+          </div>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Véhicule *</Text>
+            <Select
+              placeholder="Sélectionner un véhicule"
+              onChange={(value) => setNewTask({...newTask, vehicule: value})}
+              value={newTask.vehicule}
+              style={{ width: '100%' }}
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) => 
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {vehiculesList
+                .filter(veh => 
+                  (veh.status === 'disponible' && 
+                  !tasks.some(t => 
+                    t.vehicule === veh._id && 
+                    t.status !== 'terminé'
+                  )) || 
+                  veh._id === newTask.vehicule
+                )
+                .map(veh => (
+                  <Option key={veh._id} value={veh._id}>
+                    {veh.model} ({veh.registration}) - {veh.status}
+                  </Option>
+                ))}
+            </Select>
+          </div>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong>Pièces jointes</Text>
+            <Input
+              type="file"
+              multiple
+              onChange={(e) => {
+                const files = Array.from(e.target.files);
+                setNewTask({...newTask, files});
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Bouton de soumission et info technicien */}
+      <div style={{ marginTop: 24 }}>
+        <Button
+          type="primary"
+          onClick={handleCreateTask}
+          disabled={
+            !newTask.title || 
+            !newTask.description || 
+            !newTask.technicien || 
+            !newTask.vehicule || 
+            !newTask.startDate || 
+            !newTask.endDate ||
+            !isTechnicienAvailable(newTask.technicien, newTask.startDate, newTask.endDate)
+          }
+          style={{ width: 200 }}
+        >
+          Créer Tâche
+        </Button>
+
+        {selectedTechnicien && (
+          <div style={{ marginTop: 16, padding: 16, backgroundColor: '#f0f0f0', borderRadius: 4 }}>
+            <Text strong>Technicien sélectionné :</Text>
+            <div style={{ marginTop: 8 }}>
+              <Text>
+                <UserOutlined /> {techniciens.find(t => t._id === selectedTechnicien).name}
+              </Text>
+              <Text>
+                <MailOutlined /> {techniciens.find(t => t._id === selectedTechnicien).email}
+              </Text>
+              <Text>
+                <PhoneOutlined /> {techniciens.find(t => t._id === selectedTechnicien).phone}
+              </Text>
+              <Text>
+                Localisation: {techniciens.find(t => t._id === selectedTechnicien).location}
+              </Text>
+              <Text>
+                Tâches planifiées/en cours: {calculateTaskCount(selectedTechnicien)}
+              </Text>
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
 
     {/* Tableau des tâches */}
     <div style={{ overflowX: 'auto' }}>
@@ -1572,107 +1572,131 @@ if (selectedInteraction) {
   </Modal>
 )}
 
-              {selectedMenu === '4' && (
-                <Card title="Gestion des véhicules" bordered={false}>
-                    {/* Ajouter la barre de recherche */}
+{selectedMenu === '4' && (
+  <Card title="Gestion des véhicules" bordered={false}>
+    {/* Barre de recherche */}
     <Input.Search 
       placeholder="Rechercher par modèle ou immatriculation"
       onChange={(e) => {
         setSearchTerm(e.target.value);
-        setCurrentPage(1); // Reset à la première page lors d'une nouvelle recherche
+        setCurrentPage(1);
       }}
       style={{ marginBottom: 16, width: 300 }}
       allowClear
     />
-                  <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <Input
-                      placeholder="Immatriculation *"
-                      value={newVehicule.registration}
-                      onChange={(e) => setNewVehicule({...newVehicule, registration: e.target.value})}
-                      style={{ width: 200 }}
-                    />
-                    <Input
-                      placeholder="Modèle *"
-                      value={newVehicule.model}
-                      onChange={(e) => setNewVehicule({...newVehicule, model: e.target.value})}
-                      style={{ width: 200 }}
-                    />
-                    <Select
-                      value={newVehicule.status}
-                      onChange={(value) => setNewVehicule({...newVehicule, status: value})}
-                      style={{ width: 150 }}
-                    >
-                      <Option value="disponible">Disponible</Option>
-                      <Option value="en entretien">En entretien</Option>
-                      <Option value="réservé">Réservé</Option>
-                    </Select>
-                    <Button
-                      type="primary"
-                      onClick={handleAddVehicule}
-                      disabled={!newVehicule.registration || !newVehicule.model}
-                      style={{ minWidth: 150 }}
-                    >
-                      Ajouter Véhicule
-                    </Button>
-                  </div>
-                  <List
-                    dataSource={vehicules
-                      .filter(vehicule => 
-                        vehicule.model.toLowerCase().includes(searchTerm.toLowerCase())||
-                        vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase())
-                      )
-                      .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
+    {/* Formulaire d'ajout */}
+    <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <Input
+        placeholder="Immatriculation *"
+        value={newVehicule.registration}
+        onChange={(e) => setNewVehicule({...newVehicule, registration: e.target.value})}
+        style={{ width: 200 }}
+      />
+      <Input
+        placeholder="Modèle *"
+        value={newVehicule.model}
+        onChange={(e) => setNewVehicule({...newVehicule, model: e.target.value})}
+        style={{ width: 200 }}
+      />
+      <Select
+        value={newVehicule.status}
+        onChange={(value) => setNewVehicule({...newVehicule, status: value})}
+        style={{ width: 150 }}
+      >
+        <Option value="disponible">Disponible</Option>
+        <Option value="en entretien">En entretien</Option>
+        <Option value="réservé">Réservé</Option>
+      </Select>
+      <Button
+        type="primary"
+        onClick={handleAddVehicule}
+        disabled={!newVehicule.registration || !newVehicule.model}
+        style={{ minWidth: 150 }}
+      >
+        Ajouter Véhicule
+      </Button>
+    </div>
+
+    {/* Tableau des véhicules */}
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '70%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#f0f0f0' }}>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Modèle</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Immatriculation</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Statut</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {vehicules
+            .filter(vehicule => 
+              vehicule.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+            .map(vehicule => (
+              <tr key={vehicule._id} style={{ borderBottom: '1px solid #ddd' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <Text strong>{vehicule.model}</Text>
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  {vehicule.registration}
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <Tag 
+                    color={
+                      vehicule.status === 'disponible' ? 'green' : 
+                      vehicule.status === 'en entretien' ? 'orange' : 'red'
                     }
-                    pagination={{
-                      pageSize: pageSize,
-                      current: currentPage,
-                      total: vehicules.filter(vehicule => 
-                        vehicule.model.toLowerCase().includes(searchTerm.toLowerCase())||
-                        vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase())
-                      ).length,
-                      onChange: (page, pageSize) => {
-                        setCurrentPage(page);
-                        setPageSize(pageSize);
-                      },
-                      showSizeChanger: true,
-                      pageSizeOptions: ['4', '8', '12'],
-                      showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total} véhicules`,
+                  >
+                    {vehicule.status}
+                  </Tag>
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <Button 
+                    onClick={() => {
+                      setEditingVehicule(vehicule);
+                      setIsEditModalVisible(true);
                     }}
-                    renderItem={vehicule => (
-                      <List.Item
-                      actions={[
-                        <Button 
-                          onClick={() => {
-                            setEditingVehicule(vehicule);
-                            setIsEditModalVisible(true);
-                          }}
-                        >
-                          Modifier
-                        </Button>,
-                        <Button danger onClick={() => handleDeleteVehicule(vehicule._id)}>
-                          Supprimer
-                        </Button>
-                      ]}
-                    >
-                        <List.Item.Meta
-                          title={
-                            <Text strong>
-                              {vehicule.model} ({vehicule.registration})
-                            </Text>
-                          }
-                          description={
-                            <Text
-                              type={vehicule.status === 'disponible' ? 'success' : 'warning'}
-                            >
-                              Statut: {vehicule.status}
-                            </Text>
-                          }
-                        />
-                      </List.Item>
-                    )}
-                  />
-                </Card>
-              )}
+                    style={{ marginRight: 8 }}
+                  >
+                    Modifier
+                  </Button>
+                  <Button 
+                    danger 
+                    onClick={() => handleDeleteVehicule(vehicule._id)}
+                  >
+                    Supprimer
+                  </Button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
+
+    {/* Pagination */}
+    <div style={{ marginTop: 16, textAlign: 'right' }}>
+      <Pagination
+        current={currentPage}
+        pageSize={pageSize}
+        total={vehicules.filter(vehicule => 
+          vehicule.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase())
+        ).length}
+        onChange={(page, pageSize) => {
+          setCurrentPage(page);
+          setPageSize(pageSize);
+        }}
+        showSizeChanger
+        pageSizeOptions={['4', '8', '12']}
+        showTotal={(total, range) => `${range[0]}-${range[1]} sur ${total} véhicules`}
+      />
+    </div>
+  </Card>
+)}
 
           {selectedMenu === '5' && ( // Section Chronologie
             <Card title="Chronologie des notes" bordered={false}>
