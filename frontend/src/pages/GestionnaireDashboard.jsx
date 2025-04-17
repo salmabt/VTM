@@ -69,7 +69,8 @@ const GestionnaireDashboard = () => {
   const [newVehicule, setNewVehicule] = useState({
     registration: '',
     model: '',
-    status: 'disponible'
+    status: 'disponible',
+    image: null
   });
   // États pour les tâches
   // Ajoutez ces états dans le composant parent
@@ -83,6 +84,7 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
     description: '',
     client: '',
     location: '',
+    adresse:'',
     startDate: null,
     endDate: null,
     technicien: '',
@@ -431,6 +433,7 @@ useEffect(() => {
       formData.append('description', newTask.description);
       formData.append('client', newTask.client);
       formData.append('location', newTask.location);
+      formData.append('adresse', newTask.adresse);
       formData.append('technicien', newTask.technicien);
       formData.append('vehicule', newTask.vehicule);
       formData.append('startDate', start.toISOString());
@@ -479,6 +482,7 @@ useEffect(() => {
         description: '',
         client: '',
         location: '',
+        adresse:'',
         startDate: null,
         endDate: null,
         technicien: '',
@@ -548,6 +552,7 @@ if (selectedInteraction) {
       formData.append('description', editingTask.description);
       formData.append('client', editingTask.client || '');
       formData.append('location', editingTask.location);
+      formData.append('adresse', editingTask.adresse);
       formData.append('technicien', editingTask.technicien);
       formData.append('vehicule', editingTask.vehicule);
       formData.append('startDate', new Date(editingTask.startDate).toISOString());
@@ -726,6 +731,9 @@ if (selectedInteraction) {
     
     <Text strong>Localisation : </Text>
     <Text>{selectedTask.location}</Text><br/>
+    <Text strong>Adresse du Client : </Text>
+    <Text>{selectedTask.adresse}</Text><br/>
+
     
     {/* Modification ici pour afficher seulement l'heure */}
    {/* Modifier l'affichage de la période */}
@@ -1093,8 +1101,8 @@ if (selectedInteraction) {
             <Text strong>Adresse détaillée</Text>
             <Input
               placeholder="Adresse complète"
-              value={newTask.location}
-              onChange={(e) => setNewTask({...newTask, location: e.target.value})}
+              value={newTask.adresse}
+              onChange={(e) => setNewTask({...newTask, adresse: e.target.value})}
             />
           </div>
           
@@ -1386,6 +1394,21 @@ if (selectedInteraction) {
     cancelText="Annuler"
   >
     <Input
+      type="file"
+      accept="image/*"
+      onChange={(e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setEditingVehicule({...editingVehicule, image: reader.result});
+          };
+          reader.readAsDataURL(file);
+        }
+      }}
+      style={{ marginBottom: 16 }}
+    />
+    <Input
       placeholder="Immatriculation"
       value={editingVehicule?.registration || ''}
       onChange={e => setEditingVehicule({...editingVehicule, registration: e.target.value})}
@@ -1472,9 +1495,9 @@ if (selectedInteraction) {
     </Select>
     <Input
       placeholder="Adresse détaillée"
-      value={editingTask?.location || ''}
+      value={editingTask?.adresse || ''}
       onChange={(e) =>
-        setEditingTask({ ...editingTask, location: e.target.value })
+        setEditingTask({ ...editingTask, adresse: e.target.value })
       }
       style={{ marginBottom: 16 }}
     />
@@ -1587,6 +1610,21 @@ if (selectedInteraction) {
 
     {/* Formulaire d'ajout */}
     <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    <Input
+    type="file"
+    accept="image/*"
+    onChange={(e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setNewVehicule({...newVehicule, image: reader.result});
+        };
+        reader.readAsDataURL(file);
+      }
+    }}
+    style={{ width: 200 }}
+  />
       <Input
         placeholder="Immatriculation *"
         value={newVehicule.registration}
@@ -1623,6 +1661,7 @@ if (selectedInteraction) {
       <table style={{ width: '70%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ backgroundColor: '#f0f0f0' }}>
+          <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Image</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Modèle</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Immatriculation</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Statut</th>
@@ -1638,6 +1677,32 @@ if (selectedInteraction) {
             .slice((currentPage - 1) * pageSize, currentPage * pageSize)
             .map(vehicule => (
               <tr key={vehicule._id} style={{ borderBottom: '1px solid #ddd' }}>
+                 <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+            {vehicule.image ? (
+              <img 
+                src={vehicule.image} 
+                alt={vehicule.model} 
+                style={{ 
+                  width: 100, 
+                  height: 60, 
+                  objectFit: 'cover',
+                  borderRadius: 4 
+                }}
+              />
+            ) : (
+              <div style={{
+                width: 100,
+                height: 60,
+                backgroundColor: '#f0f0f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 4
+              }}>
+                <Text type="secondary">Aucune image</Text>
+              </div>
+            )}
+          </td>
                 <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
                   <Text strong>{vehicule.model}</Text>
                 </td>

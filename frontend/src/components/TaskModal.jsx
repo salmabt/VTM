@@ -137,11 +137,11 @@ const TaskModal = ({
 
       {/* Sélection de l'adresse */}
       <Input
-        placeholder="Adresse détaillée *"
-        value={newTask.location}
-        onChange={(e) => setNewTask({ ...newTask, location: e.target.value })}
-        style={{ marginBottom: 8, width: "100%" }}
-      />
+  placeholder="Adresse détaillée *"
+  value={newTask.adresse}
+  onChange={(e) => setNewTask({ ...newTask, adresse: e.target.value })}
+/>
+
 
       {/* Sélectionner un technicien */}
       <Select
