@@ -1244,7 +1244,7 @@ if (selectedInteraction) {
           <tr style={{ backgroundColor: '#f0f0f0' }}>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Titre</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Client</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Localisation</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Ville</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Statut</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Période</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Technicien</th>

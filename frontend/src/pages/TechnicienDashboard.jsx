@@ -614,11 +614,16 @@ const notificationContent = (
       <Text strong>Titre: </Text>
       <Text>{selectedTask.title}</Text>
       <br />
-      <Text strong>Lieu: </Text>
-      <Text>{selectedTask.location}</Text>
-      <br />
       <Text strong>Client: </Text>
       <Text>{selectedTask.client}</Text>
+      <br />
+      <Text strong>Ville: </Text>
+      <Text>{selectedTask.location}</Text>
+      <br />
+      <Text strong>Adresse compléte: </Text>
+      <Text>{selectedTask.adresse}</Text>
+      
+      <br />
     </div>
   )}
 </Modal>
