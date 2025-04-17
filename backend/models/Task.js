@@ -6,6 +6,7 @@ const taskSchema = new mongoose.Schema({
   description: { type: String, required: true },
   client: { type: String, required: true },
   location: { type: String, required: true },
+  adresse: { type: String, required: true }, 
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   technicien: { 

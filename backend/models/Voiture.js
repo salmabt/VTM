@@ -16,6 +16,10 @@ const voitureSchema = new mongoose.Schema({
   },
   lastMaintenance: {
     type: Date
+  },
+  image: {
+    type: String, // Base64 ou URL
+    required: false
   }
 
 });
