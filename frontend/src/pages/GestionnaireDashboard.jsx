@@ -1245,6 +1245,7 @@ if (selectedInteraction) {
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Titre</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Client</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Ville</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Adresse compléte</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Statut</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Période</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Technicien</th>
@@ -1282,6 +1283,9 @@ if (selectedInteraction) {
                   </td>
                   <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
                     {task.location}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                    {task.adresse}
                   </td>
                   <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
                     <Tag color={
