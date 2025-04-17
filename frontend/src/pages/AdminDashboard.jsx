@@ -163,6 +163,7 @@ const [calendarView, setCalendarView] = useState('month');
     description: '',
     client: '',
     location: '',
+    adresse:'',
     startDate: null,
     endDate: null,
     technicien: '',
@@ -748,6 +749,7 @@ const handleUpdateGestionnaire = async () => {
         formData.append('description', newTask.description);
         formData.append('client', newTask.client);
         formData.append('location', newTask.location);
+        formData.append('adresse', newTask.adresse);
         formData.append('technicien', newTask.technicien);
         formData.append('vehicule', newTask.vehicule);
         formData.append('startDate', start.toISOString());
@@ -791,6 +793,7 @@ const handleUpdateGestionnaire = async () => {
           description: '',
           client: '',
           location: '',
+          adresse:'',
           startDate: null,
           endDate: null,
           technicien: '',
@@ -1085,6 +1088,8 @@ const gestionnaireColumns = [
                 
                 <Text strong>Localisation : </Text>
                 <Text>{selectedTask.location}</Text><br/>
+                <Text strong>Adresse du client: </Text>
+                <Text>{selectedTask.adresse}</Text><br/>
                 
                 {/* Modification ici pour afficher seulement l'heure */}
                {/* Modifier l'affichage de la période */}

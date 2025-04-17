@@ -193,6 +193,7 @@ exports.updateTask = async (req, res) => {
       description: req.body.description,
       client: req.body.client,
       location: req.body.location,
+      adresse: req.body.adresse,
       technicien: req.body.technicien,
       vehicule: req.body.vehicule,
       startDate: req.body.startDate,
