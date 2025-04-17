@@ -84,7 +84,8 @@ const TechniciensSection = ({
               <Avatar 
                 size={64} 
                 icon={<UserOutlined />} 
-                style={{ backgroundColor: '#87d068' }}
+                style={{
+                   backgroundColor: '#b385d1' }}
               />
               <div style={{ marginTop: 8, fontWeight: 500 }}>{tech.name}</div>
             </div>

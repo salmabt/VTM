@@ -82,66 +82,66 @@ const Register = () => {
         {/* Formulaire */}
         <Flex vertical flex={1} className="form-section">
           <Typography.Title level={2} strong className="title">
-            Sign Up
+            Créer un compte
           </Typography.Title>
           <Typography.Text type="secondary" strong className="slogan">
-            Join for exclusive access!
+            Inscrivez-vous pour accéder à nos services !
           </Typography.Text>
           <Form layout="vertical" onFinish={handleRegister} autoComplete="off" form={form}>
             <Form.Item
-              label="Full Name"
+              label="Nom et prénom"
               name="name"
               rules={[
                 {
                   required: true,
-                  message: 'Please input your full name!',
+                  message: 'Veuillez saisir votre nom complet !',
                 },
               ]}
             >
-              <Input size="large" placeholder="Enter your full name" />
+              <Input size="large" placeholder="Entrez votre nom complet" />
             </Form.Item>
 
          
-<Form.Item
-  label="Email"
-  name="email"
-  rules={[
-    {
-      required: true,
-      message: 'Veuillez saisir votre email !',
-    },
-    {
-      type: 'email',
-      message: 'Format email invalide !',
-    },
-    {
-      pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-      message: 'Adresse email non valide !'
-    }
-  ]}
->
-  <Input size="large" placeholder="exemple@domaine.com" />
-</Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                message: 'Veuillez saisir votre email !',
+              },
+              {
+                type: 'email',
+                message: 'Format email invalide !',
+              },
+              {
+                pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                message: 'Adresse email non valide !'
+              }
+            ]}
+          >
+            <Input size="large" placeholder="exemple@domaine.com" />
+          </Form.Item>
 
 
-<Form.Item
-  label="Role"
-  name="role"
-  initialValue="technicien"
-  rules={[
-    {
-      required: true,
-      message: 'Veuillez sélectionner votre rôle !',
-    },
-  ]}
->
-  <Select size="large" disabled>
-    <Option value="technicien">Technicien</Option>
-  </Select>
-</Form.Item>
+          <Form.Item
+            label="Rôle"
+            name="role"
+            initialValue="technicien"
+            rules={[
+              {
+                required: true,
+                message: 'Veuillez sélectionner votre rôle !',
+              },
+            ]}
+          >
+            <Select size="large" disabled>
+              <Option value="technicien">Technicien</Option>
+            </Select>
+          </Form.Item>
 
-<Form.Item
-          label="Phone"
+          <Form.Item
+          label="Téléphone"
           name="phone"
           rules={[
             { required: true, message: 'Veuillez saisir votre numéro de téléphone !' },
@@ -166,16 +166,16 @@ const Register = () => {
 
             {/* Sélection de la localisation */}
             <Form.Item
-              label="Address"
+              label="Ville"
               name="location"
               rules={[
                 {
                   required: true,
-                  message: 'Please select your location!',
+                  message: 'Veuillez sélectionner votre ville !',
                 },
               ]}
             >
-              <Select size="large" placeholder="Select your location">
+              <Select size="large" placeholder="Sélectionnez votre ville">
                 {cities.map((city, index) => (
                   <Option key={index} value={city}>
                     {city}
@@ -186,34 +186,34 @@ const Register = () => {
 
             {/* Sélection des compétences */}
             <Form.Item
-              label="Skills"
+              label="Compétences"
               name="skills"
               rules={[
                 {
                   required: true,
-                  message: 'Please select your skills!',
+                  message: 'Veuillez renseigner vos compétences !',
                 },
               ]}
               extra={
-  <div style={{ fontSize: '0.8rem', color: '#666', marginTop: 5 }}>
-    <InfoCircleOutlined /> Séparez les compétences par des virgules (ex: Plomberie, Électricité)
-  </div>
-}
+            <div style={{ fontSize: '0.8rem', color: '#666', marginTop: 5 }}>
+              <InfoCircleOutlined /> Séparez les compétences par des virgules (ex: Plomberie, Électricité)
+            </div>
+          }
             >
               <Input
                 size="large"
-                placeholder="put your skills"
+                placeholder="Entrez vos compétences"
               />
             </Form.Item>
 
            
 <Form.Item
-  label="Password"
+  label="Mot de passe"
   name="password"
   rules={[
     {
       required: true,
-      message: 'Please input your Password!',
+      message: 'Veuillez saisir votre mot de passe !',
     },
     () => ({
       validator(_, value) {
@@ -231,25 +231,25 @@ const Register = () => {
 </Form.Item>
 
             <Form.Item
-              label="Confirm Password"
+              label="Confirmez le mot de passe"
               name="passwordConfirm"
               dependencies={['password']} // Dépendance pour la validation
               rules={[
                 {
                   required: true,
-                  message: 'Please confirm your password!',
+                  message: 'Veuillez confirmer votre mot de passe !',
                 },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue('password') === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error('The two passwords do not match!'));
+                    return Promise.reject(new Error('Les mots de passe ne correspondent pas !'));
                   },
                 }),
               ]}
             >
-              <Input.Password size="large" placeholder="Re-enter your password" />
+              <Input.Password size="large" placeholder="Confirmez votre mot de passe" />
             </Form.Item>
 
             {error && (
@@ -269,17 +269,17 @@ const Register = () => {
     size="large"
     className={`btn ${loading ? 'loading' : ''}`} // Ajouter une classe dynamique selon l'état de chargement
   >
-    {loading ? <Spin /> : 'Create Account'}
+    {loading ? <Spin /> : 'Créer un compte'}
   </Button>
             </Form.Item>
 
             <Form.Item>
              
               <Typography.Text style={{ color: '#666', marginRight: '20px' }}>
-                            Already have an account?
+                    Vous avez déjà un compte ?
                </Typography.Text>
               <Link to="/login" style={{ fontWeight: 500 }}>
-                              Sign in
+                       Se connecter
                             </Link>
             </Form.Item>
           </Form>

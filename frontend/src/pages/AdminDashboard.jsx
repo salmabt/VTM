@@ -486,6 +486,11 @@ const handleSearchUsers = (value) => {
         key: 'email',
       },
       {
+        title: 'Ville',
+        dataIndex: 'location',
+        key: 'location',
+      },
+      {
         title: 'Téléphone',
         dataIndex: 'phone',
         key: 'phone',

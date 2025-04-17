@@ -43,10 +43,10 @@ const Login = () => {
           {/* Formulaire */}
           <Flex vertical flex={1} className="form-section">
             <Typography.Title level={2} strong className="title">
-              Sign In
+               Se connecter
             </Typography.Title>
             <Typography.Text type="secondary" strong className="slogan">
-              Welcome back! Please log in to continue.
+                Ravie de vous revoir ! Veuillez vous connecter pour continuer.
             </Typography.Text>
             <Form layout="vertical" onFinish={handleLogin} autoComplete="off">
               <Form.Item
@@ -67,7 +67,7 @@ const Login = () => {
               </Form.Item>
 
               <Form.Item
-                label="Password"
+                label="Mot de passe"
                 name="password"
                 rules={[
                   {
@@ -96,16 +96,16 @@ const Login = () => {
                   size="large"
                   className={`btn ${loading ? 'loading' : ''}`}
                 >
-                  {loading ? <Spin /> : 'Login'}
+                  {loading ? <Spin /> : 'Connexion'}
                 </Button>
               </Form.Item>
 
               <Form.Item>
                 <Typography.Text style={{ color: '#666', marginRight: '20px' }}>
-                  Don't have an account?
+                Vous n'avez pas de compte ?
                 </Typography.Text>
                 <Link to="/register" style={{ fontWeight: 500 }}>
-                  Create an account
+                Créer un compte
                 </Link>
               </Form.Item>
             </Form>
