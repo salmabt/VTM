@@ -45,5 +45,17 @@ router.post("/save-interaction", async (req, res) => {
     }
   });
   
+  // Ajoutez cette nouvelle route DELETE
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedInteraction = await Interaction.findByIdAndDelete(req.params.id);
+    if (!deletedInteraction) {
+      return res.status(404).json({ message: 'Interaction non trouvée' });
+    }
+    res.json({ message: 'Interaction supprimée avec succès' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;
