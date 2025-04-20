@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin, Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber, Table } from 'antd';
-import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined, MoonOutlined, SunOutlined  } from '@ant-design/icons';
-import { BarChart ,PieChart, CartesianGrid, XAxis, YAxis, Bar,Legend ,Pie,Cell } from 'recharts'; 
-
+import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin,
+   Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber, Table, Select } from 'antd';
+import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, 
+  EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined, MoonOutlined, SunOutlined,BellOutlined, PhoneOutlined,MailOutlined, AreaChartOutlined } from '@ant-design/icons';
+import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import techniciensApi from '../api/techniciens';
 import gestionnairesApi from '../api/gestionnaires';
@@ -16,6 +17,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import HomeDashboard from './HomeDashboard'; // Assurez-vous que le chemin est correct
 import AdminRapport from './AdminRapport';
+import { deleteInteraction } from '../api/services';
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 const localizer = momentLocalizer(moment);
@@ -179,6 +181,12 @@ const [rating, setRating] = useState({});
 const [showRateModal, setShowRateModal] = useState(false);
   const [currentTechId, setCurrentTechId] = useState(null);
   const [currentRating, setCurrentRating] = useState(0);
+
+  //interaction chatbot
+  const [interactions, setInteractions] = useState([]);
+  const [selectedInteraction, setSelectedInteraction] = useState(null);
+  //filtrer des traitement de chatbot
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'treated', 'untreated'
 // Dans la partie véhicules
 const calculateUtilisation = (tasks, vehiculeId) => {
   return tasks
@@ -328,6 +336,23 @@ useEffect(() => {
 
   updateTechnicianData();
 }, [tasks, vehicules, selectedTech]);
+
+/////////client
+// Ajouter dans les useEffect
+useEffect(() => {
+  const loadInteractions = async () => {
+    try {
+      const response = await axios.get('/api/interactions');
+      setInteractions(response.data);
+    } catch (error) {
+      console.error('Erreur de chargement des interactions:', error);
+    }
+  };
+  
+  if (selectedMenu === '3') {
+    loadInteractions();
+  }
+}, [selectedMenu]);
 
   
 
@@ -833,6 +858,17 @@ const handleUpdateGestionnaire = async () => {
       }
     };
     
+    const handleDeleteInteraction = async (interactionId) => {
+      try {
+        await deleteInteraction(interactionId);
+    setInteractions(interactions.filter(i => i._id !== interactionId));
+    message.success('Interaction supprimée avec succès');
+  } catch (error) {
+    message.error('Erreur lors de la suppression');
+    console.error('Erreur:', error);
+  }
+};
+
     const handleExportPDF = async () => {
       setExportLoading(true);
   try {
@@ -915,11 +951,12 @@ const gestionnaireColumns = [
   },
 ];
   const menuItems = [
-    { key: '1', icon: <UserOutlined />, label: 'Dashboard' },
+    { key: '1', icon: <AreaChartOutlined />, label: 'Dashboard' },
     { key: '2', icon: <CalendarOutlined />, label: 'Calendrier' },
-    { key: '3', icon: <UserOutlined />, label: 'Techniciens' },
-    { key: '4', icon: <FileTextOutlined />, label: 'Rapports' },
+    { key: '3', icon: <UserOutlined />, label: 'Clients' },
+    { key: '4', icon: <UserOutlined />, label: 'Techniciens' },
     { key: '5', icon: <UserOutlined />, label: 'Gestionnaires' },
+    { key: '6', icon: <FileTextOutlined />, label: 'Rapports' },
   ];
   // Composant personnalisé pour afficher les événements
   const CustomEvent = ({ event }) => (
@@ -1169,7 +1206,102 @@ const gestionnaireColumns = [
                 vehiculesList={vehicules}
               />
 
-              {selectedMenu === '3' && (
+
+             {selectedMenu === '3' && (
+              <Card title="Gestion des Clients" variant="borderless">
+                   <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
+                     <Input
+                      placeholder="Rechercher un client"
+                      prefix={<SearchOutlined />}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                      }}
+
+                      style={{ flex: 1 }}
+                    />
+                   </div>
+                
+                   <Table
+                columns={[
+                  {
+                    title: 'ID',
+                    dataIndex: '_id',
+                    key: 'id',
+                    render: (text) => <Text strong>{text}</Text>,
+                    width: 160
+                  },
+                  {
+                    title: 'Nom',
+                    dataIndex: 'nom_client',
+                    key: 'nom_client',
+                    render: (text) => <Text strong>{text}</Text>,
+                    width: 120
+                  },
+                  {
+                    title: 'Email',
+                    key: 'email',
+                    render: (_, record) => (
+                      <>
+                        
+                        <div><MailOutlined /> {record.email}</div>
+                      </>
+                    ),
+                    width: 180
+                  },
+                  {
+                    title: 'Téléphone',
+                    dataIndex: 'telephone',
+                    key: 'telephone', render: (_, record) => (
+                      <>
+                        
+                        <div><PhoneOutlined /> {record.phone}</div>
+                      </>
+                    ),
+                  
+                    width: 120
+                  },
+                
+                
+                  {
+                    title: 'Adresse',
+                    dataIndex: 'address',
+                    key: 'address',
+                    width: 150
+                  },
+                  
+                  {
+                    title: 'Actions',
+                    key: 'actions',
+                    render: (_, record) => (
+                    <Popconfirm
+                          title="Êtes-vous sûr de supprimer ce client ?"
+                          onConfirm={() => handleDeleteInteraction(record._id)}
+                          okText="Oui"
+                          cancelText="Non"
+                        >
+                          <Button danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                      ),
+                      width: 100
+                    }
+                  ]}
+                  dataSource={interactions.filter(interaction => {
+                    // Filtre uniquement par recherche
+                    return !searchTerm || 
+                      interaction.nom_client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      interaction.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      interaction.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      interaction.address?.toLowerCase().includes(searchTerm.toLowerCase());
+                  })}
+                  rowKey="_id"
+                  scroll={{ x: 1300 }}
+                  pagination={{ pageSize: 8 }}
+                />
+              </Card>
+              )}
+             
+
+              {selectedMenu === '4' && (
                 <Card title="Gestion des Techniciens" variant="borderless">
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
                     <Input
@@ -1228,7 +1360,7 @@ const gestionnaireColumns = [
                 </Card>
               )}
 
-              {selectedMenu === '4' && (
+              {selectedMenu === '6' && (
                 <AdminRapport />
               )}
 

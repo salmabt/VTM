@@ -16,3 +16,12 @@ export const saveInteraction = async (data) => {
     throw error.response.data;
   }
 };
+// Ajoutez cette nouvelle fonction
+export const deleteInteraction = async (id) => {
+  try {
+    const response = await API.delete(`/interactions/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
