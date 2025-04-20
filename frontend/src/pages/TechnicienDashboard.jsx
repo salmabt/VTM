@@ -611,10 +611,10 @@ const notificationContent = (
 >
   {selectedTask && (
     <div>
-      <Text strong>Titre: </Text>
+      <Text strong>Titre du tache: </Text>
       <Text>{selectedTask.title}</Text>
       <br />
-      <Text strong>Client: </Text>
+      <Text strong>Nom du Client et son numéro du télèphone: </Text>
       <Text>{selectedTask.client}</Text>
       <br />
       <Text strong>Ville: </Text>

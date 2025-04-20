@@ -106,7 +106,7 @@ const TaskModal = ({
       />
 
       <Input
-        placeholder="Client *"
+        placeholder="Nom du Client(son numéro du télèphone) *"
         value={newTask.client}
         onChange={(e) => setNewTask({ ...newTask, client: e.target.value })}
         style={{ marginBottom: 8 }}

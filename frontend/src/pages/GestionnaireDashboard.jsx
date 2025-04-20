@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   Layout, Menu, Input, DatePicker, Typography, Button, Card, List,
-  Select, message, Spin, Tag, Modal,Badge ,Popover, Pagination
+  Select, message, Spin, Tag, Modal,Badge ,Popover, Pagination,Table
 } from 'antd';
 import {
   CalendarOutlined, FileTextOutlined,
   UnorderedListOutlined, LogoutOutlined, CarOutlined, ClockCircleOutlined,UserOutlined,
-   BellOutlined, PhoneOutlined, MailOutlined, PaperClipOutlined
+   BellOutlined, PhoneOutlined, MailOutlined, PaperClipOutlined,StarOutlined,StarFilled,ArrowRightOutlined
 } from '@ant-design/icons';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -131,6 +131,9 @@ const [interactions, setInteractions] = useState([]);
 const [selectedInteraction, setSelectedInteraction] = useState(null);
 //filtrer des traitement de chatbot
 const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'treated', 'untreated'
+//client favori
+const [favoriteClients, setFavoriteClients] = useState([]);
+const [showAllClients, setShowAllClients] = useState(false);
 
 const handleAddNote = async () => {
   if (newNote.trim()) {
@@ -358,6 +361,27 @@ useEffect(() => {
     loadInteractions();
   }
 }, [selectedMenu]);
+//client favori
+useEffect(() => {
+  const clientMap = tasks.reduce((acc, task) => {
+    const key = task.client;
+    if (!acc[key]) {
+      acc[key] = {
+        name: task.client,
+        
+        count: 0
+      };
+    }
+    acc[key].count++;
+    return acc;
+  }, {});
+
+  const frequentClients = Object.values(clientMap)
+    .filter(client => client.count >= 3)
+    .sort((a, b) => b.count - a.count);
+
+  setFavoriteClients(frequentClients);
+}, [tasks]);
 // Déclenché quand l'ID de la tâche change // Se déclenche quand la liste des tâches change
   const handleAddVehicule = async () => {
     try {
@@ -669,7 +693,8 @@ if (selectedInteraction) {
     { key: '3', icon: <UnorderedListOutlined />, label: 'Tâches' },
     { key: '4', icon: <CarOutlined />, label: 'Voitures' },
     { key: '5', icon: <ClockCircleOutlined />, label: 'Chronologie' },
-    { key: '6', icon: <UserOutlined />, label: 'Filtrage Techniciens' }
+    { key: '6', icon: <UserOutlined />, label: 'Filtrage Techniciens' },
+    { key: '7', icon: <StarOutlined />, label: 'Clients Favoris' }
   ];
   
   // Composant personnalisé pour afficher les événements
@@ -709,6 +734,7 @@ if (selectedInteraction) {
       )}
     </Menu.Item>
     <Menu.Item key="6" icon={<UserOutlined />}>Filtrage Techniciens</Menu.Item>
+    <Menu.Item key="7" icon={<StarOutlined />}>Clients Favoris</Menu.Item>
   </Menu>
 </Sider>
         {selectedTask && (
@@ -1061,12 +1087,40 @@ if (selectedInteraction) {
           </div>
           
           <div style={{ marginBottom: 16 }}>
-            <Text strong>Client *</Text>
+            <Text strong>Information sur le Client *</Text>
             <Input
-              placeholder="Nom du client"
-              value={newTask.client}
-              onChange={(e) => setNewTask({...newTask, client: e.target.value})}
-            />
+  placeholder="Nom du client (son numéro du télèphone)"
+  value={newTask.client}
+  onChange={(e) => setNewTask({...newTask, client: e.target.value})}
+  addonAfter={
+    <Popover 
+      title="Clients fréquents" 
+      content={
+        <List
+          dataSource={favoriteClients}
+          renderItem={client => (
+            <List.Item
+              style={{ cursor: 'pointer' }}
+              onClick={() => setNewTask({
+                ...newTask,
+                client: client.name,
+                phone: client.phone,
+                email: client.email
+              })}
+            >
+              <List.Item.Meta
+                title={client.name}
+                description={<><PhoneOutlined /> {client.phone}</>}
+              />
+            </List.Item>
+          )}
+        />
+      }
+    >
+      <StarOutlined style={{ color: '#ffd700' }} />
+    </Popover>
+  }
+/>
           </div>
         </div>
 
@@ -1243,7 +1297,7 @@ if (selectedInteraction) {
         <thead>
           <tr style={{ backgroundColor: '#f0f0f0' }}>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Titre</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Client</th>
+            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Information sur le Client</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Ville</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Adresse compléte</th>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Statut</th>
@@ -1838,6 +1892,61 @@ if (selectedInteraction) {
     <TechnicienFiltering techniciens={techniciens} />
   </Card>
 )}
+{selectedMenu === '7' && (
+  <Card 
+    title="Clients Fidèles" 
+    bordered={false}
+    extra={
+      <Button 
+        icon={<StarFilled style={{ color: '#faad14' }} />}
+        onClick={() => setShowAllClients(!showAllClients)}
+      >
+        {showAllClients ? 'Vue compacte' : 'Vue étendue'}
+      </Button>
+    }
+  >
+    <Table
+      dataSource={showAllClients ? favoriteClients : favoriteClients.slice(0, 5)}
+      columns={[
+        {
+          title: 'Information sur Client',
+          dataIndex: 'name',
+          key: 'name',
+          render: (text, record) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <StarFilled style={{ color: '#faad14', fontSize: 16 }} />
+              <Text strong>{text}</Text>
+            </div>
+          ),
+        },
+      
+        {
+          title: 'Actions',
+          key: 'actions',
+          render: (_, record) => (
+            <Button 
+              type="link" 
+              icon={<ArrowRightOutlined />}
+              onClick={() => {
+                setNewTask(prev => ({
+                  ...prev,
+                  client: record.name,
+               
+                }));
+                setIsModalVisible(true);
+              }}
+            >
+              Réutiliser
+            </Button>
+          ),
+        },
+      ]}
+      rowKey="phone"
+      scroll={{ x: true }}
+    />
+  </Card>
+)}
+
              </>
                     )}
                     
