@@ -22,6 +22,7 @@ import TechniciensSection from '../components/TechniciensSection';
 import TechnicienFiltering from '../components/TechnicienFiltering';
 import { technicienRegions, allCities } from '../config/technicienRegions';
 import axios from 'axios';
+import '../styles/GestionnaireInterface.css';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;

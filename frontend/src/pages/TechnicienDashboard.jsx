@@ -1,3 +1,4 @@
+//frontend/src/pages/techniciendashboard
 import React, { useState, useEffect } from 'react';
 import { Layout, List, Card, Typography, Spin, message, Menu, Avatar, Button, Select, Tag, Form, Input,  Badge,Col,Row,Popover,Modal } from 'antd';
 import { CalendarOutlined, LogoutOutlined, UserOutlined, FileTextOutlined, BellOutlined} from '@ant-design/icons';
@@ -6,6 +7,7 @@ import tasksApi from '../api/tasks';
 import vehiculesApi from '../api/vehicules';
 import reportsApi from '../api/reports'; 
 import '../styles/technicien-dashboard.css';
+import '../styles/TechnicienInterface.css';
 
 const { Content, Sider, Header } = Layout;
 const { Title, Text } = Typography;

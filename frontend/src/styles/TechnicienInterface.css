@@ -1,0 +1,92 @@
+/* TechnicienDashboard.css */
+.technicien-dashboard {
+    background: #f8f9fa;
+    min-height: 100vh;
+  }
+  
+  /* Three-column layout */
+  .task-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  @media (max-width: 1200px) {
+    .task-columns {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .task-columns {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Task card styling */
+  .task-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .task-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  /* Status tags */
+  .ant-tag {
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  
+  /* Responsive header */
+  .ant-layout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px !important;
+  }
+  
+  @media (max-width: 576px) {
+    .ant-layout-header {
+      flex-direction: column;
+      padding: 15px !important;
+      gap: 10px;
+    }
+  }
+  
+  /* Report form responsive */
+  .report-form .ant-form-item {
+    margin-bottom: 16px;
+  }
+  
+  @media (max-width: 768px) {
+    .report-form .ant-form-item-label {
+      text-align: left !important;
+    }
+  }
+  
+  /* Attachment list */
+  .attachment-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .attachment-list li {
+    margin-bottom: 5px;
+  }
+  
+  /* Status select dropdown */
+  .status-select {
+    min-width: 120px;
+  }
+  
+  @media (max-width: 576px) {
+    .status-select {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }

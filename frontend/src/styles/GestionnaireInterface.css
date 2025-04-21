@@ -1,0 +1,72 @@
+/* GestionnaireInterface.css */
+.gestionnaire-container {
+    min-height: 100vh;
+    background: #f0f2f5;
+  }
+  
+  /* Task creation grid */
+  .task-creation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    .task-creation-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Vehicule cards */
+  .vehicule-card {
+    transition: transform 0.2s;
+  }
+  
+  .vehicule-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  /* Timeline responsive */
+  .ant-timeline-item-content {
+    padding: 0 0 20px 20px;
+  }
+  
+  @media (max-width: 576px) {
+    .ant-timeline-item-tail {
+      left: 4px !important;
+    }
+    
+    .ant-timeline-item-content {
+      margin-left: 18px;
+    }
+  }
+  
+  /* Client interaction table */
+  .interaction-table {
+    min-width: 800px;
+  }
+  
+  @media (max-width: 992px) {
+    .interaction-table {
+      font-size: 14px;
+    }
+    
+    .interaction-table td {
+      padding: 8px !important;
+    }
+  }
+  
+  /* Notification bell */
+  .notification-badge .ant-scroll-number {
+    box-shadow: 0 0 0 1px #fff;
+  }
+  
+  /* Calendar event colors */
+  .rbc-event {
+    opacity: 0.9;
+    padding: 2px 5px;
+  }
+  
+  .rbc-event-content {
+    font-size: 0.9em;
+  }

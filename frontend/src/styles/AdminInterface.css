@@ -1,0 +1,84 @@
+/* AdminInterface.css */
+.admin-container {
+    min-height: 100vh;
+    transition: background-color 0.3s;
+  }
+  
+  /* Mode sombre */
+  .admin-container.dark-mode {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+  
+  /* Responsive Sidebar */
+  .ant-layout-sider {
+    transition: all 0.3s;
+  }
+  
+  @media (max-width: 768px) {
+    .ant-layout-sider {
+      position: fixed;
+      z-index: 1000;
+      height: 100vh;
+      max-width: 200px !important;
+      flex: 0 0 200px !important;
+    }
+    
+    .ant-layout-sider-collapsed {
+      max-width: 80px !important;
+      flex: 0 0 80px !important;
+    }
+    
+    .ant-layout-header {
+      padding: 0 15px !important;
+    }
+  }
+  
+  /* Calendar responsive */
+  .rbc-calendar {
+    min-height: 500px;
+  }
+  
+  @media (max-width: 992px) {
+    .rbc-toolbar {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .rbc-btn-group {
+      margin-top: 5px;
+    }
+  }
+  
+  /* Table responsive */
+  .ant-table {
+    overflow-x: auto;
+  }
+  
+  @media (max-width: 576px) {
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      padding: 12px 8px !important;
+    }
+    
+    .ant-table-column-title {
+      font-size: 12px;
+    }
+  }
+  
+  /* Modal responsive */
+  .ant-modal {
+    max-width: 90vw;
+  }
+  
+  /* Cards responsive */
+  .ant-card-head-title {
+    white-space: normal !important;
+  }
+  
+  @media (max-width: 768px) {
+    .ant-card-extra {
+      margin-top: 10px;
+      width: 100%;
+    }
+  }

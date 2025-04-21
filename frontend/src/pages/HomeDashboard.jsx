@@ -14,7 +14,7 @@ const { Text } = Typography;
 const TaskBarChart = ({ data }) => {
   const monthNames = [
     'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
-    'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'
+    'Jul', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'
   ];
 
   return (
@@ -22,17 +22,20 @@ const TaskBarChart = ({ data }) => {
       <BarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
-          dataKey="month"
-          tickFormatter={(month) => monthNames[month - 1]}
-        />
+  dataKey="month"
+  tickFormatter={(month) => monthNames[month - 1]}
+  domain={[1, 12]} // Forcer l'affichage de 12 mois
+  interval={0} // Afficher toutes les étiquettes
+  tick={{ fontSize: 12 }} // Réduire la taille
+/>
         <YAxis />
         <Tooltip
-          labelFormatter={(value) => monthNames[value - 1]}
+          labelFormatter={(monthNumber) => monthNames[monthNumber - 1]}
           formatter={(value) => [value, 'Tâches']}
         />
         <Bar
           dataKey="count"
-          fill="#8884D8"
+          fill="#8884d8"
           name="Tâches/Mois"
         />
       </BarChart>
@@ -103,7 +106,15 @@ const HomeDashboard = () => {
         const tasksMonthRes = await axios.get('http://localhost:3000/api/tasks/count-by-month', { 
           params: { year: selectedYear } // Add year parameter
         });
-        setTasksPerMonth(tasksMonthRes.data);
+        const formattedTasksPerMonth = Array.from({ length: 12 }, (_, i) => {
+          const match = tasksMonthRes.data.find(item => item.month === i + 1);
+          return {
+            month: i + 1, // Garder le numéro du mois (1-12)
+            count: match ? match.count : 0
+          };
+        });
+        setTasksPerMonth(formattedTasksPerMonth);
+        
 
         const tasksRes = await axios.get('http://localhost:3000/api/tasks/count', { params });
         setTotalTasks(tasksRes.data.totalTasks);
@@ -179,134 +190,137 @@ const HomeDashboard = () => {
             style={{ width: '100%' }}
           />
         </Modal>
-
         <Row gutter={[16, 16]}>
-          <Col span={6}>
-            <Card style={{ background: '#FFF5CC', textAlign: 'center' }}>
-              <Statistic
-                title="Total Technicians"
-                value={totalEmployees}
-                prefix={<UserOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ background: '#FDE2E2', textAlign: 'center' }}>
-              <Statistic
-                title="Best Technician"
-                value={bestTechnician}
-                prefix={<UserOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ background: '#D4EDDA', textAlign: 'center' }}>
-              <Statistic
-                title="Total Gestionnaires"
-                value={totalGestionnaires}
-                prefix={<UserOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ background: '#E0F7FA', textAlign: 'center' }}>
-              <Statistic
-                title="Total Tasks"
-                value={totalTasks}
-                prefix={<UnorderedListOutlined />}
-              />
-            </Card>
-          </Col>
-        </Row>
-        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col span={24} md={12}>
-            <Card title="📊 Statut des Véhicules">
-              <PieChart width={400} height={400}>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  label
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getVehicleStatusColor(entry.name)} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </Card>
-          </Col>
-          <Col span={12}>
-            <Card title="Tasks">
-              <div style={{ textAlign: 'center' }}>
-                <div 
-                  style={{
-                    width: 120,
-                    height: 120,
-                    borderRadius: '50%',
-                    background: `conic-gradient(
-                      #FF4D4F 0deg ${completedTasksPercent * 3.6}deg,
-                      #FAAD14 ${completedTasksPercent * 3.6}deg ${(completedTasksPercent + plannedTasksPercent) * 3.6}deg,
-                      #52C41A ${(completedTasksPercent + plannedTasksPercent) * 3.6}deg 360deg
-                    )`,
-                    margin: '0 auto',
-                    position: 'relative'
-                  }}
-                >
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    backgroundColor: 'white',
-                    width: '80%',
-                    height: '80%',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Text strong>{`${completedTasksPercent}%`}</Text>
-                  </div>
-                </div>
-                <div style={{ marginTop: 16 }}>
-                  <Text type="danger">● Terminées ({completedTasksPercent}%)</Text><br />
-                  <Text type="warning">● Planifiées ({plannedTasksPercent}%)</Text><br />
-                  <Text type="success">● En cours ({activeTasksPercent}%)</Text><br />
-                </div>
-              </div>
-            </Card>
-          </Col>
-          <Col span={12}>
-            <Card title="Tasks Per Month">
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-              <Select
-  value={selectedYear}
-  onChange={handleYearChange}
-  style={{ width: 120 }}
-  showSearch
-  placeholder="Sélectionner une année"
-  optionFilterProp="children"
-  filterOption={(input, option) =>
-    option.children.toString().toLowerCase().includes(input.toLowerCase())
-  }
->
-  {years.map(year => (
-    <Select.Option key={year} value={year}>
-      {year}
-    </Select.Option>
-  ))}
-</Select>
+  <Col xs={24} sm={12} md={6}>
+    <Card style={{ background: '#FFF5CC', textAlign: 'center' }}>
+      <Statistic title="Total Technicians" value={totalEmployees} prefix={<UserOutlined />} />
+    </Card>
+  </Col>
+  <Col xs={24} sm={12} md={6}>
+    <Card style={{ background: '#FDE2E2', textAlign: 'center' }}>
+      <Statistic title="Best Technician" value={bestTechnician} prefix={<UserOutlined />} />
+    </Card>
+  </Col>
+  <Col xs={24} sm={12} md={6}>
+    <Card style={{ background: '#D4EDDA', textAlign: 'center' }}>
+      <Statistic title="Total Gestionnaires" value={totalGestionnaires} prefix={<UserOutlined />} />
+    </Card>
+  </Col>
+  <Col xs={24} sm={12} md={6}>
+    <Card style={{ background: '#E0F7FA', textAlign: 'center' }}>
+      <Statistic title="Total Tasks" value={totalTasks} prefix={<UnorderedListOutlined />} />
+    </Card>
+  </Col>
+</Row>
 
-              </div>
-              <TaskBarChart data={tasksPerMonth} />
-            </Card>
-          </Col>
-        </Row>
+<Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+  {/* Camembert Statut Véhicules */}
+  <Col xs={2} md={8}>
+    <Card title="📊 Statut des Véhicules" style={{ height: '100%' }}>
+      <div style={{ width: '70%', height: 300 }}>
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              outerRadius="80%"
+              fill="#8884d8"
+              label
+              dataKey="value"
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={getVehicleStatusColor(entry.name)} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    </Card>
+  </Col>
+
+  {/* Donut Tasks */}
+  <Col xs={24} sm={12} md={8}>
+  <Card title="📌Tasks" className="dashboard-card">
+
+      <div style={{ textAlign: 'center' }}>
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 140,
+            height: 250,
+            borderRadius: '50%',
+            background: `conic-gradient(
+              #FF4D4F 0deg ${completedTasksPercent * 3.6}deg,
+              #FAAD14 ${completedTasksPercent * 3.6}deg ${(completedTasksPercent + plannedTasksPercent) * 3.6}deg,
+              #52C41A ${(completedTasksPercent + plannedTasksPercent) * 3.6}deg 360deg
+            )`,
+            margin: '0 auto',
+            position: 'relative'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: 'white',
+              width: '70%',
+              height: '70%',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Text strong>{`${completedTasksPercent}%`}</Text>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <Text type="danger">● Terminées ({completedTasksPercent}%)</Text><br />
+          <Text type="warning">● Planifiées ({plannedTasksPercent}%)</Text><br />
+          <Text type="success">● En cours ({activeTasksPercent}%)</Text><br />
+        </div>
+      </div>
+    </Card>
+  </Col>
+
+  {/* Bar Chart Tasks Per Month */}
+  <Col xs={24} sm={12} md={8}>
+  <Card title="📅Tasks Per Month" className="dashboard-chart">
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+        <Select
+          value={selectedYear}
+          onChange={handleYearChange}
+          style={{ width: '100%', maxWidth: 120 }}
+          showSearch
+          placeholder="Sélectionner une année"
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            option.children.toString().toLowerCase().includes(input.toLowerCase())
+          }
+        >
+          {years.map((year) => (
+            <Select.Option key={year} value={year}>
+              {year}
+            </Select.Option>
+          ))}
+        </Select>
+      </div>
+      <div style={{ width: '100%', height: 300 }}>
+        <ResponsiveContainer>
+          <TaskBarChart data={tasksPerMonth} />
+        </ResponsiveContainer>
+      </div>
+    </Card>
+  </Col>
+</Row>
+
       </Content>
     </Layout>
   );

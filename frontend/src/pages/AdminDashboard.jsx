@@ -1,3 +1,4 @@
+//frontend/src/pages/admindashboard
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin,
    Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber, Table, Select } from 'antd';
@@ -18,6 +19,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import HomeDashboard from './HomeDashboard'; // Assurez-vous que le chemin est correct
 import AdminRapport from './AdminRapport';
 import { deleteInteraction } from '../api/services';
+import '../styles/AdminInterface.css';
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 const localizer = momentLocalizer(moment);
