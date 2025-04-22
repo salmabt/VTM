@@ -215,3 +215,27 @@
 .dark-mode .admin-profile {
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
+/* Dans votre fichier AdminInterface.css */
+.ant-menu-item-group-title {
+  color: #888 !important;
+  font-weight: bold !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85em;
+  padding-left: 2px !important;
+  margin-top: 90px !important;
+}
+@media (max-width: 768px) {
+  .ant-menu-item-group-title {
+    font-size: 0.75em;
+    margin-top: 60px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ant-menu-item-group-title {
+    font-size: 0.7em;
+    margin-top: 40px !important;
+    padding-left: 0 !important;
+  }
+}

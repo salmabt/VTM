@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, Tabs, Row, Col, List, Statistic, Button, Tag, Timeline, Typography, Spin, message, Pagination } from 'antd';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Card, Tabs, Row, Col, List, Statistic, Button, Tag, Timeline, Typography, Spin, message, Pagination,Table } from 'antd';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,ResponsiveContainer } from 'recharts';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 const { Text, Title } = Typography;
 const { TabPane } = Tabs;
 
 const AdminRapport = () => {
+  
   const [techniciens, setTechniciens] = useState([]);
   const [vehicules, setVehicules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -170,149 +171,182 @@ const handleRateChange = async (techId) => {
     );
   }
 
+  const techniciensColumns = [
+    {
+      title: 'Nom',
+      dataIndex: 'name',
+      key: 'name',
+      responsive: ['md'],
+    },
+    {
+      title: 'Missions',
+      dataIndex: 'completedTasks',
+      key: 'completedTasks',
+      render: (text) => text > 0 ? text : 'Aucune',
+    },
+    {
+      title: 'Note',
+      dataIndex: 'averageRating',
+      key: 'averageRating',
+      render: (text) => `${text.toFixed(1)}/5 ⭐`,
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      align: 'right',
+      render: (_, record) => (
+        <Button
+          type="primary"
+          size="small"
+          onClick={() => handleRateChange(record._id)}
+          loading={updatingRating === record._id}
+        >
+          {updatingRating === record._id ? '...' : 'Noter'}
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <Card title="Rapports et Historique" bordered={false} className='padding-rapport'>
-      <div style={{ marginBottom: 16 }}>
-  
-  <Button type="default" onClick={exportToExcel}>📊 Exporter en Excel</Button>
+      <div style={{ marginBottom: 16, textAlign: 'right' }}>
+  <Button type="default" size="small" onClick={exportToExcel}>
+    📊 Exporter en Excel
+  </Button>
 </div>
+
+      
       <Tabs defaultActiveKey="1">
         <TabPane tab="Suivi Techniciens" key="1">
           <div className="report-section">
             <Title level={3}>📊 Performances des Techniciens</Title>
             <Row gutter={[16, 16]}>
-              <Col span={24} md={12}>
+              <Col xs={24} md={24} lg={12}>
                 <Card title="📈 Statistiques des Techniciens">
-                <BarChart
-  width={800}
-  height={400}
-  data={techniciens}
-  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
->
-  <CartesianGrid strokeDasharray="3 3" />
-  <XAxis 
-    dataKey="name" 
-    angle={-45} 
-    textAnchor="end"
-    tick={{ fontSize: 12 }}
-    interval={0}
-  />
-  <YAxis />
-  <Tooltip 
-    formatter={(value, name) => 
-      name === 'Note moyenne/5' ? value.toFixed(2) : value
-    }
-  />
-  <Legend />
-  <Bar 
-    dataKey="completedTasks" 
-    fill="#8884d8" 
-    name="Missions terminées"
-    barSize={20}
-  />
-  <Bar 
-    dataKey="averageRating" 
-    fill="#82ca9d" 
-    name="Note moyenne/5"
-    barSize={20}
-    label={{ fill: 'white', formatter: (value) => value.toFixed(1) }}
-  />
-</BarChart>
+                  <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                      <BarChart
+                        data={techniciens}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end"
+                          tick={{ fontSize: 10 }}
+                          interval={0}
+                        />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value, name) => 
+                            name === 'Note moyenne/5' ? value.toFixed(2) : value
+                          }
+                        />
+                        <Legend wrapperStyle={{ paddingTop: 20 }}/>
+                        <Bar 
+                          dataKey="completedTasks" 
+                          fill="#8884d8" 
+                          name="Missions terminées"
+                        />
+                        <Bar 
+                          dataKey="averageRating" 
+                          fill="#82ca9d" 
+                          name="Note moyenne/5"
+                          label={{ fill: 'white', formatter: (value) => value.toFixed(1) }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </Card>
               </Col>
 
-                          <Col span={24} md={12}>
-              <Card title="📝 Détails des Techniciens">
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr>
-                      <th style={{ textAlign: 'left' }}>Nom</th>
-                      <th style={{ textAlign: 'left' }}>Missions</th>
-                      <th style={{ textAlign: 'left' }}>Note</th>
-                      <th style={{ textAlign: 'right' }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {techniciens.map(tech => (
-                      <tr key={tech._id}>
-                        <td>{tech.name}</td>
-                        <td>{tech.completedTasks > 0 ? tech.completedTasks : 'Aucune'}</td>
-                        <td>{(tech.averageRating ?? 0).toFixed(1)}/5 ⭐</td>
-                        <td style={{ textAlign: 'right' }}>
-                          <Button
-                            type="primary"
-                            size="small"
-                            onClick={() => handleRateChange(tech._id)}
-                            loading={updatingRating === tech._id}
-                          >
-                            {updatingRating === tech._id ? '...' : 'Noter'}
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </Card>
-            </Col>
+              <Col xs={24} md={24} lg={12}>
+                <Card title="📝 Détails des Techniciens">
+                  <Table
+                    dataSource={techniciens}
+                    columns={techniciensColumns}
+                    pagination={{ pageSize: 5 }}
+                    scroll={{ x: true }}
+                    size="small"
+                    rowKey="_id"
+                  />
+                </Card>
+              </Col>
             </Row>
           </div>
         </TabPane>
 
         <TabPane tab="Utilisation Véhicules" key="2">
-  <div className="vehicle-reports">
-    <Title level={3}>🚗 Gestion et Utilisation des Véhicules</Title>
-    <Row gutter={[16, 16]}>
-      <Col span={24} md={12}>
-        <Card title="⏳ Temps d'Utilisation">
-          <List
-            dataSource={vehicules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)}
-            renderItem={(vehicle) => (
-              <List.Item>
-                <Statistic
-                  title={`${vehicle.model} (${vehicle.registration})`}
-                  value={vehicle.utilisationHeures}
-                  suffix="heures"
-                  precision={1}
-                />
-                <Tag color={getVehicleStatusColor(vehicle.status)}>{vehicle.status}</Tag>
-              </List.Item>
-            )}
-          />
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <Pagination
-              current={currentPage}
-              total={vehicules.length}
-              pageSize={itemsPerPage}
-              onChange={(page) => setCurrentPage(page)}
-              simple
-            />
+          <div className="vehicle-reports">
+            <Title level={3}>🚗 Gestion et Utilisation des Véhicules</Title>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} md={12}>
+                <Card title="⏳ Temps d'Utilisation">
+                  <List
+                    dataSource={vehicules}
+                    renderItem={(vehicle) => (
+                      <List.Item
+                        actions={[
+                          <Tag color={getVehicleStatusColor(vehicle.status)}>
+                            {vehicle.status}
+                          </Tag>
+                        ]}
+                      >
+                        <Statistic
+                          title={`${vehicle.model} (${vehicle.registration})`}
+                          value={vehicle.utilisationHeures}
+                          suffix="heures"
+                          precision={1}
+                        />
+                      </List.Item>
+                    )}
+                    pagination={{
+                      current: currentPage,
+                      pageSize: itemsPerPage,
+                      total: vehicules.length,
+                      onChange: (page) => setCurrentPage(page),
+                      simple: true,
+                      responsive: true,
+                      position: 'bottom',
+                      style: { textAlign: 'center' }
+                    }}
+                  />
+                </Card>
+              </Col>
+              
+              <Col xs={24} md={12}>
+                <Card title="🛠️ Historique des Maintenances">
+                  <Timeline mode="alternate">
+                    {vehicules
+                      .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                      .map((vehicle) => (
+                        <Timeline.Item 
+                          key={vehicle._id} 
+                          color={getVehicleStatusColor(vehicle.status)}
+                          label={`${vehicle.utilisationHeures}h`}
+                        >
+                          <Text strong>{vehicle.model}</Text>
+                          <br />
+                          <Text type="secondary">{vehicle.registration}</Text>
+                        </Timeline.Item>
+                      ))}
+                  </Timeline>
+                  <div style={{ textAlign: 'center', marginTop: 16 }}>
+                    <Pagination
+                      current={currentPage}
+                      total={vehicules.length}
+                      pageSize={itemsPerPage}
+                      onChange={(page) => setCurrentPage(page)}
+                      simple
+                      responsive
+                    />
+                  </div>
+                </Card>
+              </Col>
+            </Row>
           </div>
-        </Card>
-      </Col>
-      <Col span={24} md={12}>
-        <Card title="🛠️ Historique des Maintenances" style={{ marginTop: 16 }}>
-          <Timeline>
-            {vehicules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((vehicle) => (
-              <Timeline.Item key={vehicle._id} color={getVehicleStatusColor(vehicle.status)}>
-                <strong>{vehicle.model} ({vehicle.registration})</strong>
-                <div>Heures d'utilisation: {vehicle.utilisationHeures}h</div>
-              </Timeline.Item>
-            ))}
-          </Timeline>
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <Pagination
-              current={currentPage}
-              total={vehicules.length}
-              pageSize={itemsPerPage}
-              onChange={(page) => setCurrentPage(page)}
-              simple
-            />
-          </div>
-        </Card>
-      </Col>
-    </Row>
-  </div>
-</TabPane>
+        </TabPane>
       </Tabs>
     </Card>
   );

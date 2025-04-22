@@ -954,14 +954,21 @@ const gestionnaireColumns = [
     ),
   },
 ];
-  const menuItems = [
-    { key: '1', icon: <AreaChartOutlined />, label: 'Dashboard' },
-    { key: '2', icon: <CalendarOutlined />, label: 'Calendrier' },
-    { key: '3', icon: <UserOutlined />, label: 'Clients' },
-    { key: '4', icon: <UserOutlined />, label: 'Techniciens' },
-    { key: '5', icon: <UserOutlined />, label: 'Gestionnaires' },
-    { key: '6', icon: <FileTextOutlined />, label: 'Rapports' },
-  ];
+const menuItems = [
+  { key: '1', icon: <AreaChartOutlined />, label: 'Dashboard' },
+  { key: '2', icon: <CalendarOutlined />, label: 'Calendrier' },
+  { key: '6', icon: <FileTextOutlined />, label: 'Rapports' },
+  {
+    key: 'gestion-users',
+    label: 'Gestion des Utilisateurs',
+    type: 'group',
+    children: [
+      { key: '3', icon: <UserOutlined />, label: 'Clients' },
+      { key: '4', icon: <UserOutlined />, label: 'Techniciens' },
+      { key: '5', icon: <UserOutlined />, label: 'Gestionnaires' },
+    ],
+  },
+];
   // Composant personnalisé pour afficher les événements
   const CustomEvent = ({ event }) => (
     <div>
@@ -987,11 +994,11 @@ const gestionnaireColumns = [
       alt="Admin" 
       style={{ 
         width: 100,
-        height: 100,
-        borderRadius: '50%',
+        height: 140,
+        borderRadius: '60%',
         objectFit: 'cover',
         border: `2px solid ${darkMode ? '#fff' : '#001529'}`,
-        marginBottom: 16
+        marginBottom: 60
       }}
     />
     <Text 
