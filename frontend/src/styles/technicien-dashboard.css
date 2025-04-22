@@ -41,7 +41,7 @@
   
   /* Header */
   .ant-layout-header {
-    background-color: #dddbed !important;
+    background-color: #d3ebe6 !important;
     height: 70px;
     padding: 0 24px !important;
     display: flex;
@@ -125,7 +125,7 @@
  /* Styles Light Mode par défaut */
 .admin-container {
 --bg-color: #f8fafc;
---header-bg: #dddbed;
+--header-bg: #edeceecb;
 --sider-bg: #f0f8f3;
 --text-color: #333;
 --card-bg: #fff;
