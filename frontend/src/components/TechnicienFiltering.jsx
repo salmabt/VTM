@@ -1,11 +1,10 @@
-import React from 'react';
-import { Card, Table, Tag, Typography, Progress } from 'antd';
+import React, { useState } from 'react';
+import { Card, Table, Tag, Typography, Progress, Button } from 'antd';
 import { technicienRegions } from '../config/technicienRegions';
 import '../styles/TechnicienFiltering.css';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
-// Définition des backgrounds pour chaque région
 const regionBackgrounds = {
   nord: '/images/nord_tunis.jpg',
   milieu: '/images/milieu_tunis.jpg',
@@ -14,12 +13,21 @@ const regionBackgrounds = {
 };
 
 const TechnicienFiltering = ({ techniciens }) => {
+  const [expandedRegions, setExpandedRegions] = useState({});
+
+  const toggleRegion = (region) => {
+    setExpandedRegions(prev => ({
+      ...prev,
+      [region]: !prev[region]
+    }));
+  };
+
   const columns = [
     {
       title: 'Nom & Prénom',
       dataIndex: 'name',
       key: 'name',
-      render: (text, record) => <span>{record.name}</span>,
+      render: (text) => <Text className="tech-name">{text}</Text>,
     },
     {
       title: 'Ville',
@@ -31,61 +39,80 @@ const TechnicienFiltering = ({ techniciens }) => {
       title: 'Compétences',
       dataIndex: 'skills',
       key: 'skills',
-      render: (skills) => skills?.map(skill => <Tag key={skill} color="green">{skill}</Tag>),
+      render: (skills) => (
+        <div className="skills-container">
+          {skills?.map(skill => (
+            <Tag key={skill} color="green" className="skill-tag">
+              {skill}
+            </Tag>
+          ))}
+        </div>
+      ),
     },
   ];
 
   const filterTechniciensByRegion = (region) => {
-    return techniciens.filter(tech =>
+    return techniciens.filter(tech => 
       technicienRegions[region].includes(tech.location)
     );
   };
 
   return (
-    <div className="technicien-filtering">
-      <div className="technicien-grid">
-        {['nord', 'milieu', 'sahel', 'sud'].map(region => {
-          const techList = filterTechniciensByRegion(region);
-          const techCount = techList.length;
+    <div className="technicien-filtering-container">
+      {['nord', 'milieu', 'sahel', 'sud'].map(region => {
+        const techList = filterTechniciensByRegion(region);
+        const techCount = techList.length;
+        const percentage = Math.min((techCount / techniciens.length) * 100, 100);
 
-          return (
-            <Card
-              key={region}
-              className={`technicien-card ${region}`} // Ajout d'une classe pour le style
-              bordered={false}
-            >
-              {/* Background Image */}
-              <div className="background-image" style={{ backgroundImage: `url(${regionBackgrounds[region]})` }} />
+        return (
+          <div key={region} className={`region-card ${region}`}>
+            <div className="background-image" style={{ backgroundImage: `url(${regionBackgrounds[region]})` }} />
+            <div className="card-content">
+              <div className="region-header">
+                <Title level={3} className="region-title">
+                  {region.toUpperCase()}
+                </Title>
+                <Progress
+                  type="circle"
+                  percent={percentage}
+                  format={() => (
+                    <Text strong className="progress-text">
+                      {techCount}
+                    </Text>
+                  )}
+                  width={80}
+                  strokeColor="#ffcc00"
+                  trailColor="rgba(255,255,255,0.3)"
+                />
+              </div>
 
-              {/* Content */}
-              <div className="content">
-                <Title level={4} className="region-title">{region}</Title>
-
-                {/* Circular Statistics */}
-                <div className="progress-container">
-                  <Progress
-                    type="circle"
-                    percent={Math.min((techCount / techniciens.length) * 100, 100)}
-                    format={() => `${techCount}`}
-                    strokeColor="#ffcc00" /* Change color for visibility */
-                    strokeWidth={12} /* Increase thickness */
-                    size={90} /* Increase size */
-                  />
-                </div>
-
-                {/* Table for Technicians */}
+              {expandedRegions[region] ? (
                 <Table
                   dataSource={techList}
                   columns={columns}
                   rowKey="id"
                   pagination={false}
                   size="small"
+                  className="techniciens-table"
                 />
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+              ) : (
+                <Button 
+                  type="primary" 
+                  onClick={() => toggleRegion(region)}
+                  style={{ 
+                    marginTop: 16,
+                    width: '100%',
+                    backgroundColor: '#1890ff',
+                    borderColor: '#1890ff'
+                  }}
+                >
+                  Voir les {techCount} techniciens
+                </Button>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

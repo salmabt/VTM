@@ -1090,6 +1090,7 @@ if (selectedInteraction) {
     />
 
      {/* Nouveau formulaire de création de tâche - version structurée */}
+     <div className="add-task-form">
      <Card 
       title="Création de nouvelle tâche" 
       bordered={false} 
@@ -1323,6 +1324,7 @@ if (selectedInteraction) {
         )}
       </div>
     </Card>
+    </div>
 
      {/* Tableau des tâches */}
     <div style={{ overflowX: 'auto' }} >
