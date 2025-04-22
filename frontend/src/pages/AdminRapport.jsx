@@ -171,7 +171,7 @@ const handleRateChange = async (techId) => {
   }
 
   return (
-    <Card title="Rapports et Historique" bordered={false}>
+    <Card title="Rapports et Historique" bordered={false} className='padding-rapport'>
       <div style={{ marginBottom: 16 }}>
   
   <Button type="default" onClick={exportToExcel}>📊 Exporter en Excel</Button>

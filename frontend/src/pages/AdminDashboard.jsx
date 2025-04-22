@@ -20,6 +20,8 @@ import HomeDashboard from './HomeDashboard'; // Assurez-vous que le chemin est c
 import AdminRapport from './AdminRapport';
 import { deleteInteraction } from '../api/services';
 import '../styles/AdminInterface.css';
+import adminAvatar from '../assets/admin-avatar.png';
+
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 const localizer = momentLocalizer(moment);
@@ -973,48 +975,87 @@ const gestionnaireColumns = [
       backgroundColor: currentTheme.backgroundColor,
       color: currentTheme.textColor
     }}>
-      <Sider 
-        collapsible 
-        theme={darkMode ? 'dark' : 'light'}
-        style={{ backgroundColor: darkMode ? '#141414' : '#fff' }}
-      >
-        <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-          <Title level={4} style={{ margin: 0, color: darkMode ? '#fff' : '#000' }}>Admin Dashboard</Title>
-        </div>
-        <Menu
-          theme={darkMode ? 'dark' : 'light'}
-          mode="inline"
-          selectedKeys={[selectedMenu]}
-          items={menuItems}
-          onSelect={({ key }) => setSelectedMenu(key)}
-        />
-      </Sider>
+  
+<Sider 
+  collapsible 
+  theme={darkMode ? 'dark' : 'light'}
+  style={{ backgroundColor: darkMode ? '#141414' : '#fff' }}
+>
+  <div className="admin-profile" style={{ padding: 16, textAlign: 'center' }}>
+    <img 
+      src={adminAvatar}
+      alt="Admin" 
+      style={{ 
+        width: 100,
+        height: 100,
+        borderRadius: '50%',
+        objectFit: 'cover',
+        border: `2px solid ${darkMode ? '#fff' : '#001529'}`,
+        marginBottom: 16
+      }}
+    />
+    <Text 
+      strong 
+      style={{ 
+        display: 'block', 
+        color: darkMode ? '#fff' : '#001529',
+        fontSize: 16
+      }}
+    >
+      Connecté en tant que :
+    </Text>
+    <Text 
+      style={{ 
+        color: darkMode ? '#fff' : '#001529',
+        fontSize: 14 
+      }}
+    >
+      {userData?.name || 'Administrateur'}
+    </Text>
+  </div>
+
+  <Menu
+    theme={darkMode ? 'dark' : 'light'}
+    mode="inline"
+    selectedKeys={[selectedMenu]}
+    items={menuItems}
+    onSelect={({ key }) => setSelectedMenu(key)}
+  />
+</Sider>
 
       <Layout>
        <Header style={{ background: darkMode ? '#141414' : '#001529',
-            padding: '0 24px', 
+            padding: '0 16px', 
             display: 'flex', 
             justifyContent: 'space-between', 
+            flexWrap: 'wrap', // Permettre le retour à la ligne
+            gap: 8,
             alignItems: 'center',
+            minHeight: 64 ,
             borderBottom: darkMode ? '1px solid #303030' : '1px solid #f0f0f0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Text strong>Connecté en tant que : {userData?.name}</Text>
-        </div>
+  
+</div>
+
         
-        <Space>
-          {/* Bouton Dark Mode */}
-          <Tooltip title={darkMode ? "Mode clair" : "Mode sombre"}>
-            <Button 
-              icon={darkMode ? <SunOutlined /> : <MoonOutlined />} 
-              onClick={toggleDarkMode}
-              style={{ marginRight: 8 }}
-            />
-          </Tooltip>
-          
-          <Button icon={<UserOutlined />} onClick={logout}>
-            Déconnexion
-          </Button>
-        </Space>
+<Space>
+  <Tooltip title={darkMode ? "Mode clair" : "Mode sombre"}>
+    <Button 
+      icon={darkMode ? <SunOutlined /> : <MoonOutlined />} 
+      onClick={toggleDarkMode}
+      className="header-button"
+    />
+  </Tooltip>
+  
+  <Button 
+    icon={<UserOutlined />} 
+    onClick={logout}
+    className="header-button"
+  >
+    {/* Ajouter un texte caché en desktop */}
+    <span className="desktop-only">Déconnexion</span>
+  </Button>
+</Space>
       </Header>
 
         <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
@@ -1026,7 +1067,7 @@ const gestionnaireColumns = [
             <HomeDashboard  darkMode={darkMode} /> // Affichez le tableau de bord d'accueil si l'option est sélectionnée
           )}
               {selectedMenu === '2' && (
-              <Card 
+              <Card className = "Padding-calandar" 
               title="Calendrier des interventions" 
               bordered={false}
               headStyle={{ 
@@ -1210,7 +1251,7 @@ const gestionnaireColumns = [
 
 
              {selectedMenu === '3' && (
-              <Card title="Gestion des Clients" variant="borderless">
+              <Card title="Gestion des Clients" variant="borderless" className="padding-clients">
                    <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
                      <Input
                       placeholder="Rechercher un client"
@@ -1296,15 +1337,18 @@ const gestionnaireColumns = [
                       interaction.address?.toLowerCase().includes(searchTerm.toLowerCase());
                   })}
                   rowKey="_id"
-                  scroll={{ x: 1300 }}
+              
                   pagination={{ pageSize: 8 }}
+                  scroll={{ x: 'max-content', y: 240 }}
+                  size="small"
+                  className="responsive-table"
                 />
               </Card>
               )}
              
 
               {selectedMenu === '4' && (
-                <Card title="Gestion des Techniciens" variant="borderless">
+                <Card title="Gestion des Techniciens" variant="borderless" className="padding-technicien">
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
                     <Input
                       placeholder="Rechercher un technicien"
@@ -1328,6 +1372,9 @@ const gestionnaireColumns = [
                     </Button>
                   </div>
                   <Table
+                  scroll={{ x: 'max-content', y: 240 }}
+                  size="small"
+                  className="responsive-table"
                     dataSource={searchTerm ? filteredUsers : (showArchived ? archivedTechniciens : techniciens)}
                     columns={columns}
                     rowKey="_id"
@@ -1367,7 +1414,7 @@ const gestionnaireColumns = [
               )}
 
 {selectedMenu === '5' && (
-  <Card title="Gestion des Gestionnaires" variant="borderless">
+  <Card title="Gestion des Gestionnaires" variant="borderless" className="padding-gestionnaire">
     <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
       <Input
         placeholder="Rechercher un gestionnaire"
@@ -1402,7 +1449,9 @@ const gestionnaireColumns = [
       columns={gestionnaireColumns}
       rowKey="_id"
       pagination={{ pageSize: 8 }}
-      scroll={{ x: 1200 }}
+      scroll={{ x: 'max-content', y: 240 }}
+  size="small"
+  className="responsive-table"
     />
   </Card>
 )}
