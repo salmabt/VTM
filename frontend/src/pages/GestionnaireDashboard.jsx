@@ -684,6 +684,22 @@ if (selectedInteraction) {
     const sortedTechniciens = [...filteredTechniciens].sort((a, b) => 
       calculateTaskCount(a._id) - calculateTaskCount(b._id)
     );
+      const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Définir l'état initial
+    handleResize();
+    
+    // Écouter les changements de taille
+    window.addEventListener('resize', handleResize);
+    
+    // Nettoyer l'écouteur
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
  
 
 
@@ -707,7 +723,11 @@ if (selectedInteraction) {
     );
     return (
       <Layout style={{ minHeight: '100vh' }}>
-     <Sider collapsible theme="light">
+     <Sider
+      collapsible 
+      theme="light"
+      width={200} 
+      >
   <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
     <Title level={4} style={{ margin: 0 }}>Gestionnaire</Title>
   </div>
@@ -853,7 +873,7 @@ if (selectedInteraction) {
             ) : (
               <>
                 {selectedMenu === '1' && (
-                  <Card title="Calendrier des interventions" bordered={false}>
+                  <Card title="Calendrier des interventions" bordered={false} className="tous-padding">
                     <TechniciensSection 
                       techniciens={techniciens}
                       tasks={tasks}
@@ -867,6 +887,7 @@ if (selectedInteraction) {
                       onVehiclesUpdate={setAssignedVehicles}
                     />
     
+                 <div className="responsive-calendar-container">
                     <Calendar
                     
                      localizer={localizer}
@@ -918,6 +939,7 @@ if (selectedInteraction) {
                               }}
                               
                             />
+                            </div>
                             </Card>
                             )}
                           
@@ -925,7 +947,7 @@ if (selectedInteraction) {
   <Card 
     title={
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span>Demandes clients</span>
+        <span >Demandes Clients</span>
         <Select
           defaultValue="all"
           style={{ width: 200 }}
@@ -937,10 +959,10 @@ if (selectedInteraction) {
         </Select>
       </div>
     } 
-    bordered={false}
+    bordered={false}className="tous-padding"
   >
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '70%', borderCollapse: 'collapse', minWidth: '800px' }}>
+    <div className="tasks-table-container">
+    <table className="client-requests-table">
         <thead>
           <tr style={{ backgroundColor: '#f0f0f0' }}>
             <th style={{ padding: '12px', border: '1px solid #ddd' }}>Nom</th>
@@ -954,6 +976,7 @@ if (selectedInteraction) {
           </tr>
         </thead>
         <tbody>
+          
           {interactions
             .filter(interaction => {
               if (filterStatus === 'treated') return interaction.relatedTask;
@@ -968,33 +991,42 @@ if (selectedInteraction) {
                   backgroundColor: interaction.relatedTask ? '#f6ffed' : '#fff1f0'
                 }}
               >
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                data-label="Nom">
                   <Text strong>{interaction.nom_client}</Text>
                 </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                data-label="Contact">
                   <div><PhoneOutlined /> {interaction.phone}</div>
                   <div><MailOutlined /> {interaction.email}</div>
                 </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                data-label="Service">
                   {interaction.service}
                 </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                data-label="Titre">
                   {interaction.title_de_livraison}
                 </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                data-label="Description">
                   <Text ellipsis={{ tooltip: interaction.description }}>
                     {interaction.description}
                   </Text>
                 </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                data-label="Adresse">
                   {interaction.address}
                 </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                data-label="Statut">
                   <Tag color={interaction.relatedTask ? "green" : "red"}>
+                    
                     {interaction.relatedTask ? "Traité" : "Non traité"}
                   </Tag>
                 </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                data-label="Actions">
                   <Button 
                     type="primary" 
                     onClick={() => {
@@ -1045,7 +1077,7 @@ if (selectedInteraction) {
                               />
                                 
   {selectedMenu === '3' && (
-  <Card title="Gestion des tâches" bordered={false}>
+  <Card title="Gestion des tâches" bordered={false} className="tous-padding">
     {/* Barre de recherche */}
     <Input.Search
       placeholder="Rechercher par titre, localisation, Technicien ou Véhicule..."
@@ -1090,40 +1122,40 @@ if (selectedInteraction) {
           <div style={{ marginBottom: 16 }}>
             <Text strong>Information sur le Client *</Text>
             <Input
-  placeholder="Nom du client (son numéro du télèphone)"
-  value={newTask.client}
-  onChange={(e) => setNewTask({...newTask, client: e.target.value})}
-  addonAfter={
-    <Popover 
-      title="Clients fréquents" 
-      content={
-        <List
-          dataSource={favoriteClients}
-          renderItem={client => (
-            <List.Item
-              style={{ cursor: 'pointer' }}
-              onClick={() => setNewTask({
-                ...newTask,
-                client: client.name,
-                phone: client.phone,
-                email: client.email
-              })}
-            >
-              <List.Item.Meta
-                title={client.name}
-                description={<><PhoneOutlined /> {client.phone}</>}
-              />
-            </List.Item>
-          )}
-        />
+      placeholder="Nom du client (son numéro du télèphone)"
+      value={newTask.client}
+      onChange={(e) => setNewTask({...newTask, client: e.target.value})}
+      addonAfter={
+        <Popover 
+          title="Clients fréquents" 
+          content={
+            <List
+              dataSource={favoriteClients}
+              renderItem={client => (
+                <List.Item
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setNewTask({
+                    ...newTask,
+                    client: client.name,
+                    phone: client.phone,
+                    email: client.email
+                  })}
+                >
+                  <List.Item.Meta
+                    title={client.name}
+                    description={<><PhoneOutlined /> {client.phone}</>}
+                  />
+                </List.Item>
+              )}
+            />
+          }
+        >
+          <StarOutlined style={{ color: '#ffd700' }} />
+        </Popover>
       }
-    >
-      <StarOutlined style={{ color: '#ffd700' }} />
-    </Popover>
-  }
-/>
-          </div>
-        </div>
+    />
+              </div>
+            </div>
 
         {/* Colonne 2 - Localisation et planning */}
         <div>
@@ -1292,9 +1324,9 @@ if (selectedInteraction) {
       </div>
     </Card>
 
-    {/* Tableau des tâches */}
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+     {/* Tableau des tâches */}
+    <div style={{ overflowX: 'auto' }} >
+      <table style={{ width: '100%', borderCollapse: 'collapse' }} className="tasks-table">
         <thead>
           <tr style={{ backgroundColor: '#f0f0f0' }}>
             <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Titre</th>
@@ -1330,19 +1362,24 @@ if (selectedInteraction) {
 
               return (
                 <tr key={task._id} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Client">
                     <Text strong>{task.title}</Text>
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                   data-label="Ville">
                     {task.client}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Location">
                     {task.location}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Adresse">
                     {task.adresse}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Statut">
                     <Tag color={
                       task.status === 'planifié' ? 'blue' :
                       task.status === 'en cours' ? 'orange' : 'green'
@@ -1350,16 +1387,20 @@ if (selectedInteraction) {
                       {task.status}
                     </Tag>
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Période">
                     {moment(task.startDate).format('DD/MM HH:mm')} - {moment(task.endDate).format('DD/MM HH:mm')}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Technicien">
                     {assignedTechnicien?.name || 'Non assigné'}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Véhicule">
                     {assignedVehicule?.model} ({assignedVehicule?.registration || 'N/A'})
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Pièces jointes">
               {task.attachments?.length > 0 ? (
                 <Popover
                   title="Pièces jointes"
@@ -1392,7 +1433,8 @@ if (selectedInteraction) {
               )}
             </td>
 
-                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
+                  <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
+                  data-label="Actions">
                     <Button
                       onClick={() => {
                         setEditingTask(task);
@@ -1655,51 +1697,52 @@ if (selectedInteraction) {
 )}
 
 {selectedMenu === '4' && (
-  <Card title="Gestion des véhicules" bordered={false}>
+  <Card title="Gestion des véhicules" bordered={false} className="tous-padding">
     {/* Barre de recherche */}
-    <Input.Search 
-      placeholder="Rechercher par modèle ou immatriculation"
-      onChange={(e) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1);
-      }}
-      style={{ marginBottom: 16, width: 300 }}
-      allowClear
-    />
+    <div className="search-container">
+      <Input.Search 
+        placeholder="Rechercher par modèle ou immatriculation"
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setCurrentPage(1);
+        }}
+        allowClear
+      />
+    </div>
 
     {/* Formulaire d'ajout */}
-    <div style={{ marginBottom: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-    <Input
-    type="file"
-    accept="image/*"
-    onChange={(e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setNewVehicule({...newVehicule, image: reader.result});
-        };
-        reader.readAsDataURL(file);
-      }
-    }}
-    style={{ width: 200 }}
-  />
+    <div className="add-vehicule-form">
+      <Input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setNewVehicule({...newVehicule, image: reader.result});
+            };
+            reader.readAsDataURL(file);
+          }
+        }}
+        className="image-upload"
+      />
       <Input
         placeholder="Immatriculation *"
         value={newVehicule.registration}
         onChange={(e) => setNewVehicule({...newVehicule, registration: e.target.value})}
-        style={{ width: 200 }}
+        className="registration-input"
       />
       <Input
         placeholder="Modèle *"
         value={newVehicule.model}
         onChange={(e) => setNewVehicule({...newVehicule, model: e.target.value})}
-        style={{ width: 200 }}
+        className="model-input"
       />
       <Select
         value={newVehicule.status}
         onChange={(value) => setNewVehicule({...newVehicule, status: value})}
-        style={{ width: 150 }}
+        className="status-select"
       >
         <Option value="disponible">Disponible</Option>
         <Option value="en entretien">En entretien</Option>
@@ -1709,100 +1752,85 @@ if (selectedInteraction) {
         type="primary"
         onClick={handleAddVehicule}
         disabled={!newVehicule.registration || !newVehicule.model}
-        style={{ minWidth: 150 }}
+        className="add-button"
       >
         Ajouter Véhicule
       </Button>
     </div>
 
-    {/* Tableau des véhicules */}
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '70%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ backgroundColor: '#f0f0f0' }}>
-          <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Image</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Modèle</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Immatriculation</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Statut</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {vehicules
-            .filter(vehicule => 
-              vehicule.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-            .slice((currentPage - 1) * pageSize, currentPage * pageSize)
-            .map(vehicule => (
-              <tr key={vehicule._id} style={{ borderBottom: '1px solid #ddd' }}>
-                 <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
-            {vehicule.image ? (
-              <img 
-                src={vehicule.image} 
-                alt={vehicule.model} 
-                style={{ 
-                  width: 100, 
-                  height: 60, 
-                  objectFit: 'cover',
-                  borderRadius: 4 
-                }}
-              />
-            ) : (
-              <div style={{
-                width: 100,
-                height: 60,
-                backgroundColor: '#f0f0f0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 4
-              }}>
-                <Text type="secondary">Aucune image</Text>
+    {/* Tableau des véhicules - Version responsive */}
+    <div className="vehicule-table-container">
+      {vehicules
+        .filter(vehicule => 
+          vehicule.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+        .map(vehicule => (
+          <Card key={vehicule._id} className="vehicule-card">
+            <div className="vehicule-image-container">
+              {vehicule.image ? (
+                <img 
+                  src={vehicule.image} 
+                  alt={vehicule.model}
+                  className="vehicule-image"
+                />
+              ) : (
+                <div className="no-image-placeholder">
+                  <Text type="secondary">Aucune image</Text>
+                </div>
+              )}
+            </div>
+            <div className="vehicule-details">
+              <div className="detail-row">
+              <Text className="vehicule-model-label" style={{ color: '#000' }}>
+                 Modèle:</Text>
+                 <Text className="vehicule-model-value" style={{ color: '#000' }}>
+                {vehicule.model}</Text>
               </div>
-            )}
-          </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
-                  <Text strong>{vehicule.model}</Text>
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
-                  {vehicule.registration}
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
-                  <Tag 
-                    color={
-                      vehicule.status === 'disponible' ? 'green' : 
-                      vehicule.status === 'en entretien' ? 'orange' : 'red'
-                    }
-                  >
-                    {vehicule.status}
-                  </Tag>
-                </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}>
-                  <Button 
-                    onClick={() => {
-                      setEditingVehicule(vehicule);
-                      setIsEditModalVisible(true);
-                    }}
-                    style={{ marginRight: 8 }}
-                  >
-                    Modifier
-                  </Button>
-                  <Button 
-                    danger 
-                    onClick={() => handleDeleteVehicule(vehicule._id)}
-                  >
-                    Supprimer
-                  </Button>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+              <div className="detail-row">
+                <Text className="vehicule-model-label" style={{ color: '#000' }}
+                >Immatriculation:</Text>
+                <Text className="vehicule-model-value" style={{ color: '#000' }}>
+                {vehicule.registration}</Text>
+              </div>
+              <div className="detail-row">
+                <Text className="vehicule-model-label" style={{ color: '#000' }}>
+                  Statut:</Text>
+                <Tag 
+                  color={
+                    vehicule.status === 'disponible' ? 'green' : 
+                    vehicule.status === 'en entretien' ? 'orange' : 'red'
+                  }
+                >
+                  {vehicule.status}
+                </Tag>
+              </div>
+            </div>
+            <div className="vehicule-actions">
+              <Button 
+                onClick={() => {
+                  setEditingVehicule(vehicule);
+                  setIsEditModalVisible(true);
+                }}
+                className="edit-button"
+              >
+                Modifier
+              </Button>
+              <Button 
+                danger 
+                onClick={() => handleDeleteVehicule(vehicule._id)}
+                className="delete-button"
+              >
+                Supprimer
+              </Button>
+            </div>
+          </Card>
+        ))}
     </div>
 
     {/* Pagination */}
-    <div style={{ marginTop: 16, textAlign: 'right' }}>
+    <div className="pagination-container">
       <Pagination
         current={currentPage}
         pageSize={pageSize}
@@ -1821,15 +1849,21 @@ if (selectedInteraction) {
     </div>
   </Card>
 )}
-
           {selectedMenu === '5' && ( // Section Chronologie
-            <Card title="Chronologie des notes" bordered={false}>
+            <Card title="Chronologie des notes" bordered={false} className="tous-padding">
               <Input.TextArea
-                rows={4}
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                placeholder="Écrire une note..."
-                style={{ marginBottom: 16 }}
+                 value={newNote}
+                 onChange={(e) => setNewNote(e.target.value)}
+                 placeholder="Écrire une note..."
+                 autoSize={false}
+                 style={{
+                   height: 30,
+                   resize: 'none',
+                   fontSize: 13,
+                   lineHeight: '1',
+                   padding: '4px 8px',
+                   width: '100%',
+                 }}
               />
               <Button type="primary" onClick={handleAddNote}>
                 Ajouter une note
@@ -1888,8 +1922,8 @@ if (selectedInteraction) {
               )}
             </Card>
           )}
-          {selectedMenu === '6' && (
-  <Card title="Filtrage des Techniciens par Région" bordered={false}>
+  {selectedMenu === '6' && (
+  <Card title="Filtrage des Techniciens par Région" bordered={false} className="tous-padding">
     <TechnicienFiltering techniciens={techniciens} />
   </Card>
 )}
@@ -1897,6 +1931,7 @@ if (selectedInteraction) {
   <Card 
     title="Clients Fidèles" 
     bordered={false}
+    className="tous-padding"
     extra={
       <Button 
         icon={<StarFilled style={{ color: '#faad14' }} />}
