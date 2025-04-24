@@ -1,182 +1,161 @@
 .technicien-filtering-container {
-    display: grid;
+  display: grid;
+  grid-template-areas: 
+    "nord milieu"
+    "sahel sud";
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Positioning each section */
+.nord { grid-area: nord; }
+.milieu { grid-area: milieu; }
+.sahel { grid-area: sahel; }
+.sud { grid-area: sud; }
+
+/* Card styling */
+.region-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
+}
+
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4) contrast(0.9);
+  z-index: 1;
+}
+
+.card-content {
+  position: relative;
+  z-index: 2;
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.region-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.region-title {
+  color: white !important;
+  margin: 0 !important;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  font-size: 1.2rem;
+}
+
+/* Boutons styles */
+.toggle-button {
+  width: 120px;
+  height: 32px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+/* Tableau styles */
+.table-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.techniciens-table {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.tech-name {
+  font-weight: 500;
+}
+
+.skills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.skill-tag {
+  margin: 2px;
+  font-size: 0.8rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .technicien-filtering-container {
     grid-template-areas: 
-      "nord milieu"
-      "sahel sud";
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 16px;
+      "nord"
+      "milieu"
+      "sahel"
+      "sud";
+    grid-template-columns: 1fr;
   }
-  
-  /* Positioning each section */
-  .nord { grid-area: nord; }
-  .milieu { grid-area: milieu; }
-  .sahel { grid-area: sahel; }
-  .sud { grid-area: sud; }
-  
-  /* Card styling */
+
   .region-card {
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    min-height: 400px;
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .techniciens-table {
+    max-height: 200px;
   }
   
-  .background-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    filter: brightness(0.4) contrast(0.9);
-    z-index: 1;
+  .toggle-button {
+    width: 100px;
+    height: 30px;
   }
-  
+}
+
+@media (max-width: 576px) {
   .card-content {
-    position: relative;
-    z-index: 2;
-    padding: 16px;
-    height: 100%;
-    display: flex;
+    padding: 12px;
+  }
+
+  .region-title {
+    font-size: 1.1rem !important;
+  }
+
+  .region-card {
+    min-height: 220px !important;
+  }
+
+  .toggle-button {
+    height: 28px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .skills-container {
     flex-direction: column;
   }
   
-  .region-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .region-title {
-    color: white !important;
-    margin: 0 !important;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-    text-transform: capitalize;
-  }
-  
-  .progress-text {
-    color: white !important;
-    font-size: 1.2rem !important;
-  }
-  
-  .techniciens-table {
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 6px;
-    flex-grow: 1;
-  }
-  
-  .tech-name {
-    font-weight: 500;
-  }
-  
-  .skills-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  
   .skill-tag {
-    margin: 2px;
-  }
-  .ant-btn {
-    transition: all 0.3s;
+    width: 100%;
+    text-align: center;
   }
   
-  /* Ajustements pour le tableau réduit */
-  .techniciens-table {
-    max-height: 300px;
-    overflow-y: auto;
+  .toggle-button {
+    width: 80px;
+    height: 26px;
+    font-size: 0.8rem;
   }
-  
-  /* Responsive adjustments */
-  @media (max-width: 992px) {
-    .technicien-filtering-container {
-      grid-template-areas: 
-        "nord"
-        "milieu"
-        "sahel"
-        "sud";
-      grid-template-columns: 1fr;
-    }
-  
-    .region-card {
-      min-height: 300px;
-    }
-  
-    .region-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-    }
-  
-    .progress-text {
-      font-size: 1rem !important;
-    }
-  }
-  /* Ajustements responsive */
-   @media (max-width: 768px) {
-    .techniciens-table .ant-table-thead > tr > th,
-    .techniciens-table .ant-table-tbody > tr > td {
-      padding: 8px !important;
-    }
-    
-    .skills-container {
-      flex-direction: column;
-    }
-    
-    .skill-tag {
-      margin: 2px 0;
-    }
-  }
-  
-  @media (max-width: 576px) {
-    .card-content {
-      padding: 12px;
-    }
-  
-    .region-title {
-      font-size: 1.2rem !important;
-    }
-  
-    .ant-table-thead > tr > th,
-    .ant-table-tbody > tr > td {
-      padding: 8px !important;
-      font-size: 12px;
-    }
-  
-    .ant-progress-circle {
-      width: 60px !important;
-      height: 60px !important;
-    }
-    .region-card {
-        min-height: 200px !important;
-      }
-      
-      .card-content {
-        padding: 8px !important;
-      }
-      
-      .region-title {
-        font-size: 1rem !important;
-      }
-      
-      .ant-progress-circle {
-        width: 60px !important;
-        height: 60px !important;
-      }
-  }
-  
-  @media (max-width: 400px) {
-    .skills-container {
-      flex-direction: column;
-    }
-    
-    .skill-tag {
-      width: 100%;
-      text-align: center;
-    }
-  }
+}

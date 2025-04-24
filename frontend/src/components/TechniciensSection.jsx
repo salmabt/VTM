@@ -85,7 +85,7 @@ const TechniciensSection = ({
                 size={64} 
                 icon={<UserOutlined />} 
                 style={{
-                   backgroundColor: '#b385d1' }}
+                   backgroundColor: '#7ec8e3' }}
               />
               <div style={{ marginTop: 8, fontWeight: 500 }}>{tech.name}</div>
             </div>

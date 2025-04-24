@@ -280,6 +280,34 @@
 .task-row:hover {
   background-color: #fafafa;
 }
+.logout-button {
+  margin-left: auto; /* Pousse le bouton à droite */
+  transition: all 0.3s;
+}
+.ant-btn-primary {
+  color: white !important;
+}
+/* Style pour le bouton "Déjà traité" */
+.disabled-request-button {
+  padding: 0 8px !important;
+  height: 28px !important;
+  font-size: 13px !important;
+  line-height: 22px !important;
+  max-width: 140px;
+  
+}
+
+/* Texte du numéro de tâche */
+.task-reference {
+  font-size: 11px;
+  display: block;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
 
 
 

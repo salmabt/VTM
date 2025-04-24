@@ -13,7 +13,12 @@ const regionBackgrounds = {
 };
 
 const TechnicienFiltering = ({ techniciens }) => {
-  const [expandedRegions, setExpandedRegions] = useState({});
+  const [expandedRegions, setExpandedRegions] = useState({
+    nord: false,
+    milieu: false,
+    sahel: false,
+    sud: false
+  });
 
   const toggleRegion = (region) => {
     setExpandedRegions(prev => ({
@@ -28,12 +33,14 @@ const TechnicienFiltering = ({ techniciens }) => {
       dataIndex: 'name',
       key: 'name',
       render: (text) => <Text className="tech-name">{text}</Text>,
+      width: '30%'
     },
     {
       title: 'Ville',
       dataIndex: 'location',
       key: 'location',
       render: (location) => <Tag color="blue">{location}</Tag>,
+      width: '20%'
     },
     {
       title: 'Compétences',
@@ -48,6 +55,7 @@ const TechnicienFiltering = ({ techniciens }) => {
           ))}
         </div>
       ),
+      width: '50%'
     },
   ];
 
@@ -72,42 +80,36 @@ const TechnicienFiltering = ({ techniciens }) => {
                 <Title level={3} className="region-title">
                   {region.toUpperCase()}
                 </Title>
-                <Progress
-                  type="circle"
-                  percent={percentage}
-                  format={() => (
-                    <Text strong className="progress-text">
-                      {techCount}
-                    </Text>
-                  )}
-                  width={80}
-                  strokeColor="#ffcc00"
-                  trailColor="rgba(255,255,255,0.3)"
-                />
+                {techCount > 0 && !expandedRegions[region] && (
+                  <Button 
+                    type="primary" 
+                    onClick={() => toggleRegion(region)}
+                    className="toggle-button"
+                  >
+                    Voir ({techCount})
+                  </Button>
+                )}
               </div>
 
-              {expandedRegions[region] ? (
-                <Table
-                  dataSource={techList}
-                  columns={columns}
-                  rowKey="id"
-                  pagination={false}
-                  size="small"
-                  className="techniciens-table"
-                />
-              ) : (
-                <Button 
-                  type="primary" 
-                  onClick={() => toggleRegion(region)}
-                  style={{ 
-                    marginTop: 16,
-                    width: '100%',
-                    backgroundColor: '#1890ff',
-                    borderColor: '#1890ff'
-                  }}
-                >
-                  Voir les {techCount} techniciens
-                </Button>
+              {expandedRegions[region] && (
+                <div className="table-container">
+                  <Table
+                    dataSource={techList}
+                    columns={columns}
+                    rowKey="id"
+                    pagination={false}
+                    size="small"
+                    className="techniciens-table"
+                    scroll={{ y: 200 }}
+                  />
+                  <Button 
+                    type="primary"
+                    onClick={() => toggleRegion(region)}
+                    className="toggle-button"
+                  >
+                    Masquer
+                  </Button>
+                </div>
               )}
             </div>
           </div>

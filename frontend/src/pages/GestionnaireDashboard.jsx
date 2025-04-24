@@ -290,10 +290,10 @@ useEffect(() => {
   // Modifier l'effet du menu
 useEffect(() => {
   const loadMenuData = async () => {
-    if (selectedMenu === '3' || selectedMenu === '4') {
+    if (selectedMenu === '2' || selectedMenu === '3') {
       setLoading(true);
       try {
-        if (selectedMenu === '3') {
+        if (selectedMenu === '2') {
           const { data } = await tasksApi.getAllTasks();
           setTasks(data.map(t => ({
             ...t,
@@ -301,7 +301,7 @@ useEffect(() => {
             vehicule: t.vehicule?._id || t.vehicule
           })));
         }
-        if (selectedMenu === '4') {
+        if (selectedMenu === '3') {
           const { data } = await vehiculesApi.getAllVehicules();
           setVehicules(data);
         }
@@ -358,7 +358,7 @@ useEffect(() => {
     }
   };
   
-  if (selectedMenu === '2') {
+  if (selectedMenu === '5') {
     loadInteractions();
   }
 }, [selectedMenu]);
@@ -706,12 +706,12 @@ if (selectedInteraction) {
 
   const menuItems = [
     { key: '1', icon: <CalendarOutlined />, label: 'Calendrier' },
-    { key: '2', icon: <BellOutlined />, label: 'Demandes clients' },
-    { key: '3', icon: <UnorderedListOutlined />, label: 'Tâches' },
-    { key: '4', icon: <CarOutlined />, label: 'Voitures' },
-    { key: '5', icon: <ClockCircleOutlined />, label: 'Chronologie' },
-    { key: '6', icon: <UserOutlined />, label: 'Filtrage Techniciens' },
-    { key: '7', icon: <StarOutlined />, label: 'Clients Favoris' }
+    { key: '5', icon: <BellOutlined />, label: 'Demandes clients' },
+    { key: '2', icon: <UnorderedListOutlined />, label: 'Tâches' },
+    { key: '3', icon: <CarOutlined />, label: 'Voitures' },
+    { key: '7', icon: <ClockCircleOutlined />, label: 'Chronologie' },
+    { key: '4', icon: <UserOutlined />, label: 'Filtrage Techniciens' },
+    { key: '6', icon: <StarOutlined />, label: 'Clients Favoris' }
   ];
   
   // Composant personnalisé pour afficher les événements
@@ -728,8 +728,28 @@ if (selectedInteraction) {
       theme="light"
       width={200} 
       >
-  <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-    <Title level={4} style={{ margin: 0 }}>Gestionnaire</Title>
+   <div className="logo" style={{ 
+    padding: '20px 16px', 
+    textAlign: 'center',
+    borderBottom: '1px solid #f0f0f0'
+  }}>
+    {/* Ajoutez votre logo ici - remplacez le chemin par votre image */}
+    <img 
+      src="src/assets/gestionnaire-logo.jpg" 
+      alt="Logo Gestionnaire" 
+      style={{ 
+        width: '130px', 
+        height: '130px', 
+        marginBottom: '10px',
+        borderRadius: '50%',
+        objectFit: 'cover'
+      }}
+    />
+    
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Text strong>Connecté en tant que gestionnaire: </Text>
+          </div>
+          <Title level={4} style={{ margin: 0 }}>{userData?.name}</Title>
   </div>
   <Menu
     theme="light"
@@ -738,10 +758,12 @@ if (selectedInteraction) {
     onSelect={({ key }) => setSelectedMenu(key)}
   >
     <Menu.Item key="1" icon={<CalendarOutlined />}>Calendrier</Menu.Item>
-    <Menu.Item key="2" icon={<BellOutlined />}>Demandes clients</Menu.Item>
-    <Menu.Item key="3" icon={<UnorderedListOutlined />}>Tâches</Menu.Item>
-    <Menu.Item key="4" icon={<CarOutlined />}>Voitures</Menu.Item>
-    <Menu.Item key="5" icon={<ClockCircleOutlined />}>
+    <Menu.Item key="2" icon={<UnorderedListOutlined />}>Tâches</Menu.Item>
+    <Menu.Item key="3" icon={<CarOutlined />}>Voitures</Menu.Item>
+    <Menu.Item key="4" icon={<UserOutlined />}>Filtrage Techniciens</Menu.Item>
+    <Menu.Item key="5" icon={<BellOutlined />}>Demandes clients</Menu.Item>
+    <Menu.Item key="6" icon={<StarOutlined />}>Clients Favoris</Menu.Item>
+    <Menu.Item key="7" icon={<ClockCircleOutlined />}>
       Chronologie
       {notes.length > 0 && (
         <sup style={{ 
@@ -754,8 +776,7 @@ if (selectedInteraction) {
         </sup>
       )}
     </Menu.Item>
-    <Menu.Item key="6" icon={<UserOutlined />}>Filtrage Techniciens</Menu.Item>
-    <Menu.Item key="7" icon={<StarOutlined />}>Clients Favoris</Menu.Item>
+   
   </Menu>
 </Sider>
         {selectedTask && (
@@ -859,14 +880,22 @@ if (selectedInteraction) {
 
 )}
         <Layout>
-          <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Text strong>Connecté en tant que : {userData?.name}</Text>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Button icon={<LogoutOutlined />} onClick={logout}>Déconnexion</Button>
-            </div>
-          </Header>
+           <Header style={{ 
+                background: '#fff', 
+                padding: '0 24px', 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center' 
+              }}>
+                <div style={{ flex: 1 }}></div> {/* Cet espace vide pousse le bouton à droite */}
+                <Button 
+                  icon={<LogoutOutlined />} 
+                  onClick={logout}
+                  className="logout-button"
+                >
+                  Déconnexion
+                </Button>
+            </Header>
           <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
             {loading ? (
               <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
@@ -943,7 +972,7 @@ if (selectedInteraction) {
                             </Card>
                             )}
                           
-{selectedMenu === '2' && (
+{selectedMenu === '5' && (
   <Card 
     title={
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1043,15 +1072,16 @@ if (selectedInteraction) {
                       setSelectedInteraction(interaction);
                     }}
                     disabled={!!interaction.relatedTask}
-                    style={{ marginBottom: '8px' }}
+                    style={{ marginBottom: '4px' }}
+                    className={interaction.relatedTask ? "disabled-request-button" : ""}
                     block
                   >
                     {interaction.relatedTask ? 'Déjà traité' : 'Créer Tâche'}
                   </Button>
                   {interaction.relatedTask && (
-                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                    <span className="task-reference">
                       Tâche #{interaction.relatedTask}
-                    </Text>
+                    </span>
                   )}
                 </td>
               </tr>
@@ -1076,7 +1106,7 @@ if (selectedInteraction) {
                                 vehiculesList={vehiculesList}
                               />
                                 
-  {selectedMenu === '3' && (
+  {selectedMenu === '2' && (
   <Card title="Gestion des tâches" bordered={false} className="tous-padding">
     {/* Barre de recherche */}
     <Input.Search
@@ -1284,6 +1314,7 @@ if (selectedInteraction) {
       {/* Bouton de soumission et info technicien */}
       <div style={{ marginTop: 24 }}>
         <Button
+          className="white-text-btn"
           type="primary"
           onClick={handleCreateTask}
           disabled={
@@ -1698,7 +1729,7 @@ if (selectedInteraction) {
   </Modal>
 )}
 
-{selectedMenu === '4' && (
+{selectedMenu === '3' && (
   <Card title="Gestion des véhicules" bordered={false} className="tous-padding">
     {/* Barre de recherche */}
     <div className="search-container">
@@ -1851,85 +1882,100 @@ if (selectedInteraction) {
     </div>
   </Card>
 )}
-          {selectedMenu === '5' && ( // Section Chronologie
-            <Card title="Chronologie des notes" bordered={false} className="tous-padding">
-              <Input.TextArea
-                 value={newNote}
-                 onChange={(e) => setNewNote(e.target.value)}
-                 placeholder="Écrire une note..."
-                 autoSize={false}
-                 style={{
-                   height: 30,
-                   resize: 'none',
-                   fontSize: 13,
-                   lineHeight: '1',
-                   padding: '4px 8px',
-                   width: '100%',
-                 }}
-              />
-              <Button type="primary" onClick={handleAddNote}>
-                Ajouter une note
-              </Button>
-
-              {/* Ajoutez un indicateur de chargement */}
-              {loading ? (
-                <Spin size="large" style={{ display: 'block', margin: '20px auto' }} />
-              ) : (
-            
-<List
-  dataSource={notes.slice(
-    (currentNotePage - 1) * notePageSize,
-    currentNotePage * notePageSize
-  )}
-  pagination={{
-    pageSize: notePageSize,
-    current: currentNotePage,
-    total: notes.length,
-    onChange: (page, pageSize) => {
-      setCurrentNotePage(page);
-      setNotePageSize(pageSize);
-    },
-    showSizeChanger: true,
-    pageSizeOptions: ['4', '8', '12'],
-    showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total} notes`,
-  }}
-  renderItem={(note, index) => {
-    const isNew = index === 0 && Date.now() - new Date(note.timestamp).getTime() < 5000;
-    
-    return (
-      <List.Item
-        key={note._id}
-        style={{
-          animation: isNew ? 'highlight 2s ease-out' : 'none',
-          borderLeft: isNew ? '4px solid #1890ff' : 'none',
-          paddingLeft: '10px'
-        }}
-      >
-        <List.Item.Meta
-          title={<Text strong>{note.author}</Text>}
-          description={
-            <>
-              <Text>{note.content}</Text>
-              <br />
-              <Text type="secondary">
-                {moment(note.timestamp).format('DD/MM/YYYY HH:mm')}
-              </Text>
-            </>
-          }
+       {selectedMenu === '7' && (
+  <Card title="Chronologie des notes" bordered={false} className="tous-padding">
+    <div style={{ 
+      maxWidth: '500px', // Limite la largeur maximale
+       // Centre le contenu
+    }}>
+      <div style={{ marginBottom: 16 }}>
+        <Text strong>Écrire une note...</Text>
+        <Input.TextArea
+          value={newNote}
+          onChange={(e) => setNewNote(e.target.value)}
+          placeholder="Saisissez votre note ici..."
+          style={{
+            marginBottom: 12,
+            resize: 'vertical',
+            width: '100%' // Prend toute la largeur du conteneur parent
+          }}
+          rows={3}
+          autoSize={{ minRows: 3, maxRows: 5 }}
         />
-      </List.Item>
-    );
-  }}
-/>
-              )}
-            </Card>
-          )}
-  {selectedMenu === '6' && (
+        <Button 
+          type="primary" 
+          onClick={handleAddNote}
+          icon={<FileTextOutlined />}
+          style={{ marginBottom: 16 }}
+        >
+          Ajouter une note
+        </Button>
+      </div>
+
+      <div style={{ 
+        borderTop: '1px solid #f0f0f0', 
+        paddingTop: 16,
+        maxHeight: '500px',
+        overflowY: 'auto'
+      }}>
+        {notes
+          .slice(
+            (currentNotePage - 1) * notePageSize,
+            currentNotePage * notePageSize
+          )
+          .map(note => (
+            <div 
+              key={note._id} 
+              style={{ 
+                marginBottom: 12,
+                padding: '12px',
+                backgroundColor: '#fafafa',
+                borderRadius: '4px',
+                border: '1px solid #e8e8e8'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Text strong>{note.author}</Text>
+                <Text type="secondary">
+                  {moment(note.timestamp).format('DD/MM/YYYY HH:mm')}
+                </Text>
+              </div>
+              <Text style={{ 
+                marginTop: 8, 
+                display: 'block',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {note.content}
+              </Text>
+            </div>
+          ))
+        }
+
+        <div style={{ marginTop: 16, textAlign: 'center' }}>
+          <Pagination
+            current={currentNotePage}
+            pageSize={notePageSize}
+            total={notes.length}
+            onChange={(page, pageSize) => {
+              setCurrentNotePage(page);
+              setNotePageSize(pageSize);
+            }}
+            showSizeChanger
+            pageSizeOptions={['4', '8', '12']}
+            showTotal={(total, range) => `${range[0]}-${range[1]} sur ${total} notes`}
+            size="small"
+          />
+        </div>
+      </div>
+    </div>
+  </Card>
+)}
+  {selectedMenu === '4' && (
   <Card title="Filtrage des Techniciens par Région" bordered={false} className="tous-padding">
     <TechnicienFiltering techniciens={techniciens} />
   </Card>
 )}
-{selectedMenu === '7' && (
+{selectedMenu === '6' && (
   <Card 
     title="Clients Fidèles" 
     bordered={false}
