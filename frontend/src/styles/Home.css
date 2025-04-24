@@ -19,9 +19,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 30px;
+    padding: 5px 20px !important;
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 60px;
 }
   
   .logo {
@@ -729,8 +730,8 @@ body, .navbar, .hero, .feature-card, .solution-card, .footer-column {
   .navbar {
     flex-direction: row; /* Conserver l'alignement horizontal */
     flex-wrap: nowrap; /* Empêcher le passage à la ligne */
-    padding: 10px 15px;
-    height: 60px; /* Hauteur fixe pour mobile */
+    padding: 20px 5px;
+    height: 70px;
     align-items: center;
   }
 
@@ -740,7 +741,7 @@ body, .navbar, .hero, .feature-card, .solution-card, .footer-column {
   }
 
   .logo-image {
-    height: 37px; /* Taille légèrement réduite pour mobile */
+    height: 35px important;
   }
 
   .nav-links {
