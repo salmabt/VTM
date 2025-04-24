@@ -20,11 +20,14 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 const { Panel } = Collapse;
-const TaskSection = ({ title, tasks, statusFilter, collapsed = false }) => {
+const TaskSection = ({ title, tasks, statusFilter, collapsed = false ,vehicules,handleStatusChange,setSelectedTask }) => {
   const filteredTasks = tasks.filter(task => statusFilter.includes(task.status));
 
   return (
-    <Collapse defaultActiveKey={collapsed ? [] : ['1']}>
+     <Collapse 
+      defaultActiveKey={collapsed ? [] : ['1']}
+      className="responsive-collapse"
+    >
       <Panel 
         header={`${title} (${filteredTasks.length})`} 
         key="1"
@@ -33,9 +36,11 @@ const TaskSection = ({ title, tasks, statusFilter, collapsed = false }) => {
         <div className="task-grid">
           {filteredTasks.map(task => (
             <TaskCard 
-              key={task._id} 
+              key={task._id}
+              setSelectedTask={setSelectedTask}  
               task={task} 
               vehicule={vehicules.find(v => v._id === task.vehicule?._id)}
+              handleStatusChange={handleStatusChange}
             />
           ))}
         </div>
@@ -43,25 +48,108 @@ const TaskSection = ({ title, tasks, statusFilter, collapsed = false }) => {
     </Collapse>
   );
 };
-// Composant TaskCard à ajouter
-const TaskCard = ({ task, vehicule }) => {
-  const statusColor = {
-    'planifié': '#1890ff',
-    'en cours': '#52c41a',
-    'terminé': '#f5222d'
-  }[task.status];
+const TaskCard = ({ task, vehicule, handleStatusChange,setSelectedTask }) => {
+  // Ajouter dans TaskCard :
+const statusColor = {
+  'planifié': '#1890ff',
+  'en cours': '#52c41a',
+  'terminé': '#f5222d'
+}[task.status];
+  // Vérification si modifiable
+  const isEditable = () => {
+    const today = new Date();
+    const taskDate = new Date(task.startDate);
+    return today.toDateString() === taskDate.toDateString();
+  };
+  
 
   return (
     <Card
+      key={task._id}
       className="task-card"
       hoverable
       style={{ borderLeft: `4px solid ${statusColor}` }}
     >
-      {/* ... (contenu de la carte tel que défini précédemment) ... */}
+      <div className="card-header">
+        <Text strong style={{ fontSize: 16 }}>{task.title}</Text>
+        <Tag color={statusColor} style={{ marginLeft: 1 }}>
+          {task.status.toUpperCase()}
+        </Tag>
+      </div>
+
+      <div className="card-content">
+        <div className="info-section">
+          <CalendarOutlined />
+          <Text>
+{new Date(task.startDate).toLocaleDateString()} {/* Affiche la date */}
+{' '}à{' '} 
+{new Date(task.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {/* Affiche l'heure de début */}
+{' - '}
+{new Date(task.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {/* Affiche l'heure de fin */}
+</Text>
+        </div>
+
+        {vehicule && (
+          <div className="info-section">
+            <CarOutlined />
+            <Text>{vehicule.model} ({vehicule.registration})</Text>
+          </div>
+        )}
+
+        <div className="info-section">
+          <EnvironmentOutlined />
+          <Text>{task.location}</Text>
+        </div>
+
+        {task.attachments?.length > 0 && (
+          <div className="attachments-section">
+            <PaperClipOutlined />
+            {task.attachments.map((attachment, index) => (
+              <Button
+                key={index}
+                type="link"
+                icon={<DownloadOutlined />}
+                onClick={() => handleDownloadAttachment(task._id, attachment.filename)}
+              >
+                {attachment.originalName}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card-actions">
+      <div className="action-group">
+        <Select
+          value={task.status}
+          style={{ width: '100%' }}
+          onChange={(value) => handleStatusChange(task._id, value)}
+          suffixIcon={<CaretDownOutlined style={{ color: statusColor }} />}
+          disabled={!isEditable()}
+        >
+          <Option value="planifié">Planifié</Option>
+          <Option value="en cours">En cours</Option>
+          <Option value="terminé">Terminé</Option>
+        </Select>
+         {!isEditable() && (
+        <Text type="secondary" className="task-date-warning">
+          Modification disponible le {new Date(task.startDate).toLocaleDateString()}
+        </Text>
+      )} 
+      </div>
+        <Button 
+          type="link" 
+          icon={<InfoCircleOutlined />} 
+          onClick={() => setSelectedTask(task)}
+        >
+          Détails
+        </Button>
+        </div>
+
+     
     </Card>
   );
 };
-
 const TechnicienDashboard = () => {
   const { userData, logout } = useAuth();
   const [tasks, setTasks] = useState([]);
@@ -72,6 +160,11 @@ const TechnicienDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [form] = Form.useForm();  // Form instance for the report formù
   const [selectedTask, setSelectedTask] = useState(null);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
   // Charger les notifications
 useEffect(() => {
   const loadNotifications = async () => {
@@ -196,18 +289,24 @@ const notificationContent = (
 
   ///status tache 
   const handleStatusChange = async (taskId, status) => {
+    const task = tasks.find(t => t._id === taskId);
+    if (!task) return;
+  
+    // Vérification de la date
+    const today = new Date();
+    const taskDate = new Date(task.startDate);
+    
+    // Comparaison des dates sans l'heure
+    const isSameDay = today.toDateString() === taskDate.toDateString();
+  
+    if (!isSameDay) {
+      message.error('Modification uniquement autorisée le jour de la tâche');
+      return;
+    }
+  
     try {
       await tasksApi.updateTaskStatus(taskId, { status });
-      
-      // Optionnel : Rafraîchir les données des véhicules
-      const vehiculesResponse = await vehiculesApi.getVehiculesByTechnicien(userData._id);
-      setVehicules(vehiculesResponse.data);
-  
-      // Mise à jour optimiste des tâches
-      setTasks(prev => prev.map(task => 
-        task._id === taskId ? { ...task, status } : task
-      ));
-      
+      setTasks(prev => prev.map(t => t._id === taskId ? { ...t, status } : t));
       message.success('Statut mis à jour');
     } catch (error) {
       message.error('Échec de la mise à jour');
@@ -224,6 +323,7 @@ const notificationContent = (
       message.error('Erreur de chargement des rapports');
     }
   };
+
 
   useEffect(() => {
     if (selectedMenu === '3') {
@@ -347,13 +447,11 @@ const groupTasks = (tasks) => {
           background: '#fff',
           padding: '0 24px',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Text strong>Connecté en tant que : {userData?.name}</Text>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16,marginLeft: 'auto'  }}>
             {/* Notification Button with Badge */}
            
 <Badge count={notifications.filter(n => !n.read).length}>
@@ -391,93 +489,36 @@ const groupTasks = (tasks) => {
     bordered={false}
     extra={<Tag color="blue">{tasks.length} tâches</Tag>}
   >
-    <div className="task-grid">
-      {tasks.map(task => {
-        const vehicule = task.vehicule ? vehicules.find(v => String(v._id) === String(task.vehicule._id)) : null;
-        const statusColor = {
-          'planifié': '#1890ff',
-          'en cours': '#52c41a',
-          'terminé': '#f5222d'
-        }[task.status];
+    <div className="structured-tasks">
+    
+<TaskSection
+  title="Aujourd'hui"
+  setSelectedTask={setSelectedTask}
+  tasks={groupTasks(tasks).today}
+  statusFilter={['planifié', 'en cours', 'terminé']}
+  vehicules={vehicules} 
+  handleStatusChange={handleStatusChange}
+/>
 
-        return (
-          <Card
-            key={task._id}
-            className="task-card"
-            hoverable
-            style={{ borderLeft: `4px solid ${statusColor}` }}
-          >
-            <div className="card-header">
-              <Text strong style={{ fontSize: 16 }}>{task.title}</Text>
-              <Tag color={statusColor} style={{ marginLeft: 1 }}>
-                {task.status.toUpperCase()}
-              </Tag>
-            </div>
+<TaskSection
+  title="Demain"
+  setSelectedTask={setSelectedTask}
+  tasks={groupTasks(tasks).tomorrow}
+  statusFilter={['planifié']}
+  collapsed={true}
+  vehicules={vehicules}
+  handleStatusChange={handleStatusChange}
+/>
 
-            <div className="card-content">
-              <div className="info-section">
-                <CalendarOutlined />
-                <Text>
-    {new Date(task.startDate).toLocaleDateString()} {/* Affiche la date */}
-    {' '}à{' '} 
-    {new Date(task.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {/* Affiche l'heure de début */}
-    {' - '}
-    {new Date(task.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {/* Affiche l'heure de fin */}
-  </Text>
-              </div>
-
-              {vehicule && (
-                <div className="info-section">
-                  <CarOutlined />
-                  <Text>{vehicule.model} ({vehicule.registration})</Text>
-                </div>
-              )}
-
-              <div className="info-section">
-                <EnvironmentOutlined />
-                <Text>{task.location}</Text>
-              </div>
-
-              {task.attachments?.length > 0 && (
-                <div className="attachments-section">
-                  <PaperClipOutlined />
-                  {task.attachments.map((attachment, index) => (
-                    <Button
-                      key={index}
-                      type="link"
-                      icon={<DownloadOutlined />}
-                      onClick={() => handleDownloadAttachment(task._id, attachment.filename)}
-                    >
-                      {attachment.originalName}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="card-actions">
-              <Select
-                value={task.status}
-                style={{ width: 120 }}
-                onChange={(value) => handleStatusChange(task._id, value)}
-                suffixIcon={<CaretDownOutlined style={{ color: statusColor }} />}
-              >
-                <Option value="planifié">Planifié</Option>
-                <Option value="en cours">En cours</Option>
-                <Option value="terminé">Terminé</Option>
-              </Select>
-              
-              <Button 
-                type="link" 
-                icon={<InfoCircleOutlined />} 
-                onClick={() => setSelectedTask(task)}
-              >
-                Détails
-              </Button>
-            </div>
-          </Card>
-        );
-      })}
+<TaskSection
+  title="À venir"
+  setSelectedTask={setSelectedTask}
+  tasks={groupTasks(tasks).upcoming}
+  statusFilter={['planifié']}
+  collapsed={true}
+  vehicules={vehicules} 
+  handleStatusChange={handleStatusChange}
+/>
     </div>
   </Card>
 )}
@@ -560,8 +601,22 @@ const groupTasks = (tasks) => {
 
 {selectedMenu === '3' && (
 <Card title="Historique des Rapports" bordered={false}>
-  <List
-    dataSource={reports}
+<List
+      dataSource={reports.slice(
+        (pagination.current - 1) * pagination.pageSize,
+        pagination.current * pagination.pageSize
+      )}
+      pagination={{
+        ...pagination,
+        showSizeChanger: true,
+        onChange: (page, pageSize) => {
+          setPagination(prev => ({
+            ...prev,
+            current: page,
+            pageSize: pageSize,
+          }));
+        },
+      }}
     renderItem={report => (
       <List.Item key={report._id}>
         <List.Item.Meta
@@ -591,7 +646,7 @@ const groupTasks = (tasks) => {
         
       </Layout>
      
-<Modal
+      <Modal
   title="Détails de la Mission"
   open={!!selectedTask}
   onCancel={() => setSelectedTask(null)}
@@ -600,9 +655,10 @@ const groupTasks = (tasks) => {
       Fermer
     </Button>
   ]}
+  width={Math.min(window.innerWidth - 40, 600)} // Adaptation responsive
 >
   {selectedTask && (
-    <div>
+     <div style={{ wordBreak: 'break-word' }}>
       <Text strong>Titre du tache: </Text>
       <Text>{selectedTask.title}</Text>
       <br />
@@ -614,6 +670,10 @@ const groupTasks = (tasks) => {
       <br />
       <Text strong>Adresse compléte: </Text>
       <Text>{selectedTask.adresse}</Text>
+      
+      <br />
+      <Text strong>Description du tache: </Text>
+      <Text>{selectedTask.description}</Text>
       
       <br />
     </div>

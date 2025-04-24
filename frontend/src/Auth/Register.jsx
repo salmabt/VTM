@@ -482,21 +482,39 @@ const Register = () => {
 }
 
 
-            @media (max-width: 768px) {
-              .main-flex {
-                flex-direction: column;
-              }
-              
-              .image-container {
-                border-left: none;
-                border-top: 1px solid #f0f0f0;
-                height: 300px;
-              }
-              
-              .register-image {
-                max-height: 250px;
-              }
-            }
+       @media (max-width: 768px) {
+  .main-flex {
+    flex-direction: column-reverse !important;
+  }
+
+  .image-container {
+    position: relative;
+    width: 100%;
+    min-height: 250px;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .register-image {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 250px;
+    
+    display: block;
+  }
+
+.form-container {
+    height: auto !important;
+    max-height: none !important;
+  }
+  .form-section {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+
         `}
       </style>
       

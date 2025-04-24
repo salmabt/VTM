@@ -25,11 +25,10 @@
   
   /* Task card styling */
   .task-card {
-    background: white;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
+    min-width: 280px; /* Largeur minimale réduite */
+    margin: 8px;
+    break-inside: avoid; /* Empêche la coupure entre les cartes */
   }
   
   .task-card:hover {
@@ -119,7 +118,46 @@
 
 /* Pour le contenu des cartes */
 .card-content {
-  min-height: 120px; /* Hauteur minimale cohérente */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Adaptation mobile */
+@media (max-width: 768px) {
+  .task-card {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .card-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-section {
+    flex-wrap: wrap;
+  }
+
+  .attachments-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+/* Pour les très petits écrans */
+@media (max-width: 480px) {
+  .task-card {
+    padding: 12px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .info-section > span {
+    font-size: 12px;
+  }
 }
 
 .card-actions {
@@ -169,12 +207,13 @@
 }
 
 .structured-tasks {
-  padding: 0 16px;
+  padding: 20 16px;
 }
 
 
 .ant-collapse {
-  margin-bottom: 24px;
+  width: 290px;
+  margin-bottom: 14px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -183,4 +222,32 @@
 .ant-collapse-header {
   font-weight: 500 !important;
   font-size: 16px !important;
+}
+/* Dans TechnicienInterface.css */
+.disabled-status {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.task-date-warning {
+  font-size: 12px;
+  color: #ff4d4f;
+  margin-top: 8px;
+}
+/* Dans TechnicienInterface.css */
+.ant-pagination {
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .ant-pagination-item {
+    min-width: 28px;
+    height: 28px;
+  }
+  
+  .ant-pagination-options {
+    margin-left: 8px;
+  }
 }
