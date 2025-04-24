@@ -27,7 +27,6 @@ const Login = () => {
     <div className="page-container">
       {/* Navbar */}
       <nav className="navbar">
-      <div className="navbar-container">
         <div className="logo">
           <Link to="/">
             <img src={logo} alt="Digital Market Logo" className="logo-image" />
@@ -36,7 +35,6 @@ const Login = () => {
         <div className="nav-links">
           <Link to="/about">À propos</Link>
           <Link to="/login">Connexion</Link>
-        </div>
         </div>
       </nav>
       
@@ -134,71 +132,55 @@ const Login = () => {
               display: flex;
               justify-content: center;
               align-items: center;
-              padding: 70px 20px 20px;
+              padding: 40px 10px 10px;
               margin: 0;
             }
-/* Styles de la navbar améliorée */
-          .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 10px 0;
-          }
-          
-          .navbar-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            width: 100%;
-          }
-          
-          .logo-image {
-            height: 40px;
-            width: auto;
-            max-width: 200px; /* Ajusté pour mieux s'adapter */
-          }
-          
-          .nav-links {
-            display: flex;
-            align-items: center;
-          }
-          
-          .nav-links a {
-            text-decoration: none;
-            color: #2c3e50;
-            font-weight: 500;
-            padding: 8px 12px;
-            margin: 0;
-            white-space: nowrap;
-            position: relative;
-          }
-          
-          /* Séparateur minimal entre les liens */
-          .nav-links a + a::before {
-            content: "";
-            position: absolute;
-            left: -1px;
-            top: 25%;
-            height: 50%;
-            width: 1px;
-            background-color: #eee;
-          }
-          
-          .nav-links a:hover {
-            color: #8db7e7;
-          }
+
+            /* Navbar styles */
+            .navbar {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              z-index: 1200;
+              height: 60px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 10px 10px;
+              background-color: white;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .logo {
+              font-size: 70px;
+              font-weight: bold;
+              color: #2c3e50;
+              width: auto;
+            }
+            
+            .nav-links {
+              display: flex;
+              gap: 5px;
+              align-items: center;
+            }
+            
+            .nav-links a {
+              text-decoration: none;
+              color: #2c3e50;
+              font-weight: 500;
+              font-size: 20px;
+              transition: color 0.3s;
+              padding: 10px 15px;
+            }
+
+            .nav-links a:hover {
+              color: #8db7e7;
+            }
 
             .form-container {
               background-color: white;
-              width: 90%;
-              max-width: 1200px;
+              width: 60%;
+              max-width: 1000px;
               border-radius: 0;
               box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
               overflow: hidden;
@@ -214,7 +196,7 @@ const Login = () => {
             .image-container {
               position: relative;
               background-color: #fafafa;
-              min-height: 300px;
+              min-height: 450px;
             }
 
             .image-wrapper {
@@ -278,7 +260,27 @@ const Login = () => {
               .main-flex {
                 flex-direction: column-reverse;
               }
-            }
+                .navbar {
+                flex-direction: column;
+                padding: 10px;
+                height: auto;
+              }
+              
+              .logo {
+                margin-bottom: 10px;
+              }
+              
+              .nav-links {
+                width: 100%;
+                justify-content: center;
+                gap: 8px;
+              }
+              
+              .nav-links a {
+                padding: 6px 10px;
+                font-size: 14px;
+              }
+               }
 
             /* Desktop styles */
             @media (min-width: 768px) {
@@ -297,31 +299,29 @@ const Login = () => {
                 object-fit: cover;
               }
 
-              .navbar-container {
-        padding: 0 10px;
-      }
-      
-      .nav-links a {
-        padding: 8px 10px;
-        font-size: 14px;
-      }
-      
-      .nav-links a::before {
-        top: 20%;
-        height: 60%;
-      }
+               .navbar {
+                padding: 10px 12px;
+                flex-wrap: wrap;
+              }
+               
+               .nav-links {
+              display: flex;
+              gap: 4px;
+              align-items: center;
+            }
+              .nav-links a {
+              text-decoration: none;
+              color: #2c3e50;
+              font-weight: 500;
+              transition: color 0.3s;
+              padding: 10px 15px;
+            }
+
+            .nav-links a:hover {
+              color: #8db7e7;
+            }
               
             }
-             @media (max-width: 480px) {
-            .nav-links {
-              flex-wrap: wrap;
-            }
-            
-            .nav-links a {
-              font-size: 13px;
-              padding: 6px 3px;
-            }
-          }
           `}
         </style>
       </Card>
