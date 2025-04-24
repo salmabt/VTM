@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import '../styles/Home.css';
 import SuiviIcon from '../assets/icon-suivi.png';
 import RapportIcon from '../assets/icon-rapport.png';
-import logo from '../assets/logo-digital-market.png';
+import logo from '../assets/VTM-logo.png';
 import InnovationIcon from '../assets/innovation-icon.png';
 import TransparenceIcon from '../assets/transparence-icon.png';
 import ExcellenceIcon from '../assets/excellence-icon.png';
