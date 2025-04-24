@@ -24,10 +24,10 @@ const Login = () => {
   };
 
   return (
-    
     <div className="page-container">
-      {/* Added Navbar */}
+      {/* Navbar */}
       <nav className="navbar">
+      <div className="navbar-container">
         <div className="logo">
           <Link to="/">
             <img src={logo} alt="Digital Market Logo" className="logo-image" />
@@ -37,16 +37,18 @@ const Login = () => {
           <Link to="/about">À propos</Link>
           <Link to="/login">Connexion</Link>
         </div>
+        </div>
       </nav>
+      
       <Card className="form-container">
-        <Flex gap="large" align="stretch" className="main-flex">
+        <Flex gap="large" align="stretch" className="main-flex" wrap="wrap-reverse">
           {/* Formulaire */}
           <Flex vertical flex={1} className="form-section">
             <Typography.Title level={2} strong className="title">
-               Se connecter
+              Se connecter
             </Typography.Title>
             <Typography.Text type="secondary" strong className="slogan">
-                Ravie de vous revoir ! Veuillez vous connecter pour continuer.
+              Ravie de vous revoir ! Veuillez vous connecter pour continuer.
             </Typography.Text>
             <Form layout="vertical" onFinish={handleLogin} autoComplete="off">
               <Form.Item
@@ -102,10 +104,10 @@ const Login = () => {
 
               <Form.Item>
                 <Typography.Text style={{ color: '#666', marginRight: '20px' }}>
-                Vous n'avez pas de compte ?
+                  Vous n'avez pas de compte ?
                 </Typography.Text>
                 <Link to="/register" style={{ fontWeight: 500 }}>
-                Créer un compte
+                  Créer un compte
                 </Link>
               </Form.Item>
             </Form>
@@ -125,105 +127,201 @@ const Login = () => {
 
         <style>
           {`
-             /* Modified page-container */
-          .page-container {
-            background-color:#e1deed;
-            min-height: 100vh;
+            /* Modified page-container */
+            .page-container {
+              background-color: #d4e1dc;
+              min-height: 100vh;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              padding: 70px 20px 20px;
+              margin: 0;
+            }
+/* Styles de la navbar améliorée */
+          .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+          }
+          
+          .navbar-container {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            padding: 70px 0 0;
-            margin: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
           }
-
-         /* Navbar styles */
-           .navbar {
-          position: fixed; /* Garde la navbar fixe en haut */
-          top: 0;
-          left: 0;
-          width: 98%; /* Occupe toute la largeur */
-          z-index: 1000; /* Assure qu'elle passe au-dessus du contenu */
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 10px 30px;
-          background-color: white;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        } .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
+          
+          .logo-image {
+            height: 40px;
+            width: auto;
+            max-width: 200px; /* Ajusté pour mieux s'adapter */
           }
-           .nav-links {
-          display: flex;
-          gap: 5px;
-          align-items: center;
-        }
+          
+          .nav-links {
+            display: flex;
+            align-items: center;
+          }
+          
           .nav-links a {
-              text-decoration: none;
-              color: #2c3e50;
-              font-weight: 500;
-              transition: color 0.3s;
-              padding: 10px 15px; /* Ajoute un peu d'espace autour des liens */
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+            padding: 8px 12px;
+            margin: 0;
+            white-space: nowrap;
+            position: relative;
           }
-
+          
+          /* Séparateur minimal entre les liens */
+          .nav-links a + a::before {
+            content: "";
+            position: absolute;
+            left: -1px;
+            top: 25%;
+            height: 50%;
+            width: 1px;
+            background-color: #eee;
+          }
+          
           .nav-links a:hover {
-            color: #ff7b9c;
+            color: #8db7e7;
           }
-
 
             .form-container {
               background-color: white;
-              width: 80%;
+              width: 90%;
               max-width: 1200px;
               border-radius: 0;
               box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
               overflow: hidden;
               padding: 0;
-              margin: 0;
+              margin: 20px 0;
             }
               
-
             .main-flex {
               height: 100%;
-              min-height: 600px;
+              min-height: auto;
             }
 
             .image-container {
               position: relative;
               background-color: #fafafa;
-              border-left: 1px solid #f0f0f0;
+              min-height: 300px;
             }
 
             .image-wrapper {
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              overflow: hidden;
+              position: relative;
+              width: 100%;
+              height: 100%;
+              overflow: auto;
             }
 
             .auth-image {
               width: 100%;
-              height: 100%;
-              object-fit: cover;
+              height: auto;
+              max-height: none;
+              object-fit: contain;
             }
 
             .form-section {
-              padding: 40px;
-              min-width: 400px;
+              padding: 30px;
+              min-width: 300px;
             }
 
             .title {
-              font-size: 2rem !important;
+              font-size: 1.8rem !important;
               color: #2c3e50 !important;
             }
 
             .btn.ant-btn-primary {
               background-color: #8db7e7 !important;
               border-color: #8db7e7 !important;
+              width: 100%;
             }
+
+            /* Mobile styles */
+            @media (max-width: 767px) {
+              .page-container {
+                padding: 70px 10px 10px;
+                align-items: flex-start;
+              }
+              
+              .form-container {
+                width: 100%;
+                margin: 10px 0;
+              }
+              
+              .form-section {
+                padding: 20px;
+                min-width: auto;
+              }
+              
+              .image-container {
+                border-top: 1px solid #f0f0f0;
+                border-left: none;
+                height: auto;
+                min-height: 250px;
+              }
+              
+              .title, .slogan {
+                text-align: center;
+              }
+              
+              .main-flex {
+                flex-direction: column-reverse;
+              }
+            }
+
+            /* Desktop styles */
+            @media (min-width: 768px) {
+              .image-container {
+                border-left: 1px solid #f0f0f0;
+                border-top: none;
+              }
+              
+              .image-wrapper {
+                position: absolute;
+                height: 100%;
+              }
+              
+              .auth-image {
+                height: 100%;
+                object-fit: cover;
+              }
+
+              .navbar-container {
+        padding: 0 10px;
+      }
+      
+      .nav-links a {
+        padding: 8px 10px;
+        font-size: 14px;
+      }
+      
+      .nav-links a::before {
+        top: 20%;
+        height: 60%;
+      }
+              
+            }
+             @media (max-width: 480px) {
+            .nav-links {
+              flex-wrap: wrap;
+            }
+            
+            .nav-links a {
+              font-size: 13px;
+              padding: 6px 3px;
+            }
+          }
           `}
         </style>
       </Card>

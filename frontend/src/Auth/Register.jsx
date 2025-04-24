@@ -314,7 +314,7 @@ const Register = () => {
           /* Conteneur principal */
           /* Modified page-container */
           .page-container {
-            background-color: #e1deed;
+            background-color:#d4e1dc;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -344,7 +344,7 @@ const Register = () => {
           .nav-links a {
             margin-left: 2rem;
             text-decoration: none;
-            color: #333;
+            color: #2c3e50;
             font-weight: 500;
             transition: color 0.3s;
           }

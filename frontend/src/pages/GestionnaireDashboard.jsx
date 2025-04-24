@@ -727,13 +727,16 @@ if (selectedInteraction) {
       collapsible 
       theme="light"
       width={200} 
+     
       >
    <div className="logo" style={{ 
     padding: '20px 16px', 
     textAlign: 'center',
     borderBottom: '1px solid #f0f0f0'
   }}>
-    {/* Ajoutez votre logo ici - remplacez le chemin par votre image */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+    <Text strong style={{ fontSize: '20px' }}>Interface Gestionnaire</Text>
+          </div>
     <img 
       src="src/assets/gestionnaire-logo.jpg" 
       alt="Logo Gestionnaire" 
@@ -746,10 +749,6 @@ if (selectedInteraction) {
       }}
     />
     
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Text strong>Connecté en tant que gestionnaire: </Text>
-          </div>
-          <Title level={4} style={{ margin: 0 }}>{userData?.name}</Title>
   </div>
   <Menu
     theme="light"
@@ -882,11 +881,26 @@ if (selectedInteraction) {
         <Layout>
            <Header style={{ 
                 background: '#fff', 
-                padding: '0 24px', 
+                padding: '0 16px', 
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center' 
               }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          
+                <Text 
+                
+              strong 
+              style={{ 
+                fontSize: 'clamp(16px, 4vw, 20px)', // Responsive font size
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              Bienvenue {userData?.name || 'Utilisateur'}!
+            </Text>
+          </div>
                 <div style={{ flex: 1 }}></div> {/* Cet espace vide pousse le bouton à droite */}
                 <Button 
                   icon={<LogoutOutlined />} 
