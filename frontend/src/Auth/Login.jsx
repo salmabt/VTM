@@ -2,7 +2,7 @@
 import React from 'react';
 import { Alert, Card, Flex, Form, Typography, Input, Spin, Button } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import loginImage from '../assets/resized_iii.webp';
+import loginImage from '../assets/signIn_signUp.avif';
 import useLogin from '../hooks/useLogin';
 import logo from '../assets/VTM-logo.png';
 
@@ -158,11 +158,14 @@ const Login = () => {
             padding: 0 20px;
             width: 100%;
           }
-          
+          .logo {
+            flex: 1; /* Prend tout l'espace disponible */
+            min-width: 0; /* Permet au texte de truncater si nécessaire */
+          }
           .logo-image {
-            height: 40px;
-            width: auto;
-            max-width: 200px; /* Ajusté pour mieux s'adapter */
+            height: 400px;
+             width: auto;
+            max-width: 300px; /* Ajusté pour mieux s'adapter */
           }
           
           .nav-links {

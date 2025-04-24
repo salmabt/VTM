@@ -2,7 +2,7 @@
 import React from 'react';
 import { Alert, Card, Flex, Form, Typography, Input, Spin, Button, Select } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import registerImage from '../assets/resized_iii.webp';
+import registerImage from '../assets/signIn_signUp.avif';
 import useSignup from '../hooks/useSignup';
 import logo from '../assets/VTM-logo.png'; 
 import { InfoCircleOutlined } from '@ant-design/icons';
