@@ -14,7 +14,7 @@
   .task-card {
     position: relative;
     min-width: 200px; /* Largeur minimale réduite */
-    margin: 8px;
+    margin: 5px;
     break-inside: avoid; /* Empêche la coupure entre les cartes */
   }
   
@@ -40,7 +40,7 @@
   @media (max-width: 576px) {
     .ant-layout-header {
       flex-direction: column;
-      padding: 15px !important;
+      padding: 10px !important;
       gap: 10px;
     }
   }
@@ -77,9 +77,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
-  padding: 16px;
+  padding: 11px;
   justify-content: center; /* Ajouté pour le centrage */
-  max-width: 1200px; /* Limite la largeur maximale */
+  max-width: 800px; /* Limite la largeur maximale */
   margin: 0 auto; /* Centre la grille */
 }
 /* Ajustement du conteneur principal */
@@ -148,7 +148,7 @@
 
 
 .ant-collapse {
-  width: 290px;
+  width: 700px;
   margin-bottom: 14px;
   background: #fff;
   border-radius: 8px;
@@ -156,7 +156,7 @@
 }
 
 .ant-collapse-header {
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   font-size: 16px !important;
 }
 /* Dans TechnicienInterface.css */
@@ -189,7 +189,7 @@
 }
 @media (max-width: 576px) {
   .status-select {
-    width: 100%;
+    width: 70%;
     margin-top: 10px;
   }
 }
@@ -213,12 +213,15 @@
     grid-template-columns: 1fr;
     padding: 8px;
   }
+  .ant-collapse {
+    width: 250px;
+  }
 }
 /* Adaptation mobile */
 @media (max-width: 768px) {
   .task-card {
-    width: 100%;
-    margin: 8px 0;
+    width: 60%;
+    margin: 6px 0;
   }
 
   .card-actions {
