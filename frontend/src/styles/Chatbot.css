@@ -13,7 +13,7 @@
   right: 30px;
   width: 60px;
   height: 60px;
-  background: #ba58b4;
+  background: #4dbd78;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -27,7 +27,7 @@
 
 .floating-chat-icon:hover {
   transform: scale(1.1) rotate(10deg);
-  background: #852e72;
+  background: #2f701b;
 }
 
 /* Conteneur du chatbot */
@@ -65,7 +65,7 @@
 /* En-tête */
 .chat-header {
   padding: 16px 20px;
-  background: linear-gradient(135deg, #b57fcd 0%, #5d64b2 100%);
+  background: linear-gradient(135deg, #5ac37a 0%, #89b4a3 100%);
   color: white;
   display: flex;
   justify-content: space-between;
@@ -86,7 +86,7 @@
 
 /* Bouton fermer */
 .close-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(1, 31, 16, 0.2);
   border: none;
   width: 35px;
   height: 35px;
@@ -138,7 +138,7 @@
 
 /* Style utilisateur unifié */
 .user {
-  background: #c28ecc;
+  background: #14995d;
   color: white;
   align-self: flex-end;
   border-radius: 18px 18px 4px 18px; /* Arrondi cohérent */
@@ -182,7 +182,7 @@
   font-size: 17px;
   margin-left: 10px;
   padding: 0 20px;
-  background: #ac76af;
+  background: #60af74;
   color: white;
   border: none;
   border-radius: 24px;

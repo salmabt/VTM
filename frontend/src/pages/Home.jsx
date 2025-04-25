@@ -26,7 +26,7 @@ import { TranslationOutlined } from '@ant-design/icons';
 import { FaRobot } from 'react-icons/fa';
 import { translations, languageNames } from './translations';
 import Chatbot from '../components/Chatbot';
-
+import '../styles/Home.css';
 const Home = () => {
   const [language, setLanguage] = useState('fr');
   const [showChat, setShowChat] = useState(false);
@@ -72,9 +72,9 @@ const Home = () => {
       )}
       {/* Navbar */}
       <nav className="navbar">
-        <div className="logo">
+        <div className="logoo">
           <Link to="/">
-            <img src={logo} alt="Digital Market Logo" className="logo-image" />
+            <img src={logo} alt="VTM Logo" className="logoo-image" />
           </Link>
         </div>
         <div className="nav-links">
