@@ -517,7 +517,84 @@ const Register = () => {
     overflow-y: visible !important;
   }
 }
+  @media (max-width: 768px) {
+  /* Ajustements pour tablettes */
+  .navbar {
+    padding: 0 15px !important;
+    height: 70px;
+  }
 
+  .logo-image {
+    width: 120px !important;
+    height: auto !important;
+    margin-bottom: -30px !important;
+  }
+
+  .nav-links {
+    gap: 8px;
+  }
+
+  .nav-links a {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .form-container {
+    width: 95% !important;
+    margin-top: 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Ajustements pour mobiles */
+  .navbar {
+    padding: 0 10px !important;
+    height: 60px;
+  }
+
+  .logo-image {
+    width: 100px !important;
+    margin-bottom: -20px !important;
+  }
+
+  .nav-links {
+    gap: 5px;
+  }
+
+  .nav-links a {
+    padding: 6px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .title {
+    font-size: 1.5rem !important;
+  }
+
+  .slogan {
+    font-size: 0.9rem !important;
+  }
+
+  .ant-form-item-label > label {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Ajustements pour petits mobiles */
+  .nav-links a {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .logo-image {
+    width: 80px !important;
+  }
+
+  .navbar {
+    height: 50px;
+  }
+}
 
         `}
       </style>

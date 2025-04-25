@@ -1,221 +1,47 @@
-/* AdminInterface.css */
+/* AdminInterface.css - Version Finale */
 .admin-container {
-    min-height: 100vh;
-    transition: background-color 0.3s;
-  }
-  
-  /* Mode sombre */
-  .admin-container.dark-mode {
-    background-color: #1a1a1a;
-    color: #ffffff;
-  }
-  
-  /* Responsive Sidebar */
-  .ant-layout-sider {
-    transition: all 0.3s;
-    overflow: hidden;
-  }
-  
-  @media (max-width: 768px) {
-    .responsive-table td,
-  .responsive-table th {
-    white-space: nowrap;
-    min-width: 120px;
-  }
-    .ant-layout-sider {
-      position: fixed;
-      z-index: 1000;
-      height: 100vh;
-      max-width: 200px !important;
-      flex: 0 0 200px !important;
-    }
-    
-    .ant-layout-sider-collapsed {
-      max-width: 80px !important;
-      flex: 0 0 80px !important;
-    }
-    
-    .ant-layout-header {
-      padding: 0 16px !important;
-      height: auto !important;
-      line-height: 1.5;
-    }
-  }
-  
-  /* Calendar responsive */
-  .rbc-calendar {
-    min-height: 500px;
-  }
-  
-  @media (max-width: 992px) {
-    .rbc-toolbar {
-      flex-direction: column;
-      gap: 8px;
-    }
-    
-    .rbc-btn-group {
-      flex-wrap: wrap;
-  justify-content: center;
-    }
-    /* Cellules plus compactes */
-.rbc-month-view,
-.rbc-time-view {
-  height: auto !important;
-}
-
-.rbc-day-bg + .rbc-day-bg {
-  min-width: 40px;
-}
-  }
-  
-  /* Table responsive */
-  .ant-table {
-    overflow-x: auto;
-  }
-  
-  @media (max-width: 576px) {
-    .ant-layout-header .ant-space {
-      flex-direction: column;
-      gap: 8px !important;
-      align-items: flex-end;
-    }
-    
-    .ant-layout-header button {
-      padding: 4px 8px !important;
-      font-size: 12px;
-    }
-    
-    .ant-layout-header .ant-typography {
-      font-size: 14px;
-      word-break: break-word;
-    }
-    .ant-table-thead > tr > th,
-    .ant-table-tbody > tr > td {
-      padding: 12px 8px !important;
-    }
-    
-    .ant-table-column-title {
-      font-size: 12px;
-    }
-  }
-  
-  /* Modal responsive */
-  .ant-modal {
-    max-width: 95vw !important;
-   
-  
-  }
-  
-  .ant-modal-content {
-    padding: 16px !important;
-  }
-  
-  /* Cards responsive */
-  .ant-card-head-title {
-    white-space: normal !important;
-    padding: 12px 0 !important;
-  }
-  
-  @media (max-width: 768px) {
-    .ant-card-extra {
-      margin-top: 10px;
-      width: 100%;
-    }
-  }
-  .Padding-calandar{
-    padding:16px;
-  }
-  .padding-clients{
-    padding:16px;
-  }
-  .padding-technicien{
-    padding:20px;
-  }
-  .padding-gestionnaire{
-    padding:20px;
-  }
-  .padding-rapport{
-    padding: 20px;
-  }
- 
-  
-  /* Logo adaptatif */
-  .logo h4 {
-    font-size: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  /* Menu icône seul en mode réduit */
-  .ant-layout-sider-collapsed .ant-menu-item span {
-    display: none;
-  }
-  
-  .ant-layout-sider-collapsed .ant-menu-item {
-    padding: 0 calc(50% - 20px/2) !important;
-  }
-  /* Empilement vertical des champs */
-@media (max-width: 576px) {
-  .ant-form-item {
-    flex-direction: column;
-  }
-  
-  .ant-form-item-label {
-    text-align: left !important;
-    padding-bottom: 4px !important;
-  }
-}
-/* Taille adaptative des icônes */
-.anticon {
-  font-size: 20px !important;
-}
-
-@media (max-width: 576px) {
-  .ant-btn-circle {
-    width: 28px !important;
-    height: 28px !important;
-  }
-  
-  .anticon {
-    font-size: 14px !important;
-  }
-}
-/* Cards */
-.ant-card {
-  margin-bottom: 16px !important;
-}
-/* Style pour la section profil admin */
-.admin-profile {
-  border-bottom: 1px solid rgba(0,0,0,0.1);
-  padding-bottom: 24px !important;
-}
-
-.admin-profile img {
-  transition: all 0.3s ease;
-}
-
-/* Adaptation responsive */
-@media (max-width: 768px) {
-  .admin-profile {
-    padding: 12px !important;
-  }
-  
-  .admin-profile img {
-    width: 80px !important;
-    height: 80px !important;
-  }
-  
-  .admin-profile .ant-typography {
-    font-size: 13px !important;
-  }
+  min-height: 100vh;
+  transition: background-color 0.3s;
 }
 
 /* Mode sombre */
-.dark-mode .admin-profile {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+.admin-container.dark-mode {
+  background-color: #1a1a1a;
+  color: #ffffff;
 }
-/* Dans votre fichier AdminInterface.css */
+
+/* Sidebar */
+/* Ajouter ces modifications */
+.ant-layout-sider {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto !important; /* Activer le défilement vertical */
+}
+
+.ant-layout-sider > .ant-menu {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 60px; /* Espace pour le défilement */
+}
+
+
+/* Logo */
+.logo h4 {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Menu */
+.ant-layout-sider-collapsed .ant-menu-item span {
+  display: none;
+}
+
+.ant-layout-sider-collapsed .ant-menu-item {
+  padding: 0 calc(50% - 20px/2) !important;
+}
+
 .ant-menu-item-group-title {
   color: #888 !important;
   font-weight: bold !important;
@@ -225,17 +51,326 @@
   padding-left: 2px !important;
   margin-top: 90px !important;
 }
+
+/* Profil Admin */
+.admin-profile {
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 24px !important;
+}
+
+.admin-profile img {
+  transition: all 0.3s ease;
+}
+
+.dark-mode .admin-profile {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Tableaux */
+.ant-table {
+  overflow-x: auto;
+}
+
+/* Calendrier */
+.rbc-calendar {
+  min-height: 500px;
+}
+
+/* Cartes */
+.ant-card {
+  margin-bottom: 16px !important;
+}
+
+.ant-card-head-title {
+  white-space: normal !important;
+  padding: 12px 0 !important;
+}
+
+/* Modales */
+.ant-modal {
+  max-width: 95vw !important;
+}
+
+.ant-modal-content {
+  padding: 16px !important;
+}
+
+/* Icônes */
+.anticon {
+  font-size: 20px !important;
+}
+
+/* Media Queries */
+@media (max-width: 1200px) {
+  .rbc-calendar {
+    min-height: 400px;
+  }
+  
+  .ant-layout-sider {
+    max-width: 200px !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .rbc-toolbar {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .rbc-btn-group button {
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+
+  .admin-profile img {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .rbc-month-view,
+  .rbc-time-view {
+    height: auto !important;
+  }
+}
+
 @media (max-width: 768px) {
+  .ant-layout-sider {
+    position: fixed;
+    z-index: 1000;
+    height: 100vh;
+    max-width: 160px !important;
+    flex: 0 0 160px !important;
+  }
+  
+  .ant-layout-sider-collapsed {
+    max-width: 60px !important;
+    flex: 0 0 60px !important;
+  }
+
+  .responsive-table {
+    font-size: 14px;
+  }
+
+  .ant-card-extra {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .Padding-calandar,
+  .padding-clients,
+  .padding-technicien,
+  .padding-gestionnaire,
+  .padding-rapport {
+    padding: 12px;
+  }
+
+  .ant-modal-content {
+    padding: 12px !important;
+  }
+
+  .admin-profile {
+    padding: 12px !important;
+  }
+  
+  .admin-profile img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
   .ant-menu-item-group-title {
     font-size: 0.75em;
     margin-top: 60px !important;
   }
 }
 
+@media (max-width: 576px) {
+  .ant-layout-header {
+    padding: 0 12px !important;
+    height: auto !important;
+  }
+
+  .ant-layout-header .ant-space {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+
+  .ant-layout-header button {
+    padding: 6px 10px !important;
+    font-size: 12px;
+  }
+
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    padding: 10px 6px !important;
+  }
+
+  .ant-table-column-title {
+    font-size: 12px;
+  }
+
+  .ant-btn-circle {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .anticon {
+    font-size: 14px !important;
+  }
+
+  .ant-form-item {
+    flex-direction: column;
+  }
+
+  .ant-form-item-label {
+    text-align: left !important;
+    padding-bottom: 4px !important;
+  }
+}
+
 @media (max-width: 480px) {
+  .ant-layout-sider {
+    max-width: 130px !important;
+  }
+
+  .admin-profile img {
+    width: 70px !important;
+    height: 70px !important;
+  }
+
   .ant-menu-item-group-title {
     font-size: 0.7em;
     margin-top: 40px !important;
     padding-left: 0 !important;
   }
+
+  .rbc-toolbar-label {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .ant-layout-header .ant-typography {
+    font-size: 13px !important;
+  }
+
+  .ant-layout-sider-collapsed {
+    max-width: 50px !important;
+  }
+
+  .rbc-btn-group button {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+
+  .ant-modal-title {
+    font-size: 16px !important;
+  }
+
+  .ant-card-head-title {
+    font-size: 14px !important;
+  }
+}
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    max-width: 240px !important;
+    flex: 0 0 240px !important;
+  }
+  
+  .ant-layout-sider-collapsed {
+    max-width: 80px !important;
+    flex: 0 0 80px !important;
+  }
+  
+  .ant-menu-inline-collapsed {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px); /* Ajuster la hauteur */
+  }
+  
+  .ant-menu-item-group-title {
+    margin-top: 20px !important;
+  }
+  
+  .logo {
+    padding: 16px 8px !important;
+  }
+}
+/* Amélioration du défilement sur petits écrans */
+@media (max-width: 576px) {
+  .ant-layout-sider {
+    max-width: 100% !important;
+    width: 280px !important;
+  }
+  
+  .ant-menu-item {
+    padding-left: 24px !important;
+  }
+  
+  .ant-menu-item-group-title {
+    padding-left: 24px !important;
+  }
+  
+  .ant-menu-inline-collapsed .ant-menu-item {
+    padding: 0 24px !important;
+  }
+}
+
+/* Correction de l'espacement vertical */
+.ant-menu-root.ant-menu-inline {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+/* Ajoutez ces règles dans la section Media Queries */
+@media (max-width: 768px) {
+  /* Conserver l'alignement horizontal du header */
+  .ant-layout-header {
+    flex-direction: row !important;
+    height: 64px !important;
+    padding: 0 16px !important;
+  }
+
+  /* Ajuster l'espacement des boutons */
+  .ant-layout-header .ant-space {
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  /* Masquer le texte "Déconnexion" en mobile */
+  .desktop-only {
+    display: none;
+  }
+
+  /* Taille des boutons */
+  .header-button {
+    width: 40px !important;
+    min-width: 40px !important;
+  }
+
+  /* Position fixe pour le sider */
+  .ant-layout-sider {
+    position: fixed;
+    z-index: 1001;
+  }
+
+  /* Ajuster le padding du contenu principal */
+  .ant-layout-content {
+    margin-left: 0 !important;
+    margin-top: 64px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Réduire l'espacement */
+  .ant-layout-header {
+    padding: 0 8px !important;
+  }
+  
+  .ant-layout-header .ant-space {
+    gap: 4px !important;
+  }
+}
+
+/* Conserver l'alignement à droite */
+.ant-layout-header .ant-space {
+  margin-left: auto;
 }

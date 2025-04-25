@@ -177,72 +177,193 @@
   justify-content: center;
 }
 
-@media (max-width: 768px) {
-  .ant-pagination-item {
-    min-width: 28px;
-    height: 28px;
+/* Modification des Media Queries Existantes */
+@media (max-width: 1200px) {
+  .task-columns {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
   
-  .ant-pagination-options {
-    margin-left: 8px;
+  .ant-collapse {
+    width: 90%;
+    max-width: 600px;
   }
 }
-@media (max-width: 576px) {
-  .status-select {
-    width: 70%;
-    margin-top: 10px;
-  }
-}
-/* Pour les très petits écrans */
-@media (max-width: 480px) {
-  .task-card {
-    padding: 12px;
-    margin: 8px 0;
+
+@media (max-width: 992px) {
+  .task-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    max-width: 90%;
   }
 
   .card-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .task-columns {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .task-card {
+    width: 100%;
+    margin: 8px 0;
+    min-width: auto;
+  }
+
+  .ant-collapse {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 12px;
+  }
+
+  .card-actions {
+    flex-direction: row;
     gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .ant-pagination-item {
+    min-width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .task-grid {
+    grid-template-columns: 1fr;
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .status-select {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .info-section {
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+
+  .ant-pagination {
+    padding: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .technicien-dashboard .ant-layout-content {
+    padding: 0 8px;
+  }
+
+  .task-card {
+    padding: 12px;
+    margin: 6px 0;
+  }
+
+  .ant-collapse {
+    max-width: 100%;
+  }
+
+  .card-header h3 {
+    font-size: 15px;
   }
 
   .info-section > span {
     font-size: 12px;
   }
-  .task-grid {
-    grid-template-columns: 1fr;
-    padding: 8px;
-  }
-  .ant-collapse {
-    width: 250px;
+
+  .ant-pagination-item {
+    min-width: 24px;
+    height: 24px;
   }
 }
-/* Adaptation mobile */
+
+@media (max-width: 360px) {
+  .card-actions button {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .task-date-warning {
+    font-size: 11px;
+  }
+}
+/* Ajouter ces styles pour l'en-tête */
+.technician-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.technician-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.technician-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.technician-status {
+  font-size: 16px;
+  color: #4dbd78;
+  font-weight: 500;
+}
+
+/* Media Queries pour l'en-tête */
 @media (max-width: 768px) {
-  .task-card {
-    width: 60%;
-    margin: 6px 0;
-  }
-
-  .card-actions {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .info-section {
-    flex-wrap: wrap;
-  }
-
-  .attachments-section {
+  .technician-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
   }
-  .task-columns {
-    grid-template-columns: 1fr;
+  
+  .technician-name {
+    font-size: 20px;
+  }
+  
+  .technician-status {
+    font-size: 14px;
   }
 }
-@media (max-width: 1200px) {
-  .task-columns {
-    grid-template-columns: repeat(2, 1fr);
+
+@media (max-width: 480px) {
+  .technician-header {
+    padding: 12px;
+    text-align: center;
+    align-items: center;
+  }
+  
+  .technician-name {
+    font-size: 18px;
+  }
+  
+  .technician-status {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .technician-name {
+    font-size: 16px;
+  }
+  
+  .technician-status {
+    font-size: 12px;
   }
 }

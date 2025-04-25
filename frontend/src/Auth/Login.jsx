@@ -291,16 +291,76 @@ const Login = () => {
     
               
             }
-             @media (max-width: 480px) {
-            .nav-links {
-              flex-wrap: wrap;
+      /* Media Queries unifiées */
+            @media (max-width: 768px) {
+              .navbar {
+                padding: 0 15px !important;
+                height: 70px;
+              }
+
+              .logo-image {
+                width: 120px !important;
+                height: auto !important;
+                margin-bottom: -30px !important;
+              }
+
+              .nav-links {
+                gap: 8px;
+              }
+
+              .nav-links a {
+                padding: 8px 12px;
+                font-size: 14px;
+              }
+
+              .form-container {
+                width: 95% !important;
+                margin-top: 20px !important;
+              }
             }
-            
-            .nav-links a {
-              font-size: 13px;
-              padding: 6px 3px;
+              @media (max-width: 480px) {
+              .navbar {
+                padding: 0 10px !important;
+                height: 60px;
+              }
+
+              .logo-image {
+                width: 100px !important;
+                margin-bottom: -20px !important;
+              }
+
+              .nav-links {
+                gap: 5px;
+              }
+
+              .nav-links a {
+                padding: 6px 10px;
+                font-size: 12px;
+              }
+
+              .title {
+                font-size: 1.5rem !important;
+              }
+
+              .slogan {
+                font-size: 0.9rem !important;
+              }
             }
-          }
+              @media (max-width: 360px) {
+              .nav-links a {
+                padding: 4px 8px;
+                font-size: 11px;
+              }
+
+              .logo-image {
+                width: 80px !important;
+              }
+
+              .navbar {
+                height: 50px;
+              }
+            }
+  
           `}
         </style>
       </Card>

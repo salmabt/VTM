@@ -46,7 +46,7 @@ const About = () => {
       <nav className="navbar">
         <div className="logo">
           <Link to="/">
-            <img src={logo} alt="Digital Market Logo" className="logo-image" />
+            <img src={logo} alt="Digital Market Logo" className="logoo-image" />
           </Link>
         </div>
         <div className="nav-links">

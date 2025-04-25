@@ -1,648 +1,647 @@
 /* GestionnaireInterface.css */
 .gestionnaire-container {
-    min-height: 100vh;
-    background: #f0f2f5;
-  }
-  /* Layout général */
-.ant-layout {
   min-height: 100vh;
+  background: #f0f2f5;
 }
-  
-  /* Task creation grid */
-  .task-creation-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-  }
-  
-  
-  /* Vehicule cards */
-  .vehicule-card {
-    transition: transform 0.2s;
-  }
-  
-  .vehicule-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  /* Timeline responsive */
-  .ant-timeline-item-content {
-    padding: 0 0 20px 20px;
-  }
-  
- 
-  /* Client interaction table */
-  .interaction-table {
-    min-width: 800px;
-  }
-  
-  
-  /* Notification bell */
-  .notification-badge .ant-scroll-number {
-    box-shadow: 0 0 0 1px #fff;
-  }
-  
-  /* Calendar event colors */
-  .rbc-event {
-    opacity: 0.9;
-    padding: 2px 5px;
-  }
-  
-  .rbc-event-content {
-    font-size: 0.9em;
-  }
+/* Layout général */
+.ant-layout {
+min-height: 100vh;
+}
 
-  /* Styles spécifiques pour le calendrier */
+/* Task creation grid */
+.task-creation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+
+/* Vehicule cards */
+.vehicule-card {
+  transition: transform 0.2s;
+}
+
+.vehicule-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Timeline responsive */
+.ant-timeline-item-content {
+  padding: 0 0 20px 20px;
+}
+
+
+/* Client interaction table */
+.interaction-table {
+  min-width: 800px;
+}
+
+
+/* Notification bell */
+.notification-badge .ant-scroll-number {
+  box-shadow: 0 0 0 1px #fff;
+}
+
+/* Calendar event colors */
+.rbc-event {
+  opacity: 0.9;
+  padding: 2px 5px;
+}
+
+.rbc-event-content {
+  font-size: 0.9em;
+}
+
+/* Styles spécifiques pour le calendrier */
 .rbc-calendar {
-  min-height: 500px;
-  height: auto;
-  overflow-x: auto;
+min-height: 500px;
+height: auto;
+overflow-x: auto;
 }
 .rbc-header {
-  padding: 8px 4px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+padding: 8px 4px;
+text-overflow: ellipsis;
+overflow: hidden;
+white-space: nowrap;
 }
 /* Styles pour le formulaire de création de tâche */
 .task-form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+gap: 16px;
 }
 /* Styles pour les cartes responsives */
 .ant-card {
-  margin-bottom: 16px;
+margin-bottom: 16px;
 }
 /* Styles pour le tableau des demandes clients */
 .client-requests-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 16px;
+width: 100%;
+border-collapse: collapse;
+margin-top: 16px;
 }
 
 .client-requests-table th,
 .client-requests-table td {
-  padding: 12px;
-  border: 1px solid #f0f0f0;
-  text-align: left;
+padding: 12px;
+border: 1px solid #f0f0f0;
+text-align: left;
 }
 
 .client-requests-table th {
-  background-color: #fafafa;
-  font-weight: 500;
+background-color: #fafafa;
+font-weight: 500;
 }
 
 .client-request-row {
-  transition: background-color 0.3s;
+transition: background-color 0.3s;
 }
 
 .client-request-row:hover {
-  background-color: #fafafa;
+background-color: #fafafa;
 }
 
 .client-contact {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+display: flex;
+flex-direction: column;
+gap: 4px;
 }
 .request-status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+padding: 4px 8px;
+border-radius: 4px;
+font-size: 12px;
 }
 
 .request-status.treated {
-  background: #f6ffed;
-  color: #52c41a;
+background: #f6ffed;
+color: #52c41a;
 }
 
 .request-status.untreated {
-  background: #fff1f0;
-  color: #f5222d;
+background: #fff1f0;
+color: #f5222d;
 }
 /* Gestion des véhicules - Version responsive */
 .tous-padding {
-  padding: 16px;
+padding: 16px;
 }
 
 .search-container {
-  margin-bottom: 8px;
-  padding: 8px 0;
-  max-width: 400px;
+margin-bottom: 8px;
+padding: 8px 0;
+max-width: 400px;
 }
 
 .add-vehicule-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+gap: 12px;
+margin-bottom: 20px;
 }
 
 .vehicule-table-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+gap: 16px;
 }
 
 .vehicule-card {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  overflow: hidden;
+display: flex;
+flex-direction: column;
+border: 1px solid #f0f0f0;
+border-radius: 8px;
+overflow: hidden;
 }
 
 .vehicule-image-container {
-  width: 100%;
-  height: 160px;
-  overflow: hidden;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+width: 100%;
+height: 160px;
+overflow: hidden;
+background: #f5f5f5;
+display: flex;
+align-items: center;
+justify-content: center;
 }
 
 .vehicule-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+width: 100%;
+height: 100%;
+object-fit: cover;
 }
 /* Version desktop - Taille normale */
 .vehicule-model-label {
-  font-size: 14px;
-  color: #000 !important; /* Noir pur */
-  font-weight: 500; /* Pour un peu plus de gras */
+font-size: 14px;
+color: #000 !important; /* Noir pur */
+font-weight: 500; /* Pour un peu plus de gras */
 }
 .no-image-placeholder {
-  padding: 16px;
-  text-align: center;
+padding: 16px;
+text-align: center;
 }
 
 .vehicule-details {
-  padding: 16px;
+padding: 16px;
 }
 
 .detail-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
+display: flex;
+justify-content: space-between;
+margin-bottom: 8px;
 }
 
 .vehicule-actions {
-  display: flex;
-  gap: 8px;
-  padding: 0 16px 16px;
+display: flex;
+gap: 8px;
+padding: 0 16px 16px;
 }
 
 .pagination-container {
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
+margin-top: 24px;
+display: flex;
+justify-content: center;
 }
 /* Styles pour le conteneur des tâches */
 .tasks-responsive-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+gap: 16px;
+margin-top: 16px;
 }
 
 /* Styles pour les cartes de tâches */
 .task-card {
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  transition: box-shadow 0.3s;
+border: 1px solid #f0f0f0;
+border-radius: 8px;
+transition: box-shadow 0.3s;
 }
 
 .task-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .task-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 12px;
+padding-bottom: 8px;
+border-bottom: 1px solid #f0f0f0;
 }
 
 .task-card-section {
-  margin-bottom: 8px;
-  display: flex;
-  flex-wrap: wrap;
+margin-bottom: 8px;
+display: flex;
+flex-wrap: wrap;
 }
 
 .task-card-section strong {
-  margin-right: 8px;
-  min-width: 80px;
+margin-right: 8px;
+min-width: 80px;
 }
 
 .task-card-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+display: flex;
+gap: 8px;
+margin-top: 12px;
+padding-top: 12px;
+border-top: 1px solid #f0f0f0;
 }
 
 .attachments-container {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+display: flex;
+flex-direction: column;
+gap: 4px;
 }
 
 .attachment-link {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #1890ff;
+display: flex;
+align-items: center;
+gap: 4px;
+color: #1890ff;
 }
 /* Styles pour le tableau des tâches */
 .tasks-table {
-  width: 100%;
-  border-collapse: collapse;
+width: 100%;
+border-collapse: collapse;
 }
 
 .tasks-table th,
 .tasks-table td {
-  padding: 12px;
-  border: 1px solid #f0f0f0;
-  text-align: left;
+padding: 12px;
+border: 1px solid #f0f0f0;
+text-align: left;
 }
 
 .tasks-table th {
-  background-color: #fafafa;
-  font-weight: 500;
+background-color: #fafafa;
+font-weight: 500;
 }
 
 .task-row:hover {
-  background-color: #fafafa;
+background-color: #fafafa;
 }
 .logout-button {
-  margin-left: auto; /* Pousse le bouton à droite */
-  transition: all 0.3s;
+margin-left: auto; /* Pousse le bouton à droite */
+transition: all 0.3s;
 }
 .ant-btn-primary {
-  color: white !important;
+color: white !important;
 }
 /* Style pour le bouton "Déjà traité" */
 .disabled-request-button {
-  padding: 0 8px !important;
-  height: 28px !important;
-  font-size: 13px !important;
-  line-height: 22px !important;
-  max-width: 140px;
-  
+padding: 0 8px !important;
+height: 28px !important;
+font-size: 13px !important;
+line-height: 22px !important;
+max-width: 140px;
+
 }
 
 /* Texte du numéro de tâche */
 .task-reference {
-  font-size: 11px;
-  display: block;
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
+font-size: 11px;
+display: block;
+margin-top: 4px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+max-width: 100px;
 }
 
 
 
 
-  @media (max-width: 768px) {
-    .task-creation-grid {
-      grid-template-columns: 1fr;
-    }
-    .interaction-table {
-      font-size: 14px;
-    }
-    .interaction-table td {
-      padding: 8px !important;
-    }
-    .ant-timeline-item-tail {
-      left: 4px !important;
-    }
-    
-    .ant-timeline-item-content {
-      margin-left: 18px;
-    }
-    .ant-layout-sider {
-      width: 80px !important;
-      min-width: 80px !important;
-      max-width: 80px !important;
-    }
-    
-    .ant-layout-sider-collapsed {
-      width: 0 !important;
-      min-width: 0 !important;
-      max-width: 0 !important;
-    }
-    
-    .ant-menu-item {
-      padding: 0 16px !important;
-      text-align: center;
-    }
-    
-      .ant-menu-item span {
-        display: none;
-      }
-      
-      .ant-menu-item .anticon {
-        font-size: 20px;
-        margin-right: 0;
-      }
-      .rbc-calendar {
-        min-height: 400px;
-        display: flex;
-      flex-direction: column;
-      }
-    
-    .rbc-toolbar {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  
-    .rbc-toolbar-label {
-      margin: 8px 0;
-      font-size: 14px;
-    }
-    
-    .rbc-btn-group {
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-    .rbc-btn-group button {
-    font-size: 12px;
-    padding: 4px 8px;
+@media (max-width: 768px) {
+  .task-creation-grid {
+    grid-template-columns: 1fr;
+  }
+  .interaction-table {
+    font-size: 14px;
+  }
+  .interaction-table td {
+    padding: 8px !important;
+  }
+  .ant-timeline-item-tail {
+    left: 4px !important;
   }
   
-  .rbc-header {
-    font-size: 12px;
-    padding: 4px 2px;
+  .ant-timeline-item-content {
+    margin-left: 18px;
+  }
+  .ant-layout-sider {
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
   }
   
-  .rbc-date-cell {
-    font-size: 12px;
-    padding: 2px;
+  .ant-layout-sider-collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
   }
-    table {
-      font-size: 14px;
-    }
-    
-    th, td {
-      padding: 8px !important;
-    }
-    .client-requests-container {
-      display: none;
-      flex-direction: column;
-      gap: 16px;
-    }
-    
-    .client-requests-table {
-      display: block;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-    
-    .client-requests-table thead {
+  
+  .ant-menu-item {
+    padding: 0 16px !important;
+    text-align: center;
+  }
+  
+    .ant-menu-item span {
       display: none;
     }
     
-    .client-requests-table tbody {
-      display: block;
+    .ant-menu-item .anticon {
+      font-size: 20px;
+      margin-right: 0;
     }
-    
-    .client-requests-table tr {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      border-bottom: 1px solid #f0f0f0;
-      padding: 12px 0;
+    .rbc-calendar {
+      min-height: 400px;
+      display: flex;
+    flex-direction: column;
     }
-    
-    .client-requests-table td {
-      display: block;
-      padding: 8px;
-      border: none;
-      white-space: normal;
-    }
-    
-    .client-requests-table td:before {
-      content: attr(data-label);
-      font-weight: 500;
-      display: block;
-      margin-bottom: 4px;
-      color: #666;
-    }
-    
-    .client-contact {
-      grid-column: span 2;
-    }
-    .client-requests-table tr {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      margin-bottom: 12px;
-      padding: 12px;
-    }
-    .vehicule-list {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    }
-    
-    .search-add-container {
-      flex-direction: column;
-    }
-    
-    .add-button {
-      width: 100%;
-    }
-    .tasks-responsive-container {
-      grid-template-columns: 1fr;
-    }
-    
-    .task-card {
-      padding: 12px;
-    }
-    
-    .task-card-section {
-      flex-direction: column;
-    }
-    
-    .task-card-section strong {
-      margin-bottom: 4px;
-    }
+  
+  .rbc-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rbc-toolbar-label {
+    margin: 8px 0;
+    font-size: 14px;
+  }
+  
+  .rbc-btn-group {
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .rbc-btn-group button {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.rbc-header {
+  font-size: 12px;
+  padding: 4px 2px;
+}
+
+.rbc-date-cell {
+  font-size: 12px;
+  padding: 2px;
+}
+  table {
+    font-size: 14px;
+  }
+  
+  th, td {
+    padding: 8px !important;
+  }
+  .client-requests-container {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .client-requests-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .client-requests-table thead {
+    display: none;
+  }
+  
+  .client-requests-table tbody {
+    display: block;
+  }
+  
+  .client-requests-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 12px 0;
+  }
+  
+  .client-requests-table td {
+    display: block;
+    padding: 8px;
+    border: none;
+    white-space: normal;
+  }
+  
+  .client-requests-table td:before {
+    content: attr(data-label);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
+    color: #666;
+  }
+  
+  .client-contact {
+    grid-column: span 2;
+  }
+  .client-requests-table tr {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+  .vehicule-list {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  
+  .search-add-container {
+    flex-direction: column;
+  }
+  
+  .add-button {
+    width: 100%;
+  }
+  .tasks-responsive-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-card {
+    padding: 12px;
+  }
+  
+  .task-card-section {
+    flex-direction: column;
+  }
+  
+  .task-card-section strong {
+    margin-bottom: 4px;
+  }
 }
 
 
 @media (max-width: 576px) {
-  .ant-card-body {
-    padding: 12px;
-  }
-  .ant-modal {
-    width: 90% !important;
-    max-width: none;
-  }
-  
-  .ant-modal-body {
-    padding: 12px;
-    max-height: 70vh;
-    overflow-y: auto;
-  }
-  
-  .ant-popover-inner {
-    max-width: 280px;
-  }
-  .add-vehicule-form {
-    grid-template-columns: 1fr;
-  }
-  
-  .vehicule-table-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .vehicule-image-container {
-    height: 120px;
-  }
-  
-  .vehicule-actions {
-    flex-direction: column;
-  }
-  
-  .vehicule-actions button {
-    width: 100%;
-  }
-  .vehicule-model-label {
-    font-size: 12px;
-    white-space: nowrap;
-  }
-  
-  .vehicule-model-value {
-    font-size: 13px;
-  }
-  .client-requests-table tr {
-    grid-template-columns: 1fr;
-  }
-  
-  .client-contact {
-    grid-column: span 1;
-  }
-  
-  .tasks-table {
-    display: block;
-    width: 100%;
-  }
-  
-  .tasks-table thead {
-    display: none;
-  }
-  
-  .tasks-table tbody {
-    display: block;
-  }
-  
-  .tasks-table tr {
-    display: block;
-    margin-bottom: 16px;
-    border: 1px solid #f0f0f0;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
-  .tasks-table td {
-    display: flex;
-    padding: 8px 12px;
-    border: none;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  .tasks-table td:before {
-    content: attr(data-label);
-    font-weight: 500;
-    min-width: 100px;
-    margin-right: 12px;
-    color: #666;
-  }
-  
-  .tasks-table td:last-child {
-    border-bottom: none;
-    justify-content: center;
-  }
-  
-  /* Adaptation des boutons */
-  .tasks-table .ant-btn {
-    margin: 4px;
-    width: calc(50% - 8px);
-  }
+.ant-card-body {
+  padding: 12px;
+}
+.ant-modal {
+  width: 90% !important;
+  max-width: none;
+}
+
+.ant-modal-body {
+  padding: 12px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.ant-popover-inner {
+  max-width: 280px;
+}
+.add-vehicule-form {
+  grid-template-columns: 1fr;
+}
+
+.vehicule-table-container {
+  grid-template-columns: 1fr;
+}
+
+.vehicule-image-container {
+  height: 120px;
+}
+
+.vehicule-actions {
+  flex-direction: column;
+}
+
+.vehicule-actions button {
+  width: 100%;
+}
+.vehicule-model-label {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.vehicule-model-value {
+  font-size: 13px;
+}
+.client-requests-table tr {
+  grid-template-columns: 1fr;
+}
+
+.client-contact {
+  grid-column: span 1;
+}
+
+.tasks-table {
+  display: block;
+  width: 100%;
+}
+
+.tasks-table thead {
+  display: none;
+}
+
+.tasks-table tbody {
+  display: block;
+}
+
+.tasks-table tr {
+  display: block;
+  margin-bottom: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tasks-table td {
+  display: flex;
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tasks-table td:before {
+  content: attr(data-label);
+  font-weight: 500;
+  min-width: 100px;
+  margin-right: 12px;
+  color: #666;
+}
+
+.tasks-table td:last-child {
+  border-bottom: none;
+  justify-content: center;
+}
+
+/* Adaptation des boutons */
+.tasks-table .ant-btn {
+  margin: 4px;
+  width: calc(50% - 8px);
+}
 }
 
 @media (max-width: 480px) {
-  .client-requests-table tr {
-    grid-template-columns: 1fr;
-  }
-  
-  .client-contact {
-    grid-column: span 1;
-  }
-  .ant-layout-header {
-    padding: 0 8px !important;
-  }
-  
-  /* Adapter les boutons */
-  .ant-btn {
-    padding: 0 8px;
-    font-size: 12px;
-  }
-  
-  /* Simplifier les modales */
-  .ant-modal {
-    width: 95% !important;
-    max-width: 95% !important;
-    top: 10px;
-  }
-  
-  .ant-modal-body {
-    padding: 8px;
-    max-height: calc(100vh - 100px);
-  }
-  .vehicule-list {
-    grid-template-columns: 1fr;
-  }
-  
-  .vehicule-body {
-    flex-direction: column;
-  }
-  
-  .vehicule-image-container {
-    width: 100%;
-    height: 120px;
-    margin-bottom: 12px;
-  }
-  .task-card-actions {
-    flex-direction: column;
-  }
-  
-  .task-card-actions button {
-    width: 100%;
-  }
-   .tasks-table td {
-    flex-direction: column;
-  }
-  
-  .tasks-table td:before {
-    margin-bottom: 4px;
-  }len
-  
-  .tasks-table td:last-child {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  
-  .tasks-table .ant-btn {
-    width: 100%;
-    margin: 4px 0;
-  }
+.client-requests-table tr {
+  grid-template-columns: 1fr;
 }
 
+.client-contact {
+  grid-column: span 1;
+}
+.ant-layout-header {
+  padding: 0 8px !important;
+}
+
+/* Adapter les boutons */
+.ant-btn {
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+/* Simplifier les modales */
+.ant-modal {
+  width: 95% !important;
+  max-width: 95% !important;
+  top: 10px;
+}
+
+.ant-modal-body {
+  padding: 8px;
+  max-height: calc(100vh - 100px);
+}
+.vehicule-list {
+  grid-template-columns: 1fr;
+}
+
+.vehicule-body {
+  flex-direction: column;
+}
+
+.vehicule-image-container {
+  width: 100%;
+  height: 120px;
+  margin-bottom: 12px;
+}
+.task-card-actions {
+  flex-direction: column;
+}
+
+.task-card-actions button {
+  width: 100%;
+}
+ .tasks-table td {
+  flex-direction: column;
+}
+
+.tasks-table td:before {
+  margin-bottom: 4px;
+}len
+
+.tasks-table td:last-child {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.tasks-table .ant-btn {
+  width: 100%;
+  margin: 4px 0;
+}
+}
 
 
