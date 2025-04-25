@@ -152,10 +152,13 @@ const Login = () => {
   padding: 5px 20px !important;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  height: 90px;
+  height: 80px;
 }
-             .logo-image {
+              .logo-image {
             height: 250px;
+            width: 250px;
+            object-fit: contain;
+            margin-bottom: -50px; 
           }
 
         .nav-links {

@@ -10,23 +10,10 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
-  
-  @media (max-width: 1200px) {
-    .task-columns {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .task-columns {
-      grid-template-columns: 1fr;
-    }
-  }
-  
   /* Task card styling */
   .task-card {
     position: relative;
-    min-width: 280px; /* Largeur minimale réduite */
+    min-width: 200px; /* Largeur minimale réduite */
     margin: 8px;
     break-inside: avoid; /* Empêche la coupure entre les cartes */
   }
@@ -48,6 +35,7 @@
     align-items: center;
     padding: 0 24px !important;
   }
+  
   
   @media (max-width: 576px) {
     .ant-layout-header {
@@ -83,12 +71,7 @@
     min-width: 120px;
   }
   
-  @media (max-width: 576px) {
-    .status-select {
-      width: 100%;
-      margin-top: 10px;
-    }
-  }
+ 
 /* technicien-dashboard.css */
 .task-grid {
   display: grid;
@@ -98,16 +81,6 @@
   justify-content: center; /* Ajouté pour le centrage */
   max-width: 1200px; /* Limite la largeur maximale */
   margin: 0 auto; /* Centre la grille */
-}
-@media (max-width: 480px) {
-  .task-grid {
-    grid-template-columns: 1fr;
-    padding: 8px;
-  }
-  
-  .task-card {
-    margin: 8px 0;
-  }
 }
 /* Ajustement du conteneur principal */
 .technicien-dashboard .ant-layout-content {
@@ -121,43 +94,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-/* Adaptation mobile */
-@media (max-width: 768px) {
-  .task-card {
-    width: 100%;
-    margin: 8px 0;
-  }
-
-  .card-actions {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .info-section {
-    flex-wrap: wrap;
-  }
-
-  .attachments-section {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-/* Pour les très petits écrans */
-@media (max-width: 480px) {
-  .task-card {
-    padding: 12px;
-  }
-
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .info-section > span {
-    font-size: 12px;
-  }
 }
 
 .card-actions {
@@ -249,5 +185,61 @@
   
   .ant-pagination-options {
     margin-left: 8px;
+  }
+}
+@media (max-width: 576px) {
+  .status-select {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+/* Pour les très petits écrans */
+@media (max-width: 480px) {
+  .task-card {
+    padding: 12px;
+    margin: 8px 0;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .info-section > span {
+    font-size: 12px;
+  }
+  .task-grid {
+    grid-template-columns: 1fr;
+    padding: 8px;
+  }
+}
+/* Adaptation mobile */
+@media (max-width: 768px) {
+  .task-card {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .card-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-section {
+    flex-wrap: wrap;
+  }
+
+  .attachments-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .task-columns {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 1200px) {
+  .task-columns {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

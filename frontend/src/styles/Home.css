@@ -25,26 +25,11 @@
   height: 90px;
 }
 
-.logoo {
-  font-size: 0.1cap;
-  font-weight: bold;
-  color: #2c3e50;
-  flex: 0 4 auto; /* Ne pas grandir, peut rétrécir */
-  min-width: 180px; /* Largeur minimale */
-  display: flex;
-  align-items: center;
-  height: 100%;
-  justify-content: flex-start;
-}
 .logoo-image {
-  height: auto;
-  max-height: 800px; /* Taille maximale basée sur la hauteur de la navbar */
-  width: auto;
-  max-width: 250px;
+  height: 250px;
+  width: 250px;
   object-fit: contain;
-  padding: 10px 0;
-  display: flex;
-  justify-content: flex-start;
+  margin-bottom: -50px; 
 }
 
 .nav-links {
@@ -751,13 +736,18 @@ flex-direction: row-reverse;
   align-items: center;
 }
 
-.logo {
-  flex: 1; /* Prend tout l'espace disponible */
-  min-width: 0; /* Permet au texte de truncater si nécessaire */
+.logoo {
+  height: auto;
+  display: flex;
+  align-items: flex-end; /* Alignement en bas */
+  padding-bottom: 5px; /* Ajustement fin */
 }
 
-.logo-image {
-  height: 35px important;
+.logoo-image {
+  height: 50px; /* Taille réduite */
+  width: auto;
+  object-fit: contain;
+  margin-bottom: -5px; /* Ajustement précis */
 }
 
 .nav-links {

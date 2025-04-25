@@ -333,13 +333,17 @@ const Register = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 20px !important;
+  padding: 0 30px 10px !important;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  height: 90px;
+  height: 80px;
 }
+  
              .logo-image {
             height: 250px;
+            width: 250px;
+            object-fit: contain;
+            margin-bottom: -50px; 
           }
 
         .nav-links {
