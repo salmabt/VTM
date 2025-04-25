@@ -26,8 +26,9 @@ const Login = () => {
   return (
     <div className="page-container">
       {/* Navbar */}
-      <nav className="navbar">
-      <div className="navbar-container">
+     {/* Navbar */}
+{/* Navbar */}
+     <nav className="navbar">
         <div className="logo">
           <Link to="/">
             <img src={logo} alt="Digital Market Logo" className="logo-image" />
@@ -36,7 +37,7 @@ const Login = () => {
         <div className="nav-links">
           <Link to="/about">À propos</Link>
           <Link to="/login">Connexion</Link>
-        </div>
+          
         </div>
       </nav>
       
@@ -128,75 +129,55 @@ const Login = () => {
         <style>
           {`
             /* Modified page-container */
-            .page-container {
-              background-color: #d4e1dc;
-              min-height: 100vh;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              padding: 70px 20px 20px;
-              margin: 0;
-            }
-/* Styles de la navbar améliorée */
-          .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 10px 0;
-          }
-          
-          .navbar-container {
+             .page-container {
+            background-color:#d4e1dc;
+            min-height: 100vh;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            width: 100%;
-          }
-          .logo {
-            flex: 1; /* Prend tout l'espace disponible */
-            min-width: 0; /* Permet au texte de truncater si nécessaire */
-          }
-          .logo-image {
-            height: 400px;
-             width: auto;
-            max-width: 300px; /* Ajusté pour mieux s'adapter */
-          }
-          
-          .nav-links {
-            display: flex;
-            align-items: center;
-          }
-          
-          .nav-links a {
-            text-decoration: none;
-            color: #2c3e50;
-            font-weight: 500;
-            padding: 8px 12px;
+            padding: 70px 0 0;
             margin: 0;
-            white-space: nowrap;
-            position: relative;
           }
-          
-          /* Séparateur minimal entre les liens */
-          .nav-links a + a::before {
-            content: "";
-            position: absolute;
-            left: -1px;
-            top: 25%;
-            height: 50%;
-            width: 1px;
-            background-color: #eee;
+/* Styles de la navbar améliorée */
+       
+        .navbar {
+  position: fixed; /* Garde la navbar fixe en haut */
+  top: 0;
+  left: 0;
+  width: 98%; /* Occupe toute la largeur */
+  z-index: 1000; /* Assure qu'elle passe au-dessus du contenu */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 20px !important;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 90px;
+}
+             .logo-image {
+            height: 250px;
           }
-          
-          .nav-links a:hover {
-            color: #8db7e7;
-          }
+
+        .nav-links {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 500;
+  transition: color 0.3s;
+  padding: 10px 20px; 
+}
+
+
+.nav-links a:hover {
+  color: #3498db;
+}
+     
+       
 
             .form-container {
               background-color: white;
@@ -301,18 +282,10 @@ const Login = () => {
               }
 
               .navbar-container {
-        padding: 0 10px;
+        padding: 0 0px;
       }
       
-      .nav-links a {
-        padding: 8px 10px;
-        font-size: 14px;
-      }
-      
-      .nav-links a::before {
-        top: 20%;
-        height: 60%;
-      }
+    
               
             }
              @media (max-width: 480px) {

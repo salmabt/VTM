@@ -324,34 +324,42 @@ const Register = () => {
           }
 
           /* Added navbar styles */
-          .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 5%;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-          }
+        .navbar {
+  position: fixed; /* Garde la navbar fixe en haut */
+  top: 0;
+  left: 0;
+  width: 98%; /* Occupe toute la largeur */
+  z-index: 1000; /* Assure qu'elle passe au-dessus du contenu */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 20px !important;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 90px;
+}
              .logo-image {
-            height: 50px;
+            height: 250px;
           }
 
-          .nav-links a {
-            margin-left: 2rem;
-            text-decoration: none;
-            color: #2c3e50;
-            font-weight: 500;
-            transition: color 0.3s;
-          }
+        .nav-links {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
 
-          .nav-links a:hover {
-            color: #ff7b9c;
-          }
+.nav-links a {
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 500;
+  transition: color 0.3s;
+  padding: 10px 20px; 
+}
+
+
+.nav-links a:hover {
+  color: #3498db;
+}
 
             
             .form-container {
@@ -462,15 +470,7 @@ const Register = () => {
         .ant-typography {
           color: #7f8c8d;
         }
-        a {
-          color: #3498db !important;
-          font-weight: 500;
-        }
-
-        a:hover {
-          color: #2980b9 !important;
-          text-decoration: underline !important;
-        }
+    
        
 .alert {
   border-radius: 6px;
