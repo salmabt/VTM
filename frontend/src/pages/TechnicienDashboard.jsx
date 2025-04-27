@@ -14,6 +14,7 @@ import reportsApi from '../api/reports';
 import '../styles/technicien-dashboard.css';
 import '../styles/TechnicienInterface.css';
 import technicienAvatar from '../assets/technicien-avatar.jpg';
+import TechnicienMap from './TechnicienMap';
 
 const { Content, Sider, Header } = Layout;
 const { Title, Text } = Typography;
@@ -98,7 +99,10 @@ const statusColor = {
 
         <div className="info-section">
           <EnvironmentOutlined />
-          <Text>{task.location}</Text>
+          <Text>{typeof task.location === 'string' 
+      ? task.location 
+      : task.location?.address || 'Adresse non spécifiée'}
+      </Text>
         </div>
 
         {task.attachments?.length > 0 && (
@@ -655,6 +659,7 @@ const groupTasks = (tasks) => {
       Fermer
     </Button>
   ]}
+  
   width={Math.min(window.innerWidth - 40, 600)} // Adaptation responsive
 >
   {selectedTask && (
@@ -666,16 +671,40 @@ const groupTasks = (tasks) => {
       <Text>{selectedTask.client}</Text>
       <br />
       <Text strong>Ville: </Text>
-      <Text>{selectedTask.location}</Text>
+      <Text>{typeof selectedTask.location === 'string'
+          ? selectedTask.location
+          : selectedTask.location?.address || selectedTask.location?.formattedAddress}</Text>
       <br />
       <Text strong>Adresse compléte: </Text>
       <Text>{selectedTask.adresse}</Text>
       
       <br />
-      <Text strong>Description du tache: </Text>
+      <Text strong>Description du tâche: </Text>
       <Text>{selectedTask.description}</Text>
       
       <br />
+        {/* Ajout de la carte */}
+        <div style={{ height: '400px', marginTop: 20 }}>
+        <TechnicienMap 
+          technician={{
+            name: userData?.name || 'Technicien',
+            coordinates: selectedTask?.coordinates,
+            vehicle: vehicules.find(v => v._id === selectedTask.vehicule)
+          }}
+          client={{
+            name: selectedTask.client,
+            address: selectedTask.adresse,
+            location: typeof selectedTask.location === 'string' 
+              ? selectedTask.location 
+              : selectedTask.location?.address,
+            coordinates: selectedTask?.coordinates
+          }}
+          showRoute={true}
+          onGeocodingError={(error) => {
+            message.error(`Erreur de localisation: ${error.message}`);
+          }}
+        />
+      </div>
     </div>
   )}
 </Modal>
