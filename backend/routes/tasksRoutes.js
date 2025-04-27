@@ -15,7 +15,8 @@ const {
   getTasksCountByMonth,
   // Ajouter les nouvelles fonctions de notification
   getNotifications,
-  markNotificationRead
+  markNotificationRead,
+  geocodeAddress
 } = require('../controllers/taskscontroller');
 
 // Routes pour les notifications (doivent être placées en premier)
@@ -68,5 +69,9 @@ router.delete('/:id', deleteTask);
 router.patch('/:taskId/status', updateTaskStatus);
 router.get('/:id/attachments', getTaskAttachments);
 router.get('/:id/attachments/:filename', getAttachmentFile);
+
+router.get('/geocode', geocodeAddress);
+
+
 
 module.exports = router;

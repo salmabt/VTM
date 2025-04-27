@@ -5,8 +5,30 @@ const taskSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   client: { type: String, required: true },
-  location: { type: String, required: true },
-  adresse: { type: String, required: true }, 
+  location: {
+    type: {
+      address: String,
+      city: String,
+      coordinates: [Number],
+      geocodingSuccess: Boolean,
+      exactMatch: Boolean
+    },
+    required: true
+  },
+  coordinates: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number],
+      default: [0, 0]
+    }
+  },
+
+  adresse: {  type: mongoose.Schema.Types.Mixed, // Accepte à la fois String et Object
+    required: true }, 
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   technicien: { 
@@ -45,5 +67,8 @@ report: {
 },
 { timestamps: true } // <- Cette accolade était mal placée
 );
+
+// Ajoutez un index géospatial pour les requêtes de proximité
+taskSchema.index({ coordinates: '2dsphere' });
 
 module.exports = mongoose.model('Task', taskSchema);

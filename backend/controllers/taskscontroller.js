@@ -11,23 +11,21 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 
+const { geocodeWithFallback } = require('../services/geocodingService'); // Modifier l'import
+
 // Créer une nouvelle tâche
 exports.createTask = async (req, res) => {
   try {
-    console.log('Fichiers reçus:', req.files); // Debug
-    console.log('Corps de la requête:', req.body); // Debug
+    console.log('Fichiers reçus:', req.files);
+    console.log('Corps de la requête:', req.body);
 
-    // Vérifier les références (technicien et véhicule)
+    // Vérification des références
     const [technicien, vehicule] = await Promise.all([
       Technicien.findById(req.body.technicien),
       Voiture.findById(req.body.vehicule)
     ]);
 
     if (!technicien || !vehicule) {
-      console.error('Références manquantes:', { 
-        technicienExists: !!technicien, 
-        vehiculeExists: !!vehicule 
-      });
       return res.status(400).json({
         message: "Références invalides",
         details: {
@@ -37,7 +35,7 @@ exports.createTask = async (req, res) => {
       });
     }
 
-    // Gérer les pièces jointes
+    // Gestion des pièces jointes
     const attachments = req.files?.map(file => ({
       filename: file.filename,
       originalName: file.originalname,
@@ -45,10 +43,25 @@ exports.createTask = async (req, res) => {
       size: file.size
     })) || [];
 
-    // Créer la tâche
+    // Géocodage avec fallback
+    const fullAddress = `${req.body.adresse}, ${req.body.location}, Tunisie`;
+    const geocodingResult = await geocodeWithFallback(fullAddress);
+
     const taskData = {
       ...req.body,
-      attachments
+      attachments,
+      coordinates: {
+        type: 'Point',
+        coordinates: geocodingResult.coordinates
+      },
+      location: {
+        address: req.body.adresse,
+        city: req.body.location,
+        coordinates: geocodingResult.coordinates,
+        geocodingSuccess: geocodingResult.success,
+        exactMatch: geocodingResult.exactMatch || false
+      },
+      status:'planifié' 
     };
     // Créer la tâche
     const newTask = await Task.create(taskData);
@@ -101,6 +114,15 @@ if (global.clients) {
       error: error.message,
       ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
     });
+
+    // Gestion améliorée des erreurs
+    if (error.message.includes('Échec du géocodage')) {
+      return res.status(400).json({
+        message: "Impossible de localiser l'adresse",
+        suggestion: "Vérifiez l'adresse et réessayez",
+        originalError: error.message
+      });
+    }
   }
 };
 
@@ -574,9 +596,21 @@ exports.markNotificationRead = async (req, res) => {
 };
 
 
+// Dans taskController.js
+exports.geocodeAddress = async (req, res) => {
+  try {
+    const { address } = req.query;
+    if (!address) {
+      return res.status(400).json({ message: "Le paramètre 'address' est requis" });
+    }
 
+    const result = await geocode(address);
+    res.json(result);
 
-
-
-
-
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+      ...(error.response?.data && { details: error.response.data })
+    });
+  }
+};
