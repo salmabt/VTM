@@ -47,10 +47,21 @@ exports.createTask = async (req, res) => {
     const fullAddress = `${req.body.adresse}, ${req.body.location}, Tunisie`.replace(/\s+/g, ' ').trim();
     const geocodingResult = await geocodeWithFallback(fullAddress);
 
+// Validation des coordonnées
+if (geocodingResult.coordinates[0] === 0 && geocodingResult.coordinates[1] === 0) {
+  // Si on a [0,0], utiliser le fallback pour la ville
+  const cityFallback = CITY_FALLBACKS[normalizeCityName(req.body.location)] || CITY_FALLBACKS.default;
+  geocodingResult.coordinates = cityFallback;
+  geocodingResult.success = false;
+}
+
     const taskData = {
       ...req.body,
       attachments,
-      // ...
+      coordinates: {
+        type: "Point",
+        coordinates: geocodingResult.coordinates
+      },
       address: geocodingResult.success 
         ? geocodingResult.formattedAddress
         : `${req.body.adresse}, ${req.body.location}, Tunisie`,

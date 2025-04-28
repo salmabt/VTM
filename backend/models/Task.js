@@ -17,7 +17,16 @@ const taskSchema = new mongoose.Schema({
     },
     coordinates: {
       type: [Number],
-      default: [0, 0]
+      required: true,
+      validate: {
+        validator: function(v) {
+          return v.length === 2 && 
+                 v[0] !== 0 && v[1] !== 0 && // Rejette [0,0]
+                 v[0] >= -180 && v[0] <= 180 && // Longitude valide
+                 v[1] >= -90 && v[1] <= 90;    // Latitude valide
+        },
+        message: props => `${props.value} n'est pas une position géographique valide!`
+      }
     }
   },
 
