@@ -26,7 +26,7 @@ export const translations = {
       deepAnalysisDesc: "Générez des rapports personnalisés pour suivre vos performances.",
       availability: "Gestion de la disponibilité des techniciens",
       availabilityDesc: "Planifier les interventions et suivre leur charge de travail.",
-      mapsIntegration: "Intégration d'un Google Maps",
+      mapsIntegration: "Intégration d'un Open Street Map",
       mapsIntegrationDesc: "Cette Intégration permet de visualiser les lieux d'interventions.",
       
       // Solutions Section
@@ -124,7 +124,7 @@ export const translations = {
       deepAnalysisDesc: "Generate custom reports to track your performance.",
       availability: "Technician availability management",
       availabilityDesc: "Schedule interventions and track their workload.",
-      mapsIntegration: "Google Maps integration",
+      mapsIntegration: "Open Street Map integration",
       mapsIntegrationDesc: "This integration allows you to visualize intervention locations.",
       
       // Solutions Section
@@ -221,7 +221,7 @@ export const translations = {
       deepAnalysisDesc: "إنشاء تقارير مخصصة لمتابعة أدائك.",
       availability: "إدارة توافر الفنيين",
       availabilityDesc: "جدولة التدخلات ومتابعة عبء العمل لديهم.",
-      mapsIntegration: "تكامل خرائط جوجل",
+      mapsIntegration: "تكامل خريطة الشارع المفتوحة",
       mapsIntegrationDesc: "يسمح هذا التكامل بتصور مواقع التدخلات.",
       
       // Solutions Section
