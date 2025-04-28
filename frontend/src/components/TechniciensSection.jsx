@@ -194,8 +194,8 @@ const TaskListItem = ({ task, vehicules }) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <Tag 
         color={
-          task.status === 'planifié' ? 'blue' :
-          task.status === 'en cours' ? 'orange' : 'green'
+          task.status === 'planifié' ? '#80e2fd' :
+          task.status === 'en cours' ? '#b1e68c' : '#ef5b82'
         }
         style={{ marginLeft: 8 }}
       >

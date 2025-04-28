@@ -31,23 +31,16 @@ const { Option } = Select;
 const localizer = momentLocalizer(moment);
 moment.locale('fr');
 
+const STATUS_COLORS = {
+  'planifié': '#80e2fd', // Bleu Ant Design
+  'en cours': '#b1e68c', // Vert Ant Design
+  'terminé': '#ef5b82'   // Rouge Ant Design
+};
+
+
 // Déclaration de la fonction avant le JSX
 const eventStyleGetter = (event) => {
-  let backgroundColor = '#b3cde0'; // Planifié par défaut (bleu clair)
-
-  switch (event.status) {
-    case 'terminé':
-      backgroundColor = '#f8d7da'; // Rouge clair
-      break;
-    case 'en cours':
-      backgroundColor = '#d4edda'; // Vert clair
-      break;
-    case 'planifié':
-      backgroundColor = '#dbe9f4'; // Bleu clair
-      break;
-    default:
-      backgroundColor = '#e2e3e5'; // Gris clair
-  }
+  const backgroundColor = STATUS_COLORS[event.status] || '#e8e8e8';
 
   return {
     style: {
@@ -56,11 +49,41 @@ const eventStyleGetter = (event) => {
       borderRadius: '4px',
       border: 'none',
       padding: '4px 8px',
-    },
+      fontSize: '0.9em',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      transition: 'all 0.3s ease',
+      cursor: 'pointer',
+      ':hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
+      }
+    }
   };
 };
-
 const GestionnaireDashboard = () => {
+  const Legend = () => (
+    <div style={{ 
+      marginBottom: 16,
+      display: 'flex',
+      gap: 8,
+      flexWrap: 'wrap',
+      alignItems: 'center'
+    }}>
+      {Object.entries(STATUS_COLORS).map(([status, color]) => (
+        <div key={status} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{
+            width: 12,
+            height: 12,
+            borderRadius: '50%',
+            backgroundColor: color
+          }} />
+          <Text style={{ textTransform: 'capitalize', fontSize: 14 }}>
+            {status}
+          </Text>
+        </div>
+      ))}
+    </div>
+  );
   const { userData, logout } = useAuth();
   const [selectedMenu, setSelectedMenu] = useState('1');
   const [loading, setLoading] = useState(false);
@@ -831,12 +854,12 @@ if (selectedInteraction) {
     
     <Text strong>Statut : </Text>
     <Tag color={
-      selectedTask.status === 'planifié' ? 'blue' :
-      selectedTask.status === 'en cours' ? 'orange' : 'green'
-    }>
+      selectedTask.status === 'planifié' ? '#80e2fd' :
+      selectedTask.status === 'en cours' ? '#b1e68c' : '#ef5b82'
+    }> 
       {selectedTask.status}
       
-    </Tag>
+    </Tag><br/>
     <Text strong>Pièces jointes :</Text>
 {selectedTask.attachments?.map(attachment => (
   <div key={attachment.filename}>
@@ -916,7 +939,7 @@ if (selectedInteraction) {
             ) : (
               <>
                 {selectedMenu === '1' && (
-                  <Card title="Calendrier des interventions" bordered={false} className="tous-padding">
+                  <Card title="Calendrier des interventions" bordered={false} extra={<Legend />}  className="tous-padding">
                     <TechniciensSection 
                       techniciens={techniciens}
                       tasks={tasks}
