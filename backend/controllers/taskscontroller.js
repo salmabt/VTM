@@ -44,25 +44,26 @@ exports.createTask = async (req, res) => {
     })) || [];
 
     // Géocodage avec fallback
-    const fullAddress = `${req.body.adresse}, ${req.body.location}, Tunisie`;
+    const fullAddress = `${req.body.adresse}, ${req.body.location}, Tunisie`.replace(/\s+/g, ' ').trim();
     const geocodingResult = await geocodeWithFallback(fullAddress);
 
     const taskData = {
       ...req.body,
       attachments,
-      coordinates: {
-        type: 'Point',
-        coordinates: geocodingResult.coordinates
-      },
-      location: {
-        address: req.body.adresse,
+      // ...
+      address: geocodingResult.success 
+        ? geocodingResult.formattedAddress
+        : `${req.body.adresse}, ${req.body.location}, Tunisie`,
+      // Ajouter un champ séparé pour les détails si nécessaire
+      locationDetails: {
+        location: req.body.adresse,
         city: req.body.location,
         coordinates: geocodingResult.coordinates,
-        geocodingSuccess: geocodingResult.success,
-        exactMatch: geocodingResult.exactMatch || false
-      },
-      status:'planifié' 
+        geocodingSuccess: geocodingResult.success
+      }
     };
+
+
     // Créer la tâche
     const newTask = await Task.create(taskData);
     // Créer la notification
@@ -614,3 +615,7 @@ exports.geocodeAddress = async (req, res) => {
     });
   }
 };
+
+
+
+

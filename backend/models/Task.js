@@ -1,4 +1,4 @@
-// backend/models/Task.js
+///// backend/models/Task.js
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
@@ -6,13 +6,7 @@ const taskSchema = new mongoose.Schema({
   description: { type: String, required: true },
   client: { type: String, required: true },
   location: {
-    type: {
-      address: String,
-      city: String,
-      coordinates: [Number],
-      geocodingSuccess: Boolean,
-      exactMatch: Boolean
-    },
+    type: String, // Accepte à la fois String et Object
     required: true
   },
   coordinates: {
@@ -27,8 +21,7 @@ const taskSchema = new mongoose.Schema({
     }
   },
 
-  adresse: {  type: mongoose.Schema.Types.Mixed, // Accepte à la fois String et Object
-    required: true }, 
+  adresse: { type: String, required: true }, 
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   technicien: { 
