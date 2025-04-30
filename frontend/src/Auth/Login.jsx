@@ -130,7 +130,7 @@ const Login = () => {
           {`
             /* Modified page-container */
              .page-container {
-            background-color:#d4e1dc;
+            background-color: #e0e0e0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -162,10 +162,11 @@ const Login = () => {
           }
 
         .nav-links {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
+          display: flex;
+          gap: 5px;
+          align-items: center;
+          font-size: 20px;
+        }
 
 .nav-links a {
   text-decoration: none;
@@ -187,10 +188,14 @@ const Login = () => {
               width: 90%;
               max-width: 1200px;
               border-radius: 0;
-              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+              box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05) !important;
               overflow: hidden;
               padding: 0;
               margin: 20px 0;
+              min-height: 650px !important; /* Hauteur augmentée */
+              display: flex;
+              flex-direction: column;
+              justify-content: center; /* Centre le contenu verticalement */
             }
               
             .main-flex {
@@ -208,13 +213,13 @@ const Login = () => {
               position: relative;
               width: 100%;
               height: 100%;
-              overflow: auto;
             }
 
             .auth-image {
               width: 100%;
               height: auto;
-              max-height: none;
+              max-width: 100%;
+              max-height: 100%;
               object-fit: contain;
             }
 

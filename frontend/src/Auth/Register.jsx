@@ -77,7 +77,13 @@ const Register = () => {
           
         </div>
       </nav>
-    <Card className="form-container">
+    <Card className="form-container" style={{ 
+      width: '80%', // Réduction de la largeur
+      maxWidth: '1000px', // Largeur max réduite
+      minHeight: 'auto', // Suppression de la hauteur fixe
+      padding: '5px 0' // Espacement interne ajusté
+    }}
+    >
       <Flex gap="large" align="stretch" className="main-flex">
         {/* Formulaire */}
         <Flex vertical flex={1} className="form-section">
@@ -298,7 +304,8 @@ const Register = () => {
         bottom: 0,
         width: '100%',
         height: '100%',
-        objectFit: 'cover'
+        objectFit: 'contain', // Ajustement sans déformation
+        padding: '20px'
       }}
       className="register-image"
       alt="Inscription"
@@ -314,7 +321,7 @@ const Register = () => {
           /* Conteneur principal */
           /* Modified page-container */
           .page-container {
-            background-color:#d4e1dc;
+            background-color: #e0e0e0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -350,6 +357,7 @@ const Register = () => {
   display: flex;
   gap: 5px;
   align-items: center;
+  font-size: 20px;
 }
 
 .nav-links a {
@@ -375,7 +383,7 @@ const Register = () => {
               overflow: hidden;
               padding: 0 !important;
               margin: 0 !important;
-               max-height: 99vh;
+              max-height: 1000px !important; /* Hauteur réduite */
             }
             
             .main-flex {
@@ -385,13 +393,13 @@ const Register = () => {
             }
             
             .form-section {
-              padding: 10px;
+              padding: 20px !important; /* Espacement interne réduit */
+            overflow-y: auto;
              max-height: 87vh; 
-              overflow-y: auto;
               animation: fadeIn 0.5s ease-out;
             }
             .ant-form-item {
-              margin-bottom: 8px !important; /* Réduit l'espace entre les champs */
+              margin-bottom: 5px !important; /* Réduit l'espace entre les champs */
             }
                         
              .title {
@@ -438,6 +446,7 @@ const Register = () => {
               border-left: 1px solid #f0f0f0;
                padding: 0 !important;
                margin: 0 !important;
+               min-height: 400px !important; /* Taille mieux proportionnée */
             }
           .image-section {
              position: relative;
