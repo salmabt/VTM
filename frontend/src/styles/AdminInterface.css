@@ -16,6 +16,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto !important; /* Activer le défilement vertical */
+  overflow-x: hidden !important;
 }
 
 .ant-layout-sider > .ant-menu {
@@ -184,6 +185,23 @@
 }
 
 @media (max-width: 576px) {
+  
+    .ant-menu-item span {
+      font-size: 12px !important;
+    }
+  
+    .ant-menu-item-group-title {
+      font-size: 0.65em !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  
+    .ant-layout-content {
+      overflow-x: hidden !important;
+    }
+  
+  
   .ant-layout-header {
     padding: 0 12px !important;
     height: auto !important;
@@ -233,11 +251,15 @@
   }
 
   .admin-profile img {
-    width: 70px !important;
-    height: 70px !important;
+    width: 50px !important;
+    height: 50px !important;
   }
 
   .ant-menu-item-group-title {
+    font-size: 0.65em !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 0.7em;
     margin-top: 40px !important;
     padding-left: 0 !important;
@@ -288,7 +310,11 @@
   }
   
   .ant-menu-item-group-title {
-    margin-top: 20px !important;
+    font-size: 0.6em !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
   
   .logo {
@@ -307,7 +333,11 @@
   }
   
   .ant-menu-item-group-title {
-    padding-left: 24px !important;
+    font-size: 0.6em !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
   }
   
   .ant-menu-inline-collapsed .ant-menu-item {

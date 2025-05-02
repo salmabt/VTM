@@ -411,7 +411,7 @@ const groupTasks = (tasks) => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible theme="light" width={200}>
         <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-          <Title level={4} style={{ margin: 0 }}>Interface technicien</Title>
+          <Title level={4} style={{ margin: 0 }} className="sidebar-title">Interface technicien</Title>
         </div><div style={{ 
   padding: '10px 16px',
   textAlign: 'center',

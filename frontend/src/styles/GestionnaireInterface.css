@@ -332,13 +332,21 @@ max-width: 100px;
     width: 80px !important;
     min-width: 80px !important;
     max-width: 80px !important;
+    overflow-x: hidden; /* Ajoute ceci */
+    position: fixed;    /* Ajoute ceci */
+    height: 100vh;       /* Ajoute ceci */
+    left: 0;             /* Ajoute ceci */
+    top: 0;              /* Ajoute ceci */
+    z-index: 1000;       /* Ajoute ceci pour qu'elle reste au-dessus */
   }
   
   .ant-layout-sider-collapsed {
     width: 0 !important;
     min-width: 0 !important;
     max-width: 0 !important;
+    overflow-x: hidden; /* Ajoute ceci */
   }
+  
   
   .ant-menu-item {
     padding: 0 16px !important;
@@ -642,6 +650,19 @@ max-width: 100px;
   width: 100%;
   margin: 4px 0;
 }
+}
+@media (max-width: 768px) {
+  .gestionnaire-logo {
+    width: 90px !important;
+    height: 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .gestionnaire-logo {
+    width: 70px !important;
+    height: 70px !important;
+  }
 }
 
 

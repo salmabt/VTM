@@ -863,6 +863,6 @@ flex-direction: row-reverse;
 
   .feature-item,
   .value-item {
-    padding: 20px;
+    padding: 2px;
   }
 }

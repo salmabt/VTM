@@ -418,13 +418,17 @@ useEffect(() => {
       message.error(error.response?.data?.message || "Erreur lors de l'ajout");
     }
   };
-  const handleDeleteVehicule = async (id) => {
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+const [vehiculeToDelete, setVehiculeToDelete] = useState(null);
+const handleDeleteVehicule = async () => {
     try {
-      await vehiculesApi.deleteVehicule(id);
-      setVehicules(vehicules.filter(v => v._id !== id));
+      await vehiculesApi.deleteVehicule(vehiculeToDelete);
+      setVehicules(vehicules.filter(v => v._id !== vehiculeToDelete));
       message.success('Véhicule supprimé avec succès');
+      setIsDeleteModalVisible(false);
     } catch (error) {
       message.error(error.response?.data?.message || 'Erreur de suppression');
+      setIsDeleteModalVisible(false);
     }
   };
   const handleUpdateVehicule = async () => {
@@ -763,6 +767,7 @@ if (selectedInteraction) {
     <img 
       src="src/assets/gestionnaire-logo.jpg" 
       alt="Logo Gestionnaire" 
+      className="gestionnaire-logo"
       style={{ 
         width: '130px', 
         height: '130px', 
@@ -901,6 +906,21 @@ if (selectedInteraction) {
 </Modal>
 
 )}
+ <Modal
+  title="Confirmation de suppression"
+  visible={isDeleteModalVisible}
+  onCancel={() => setIsDeleteModalVisible(false)}
+  footer={[
+    <Button key="back" onClick={() => setIsDeleteModalVisible(false)}>
+      Non
+    </Button>,
+    <Button key="submit" type="primary" danger onClick={handleDeleteVehicule}>
+      Oui
+    </Button>,
+  ]}
+>
+  <p>Êtes-vous sûr de vouloir supprimer ce véhicule ?</p>
+</Modal>
         <Layout>
            <Header style={{ 
                 background: '#fff', 
@@ -1888,12 +1908,15 @@ if (selectedInteraction) {
                 Modifier
               </Button>
               <Button 
-                danger 
-                onClick={() => handleDeleteVehicule(vehicule._id)}
-                className="delete-button"
-              >
-                Supprimer
-              </Button>
+  danger 
+  onClick={() => {
+    setVehiculeToDelete(vehicule._id);
+    setIsDeleteModalVisible(true);
+  }}
+  className="delete-button"
+>
+  Supprimer
+</Button>
             </div>
           </Card>
         ))}
