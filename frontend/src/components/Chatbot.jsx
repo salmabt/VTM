@@ -12,7 +12,6 @@ const Chatbot = ({ onClose }) => {
   const [formData, setFormData] = useState({
     nom_client: '',
     email: '',
-    service: '',
     phone: '',
     title_de_livraison: '',
     description: '',
