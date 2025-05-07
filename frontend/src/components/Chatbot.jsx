@@ -11,12 +11,13 @@ const Chatbot = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [formData, setFormData] = useState({
     nom_client: '',
-    email: '',
-    service: '',
+    email: '', 
     phone: '',
+    address: '',
+    service: '',
     title_de_livraison: '',
     description: '',
-    address: ''
+    
   });
   const initialMessageAdded = useRef(false);
 
@@ -43,12 +44,12 @@ useEffect(() => {
       setMessages(prev => [
         ...prev,
         { 
-          text: "Bonjour ! Je suis l'assistant virtuel de Digital Market. Comment puis-je vous aider ?", 
+          text: "Bonjour ! Je suis l'assistant virtuel de VTM. Comment puis-je vous aider ?", 
           isBot: true,
           suggestions: [ // Add suggestions array
             "Information sur Digital Market",
             "Information sur VTM",
-            "Tu vais faire une livraison"
+            "Faire une livraison"
           ]
         }
       ]);
@@ -106,7 +107,7 @@ useEffect(() => {
     <div className="chatbot-container">
         {/* En-tête avec bouton de fermeture */}
       <div className="chat-header">
-        <h3>Digital Market Bot</h3>
+        <h3>VTM Bot</h3>
         <button className="close-btn" onClick={onClose}>×</button>
       </div>
       <div className="chat-messages">

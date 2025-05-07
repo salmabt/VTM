@@ -10,11 +10,13 @@ router.post("/save-interaction", async (req, res) => {
       const newInteraction = new Interaction({ 
         nom_client,
         email,
-        service,
-        description,
         phone,
+        address,
+        service, 
         title_de_livraison,
-        address
+        description,
+        
+        
       });
   
       await newInteraction.save();
