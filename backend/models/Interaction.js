@@ -7,7 +7,6 @@ const InteractionSchema = new mongoose.Schema({
   nom_client: String,
   phone: String,
   email: String, 
-  service: String ,
   address: String,
   relatedTask: { 
     type: mongoose.Schema.Types.ObjectId,

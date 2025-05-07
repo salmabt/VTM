@@ -5,12 +5,11 @@ const Interaction = require("../models/Interaction");
 
 router.post("/save-interaction", async (req, res) => {
     try {
-      const { nom_client, email, service, description, phone, title_de_livraison ,address} = req.body;
+      const { nom_client, email, description, phone, title_de_livraison ,address} = req.body;
   
       const newInteraction = new Interaction({ 
         nom_client,
         email,
-        service,
         description,
         phone,
         title_de_livraison,
