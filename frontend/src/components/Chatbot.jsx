@@ -14,7 +14,6 @@ const Chatbot = ({ onClose }) => {
     email: '',
     phone: '',
     address: '',
-    service: '',
     title_de_livraison: '',
     description: '',
     
