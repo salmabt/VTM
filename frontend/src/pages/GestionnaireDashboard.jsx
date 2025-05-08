@@ -781,11 +781,9 @@ const handleDeleteInteraction = async (interactionId) => {
     textAlign: 'center',
     borderBottom: '1px solid #f0f0f0'
   }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-    <Text strong style={{ fontSize: '20px' }}>Interface Gestionnaire</Text>
-          </div>
+    
     <img 
-      src="src/assets/gestionnaire.png" 
+      src="src/assets/logo__ges.webp" 
       alt="Logo Gestionnaire" 
       className="gestionnaire-logo"
       style={{ 
@@ -796,6 +794,9 @@ const handleDeleteInteraction = async (interactionId) => {
         objectFit: 'cover'
       }}
     />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+    <Text strong style={{ fontSize: '20px' }}>Interface Gestionnaire</Text>
+          </div>
     
   </div>
   <Menu
