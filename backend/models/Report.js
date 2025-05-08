@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const reportSchema = new mongoose.Schema({
   title: String,
   description: String,
-  timeSpent: Number,
+  timeSpent: String,
   issuesEncountered: String,
   finalStatus: {
     type: String,
