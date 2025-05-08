@@ -6,7 +6,7 @@ import { CalendarOutlined, LogoutOutlined, UserOutlined, FileTextOutlined, BellO
   PaperClipOutlined, 
   DownloadOutlined, 
   InfoCircleOutlined, 
-  CaretDownOutlined } from '@ant-design/icons';
+  CaretDownOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import tasksApi from '../api/tasks';
 import vehiculesApi from '../api/vehicules';
@@ -21,7 +21,7 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 const { Panel } = Collapse;
-const TaskSection = ({ title, tasks, statusFilter, collapsed = false ,vehicules,handleStatusChange,setSelectedTask }) => {
+const TaskSection = ({ title, tasks, statusFilter, collapsed = false ,vehicules,handleStatusChange,setSelectedTask, isDarkMode}) => {
   const filteredTasks = tasks.filter(task => statusFilter.includes(task.status));
 
   return (
@@ -42,6 +42,7 @@ const TaskSection = ({ title, tasks, statusFilter, collapsed = false ,vehicules,
               task={task} 
               vehicule={vehicules.find(v => v._id === task.vehicule?._id)}
               handleStatusChange={handleStatusChange}
+              isDarkMode={isDarkMode}
             />
           ))}
         </div>
@@ -49,12 +50,12 @@ const TaskSection = ({ title, tasks, statusFilter, collapsed = false ,vehicules,
     </Collapse>
   );
 };
-const TaskCard = ({ task, vehicule, handleStatusChange,setSelectedTask }) => {
+const TaskCard = ({ task, vehicule, handleStatusChange,setSelectedTask,isDarkMode }) => {
   // Ajouter dans TaskCard :
 const statusColor = {
-  'planifié': '#1890ff',
-  'en cours': '#52c41a',
-  'terminé': '#f5222d'
+  'planifié': isDarkMode ? '#177ddc' : '#1890ff',
+  'en cours': isDarkMode ? '#49aa19' : '#52c41a',
+  'terminé': isDarkMode ? '#d32029' : '#f5222d'
 }[task.status];
   // Vérification si modifiable
   const isEditable = () => {
@@ -155,6 +156,7 @@ const statusColor = {
   );
 };
 const TechnicienDashboard = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const { userData, logout } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [vehicules, setVehicules] = useState([]);
@@ -169,6 +171,9 @@ const TechnicienDashboard = () => {
     pageSize: 10,
     total: 0,
   });
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
   // Charger les notifications
 useEffect(() => {
   const loadNotifications = async () => {
@@ -228,7 +233,7 @@ const handleNotificationClick = async (notification) => {
 // Contenu du Popover
 // Contenu du Popover
 const notificationContent = (
-  <div style={{ maxWidth: 300, maxHeight: 400, overflowY: 'auto' }}>
+  <div style={{ maxWidth: 300, maxHeight: 400, overflowY: 'auto', background: isDarkMode ? '#1f1f1f': '#fff'  }}>
     {/* Ajoutez ces styles */}
     <List
       dataSource={notifications}
@@ -238,12 +243,14 @@ const notificationContent = (
           onClick={() => handleNotificationClick(item)}
           style={{ 
             cursor: 'pointer', 
-            backgroundColor: item.read ? '#fff' : '#f6ffed',
+            backgroundColor: isDarkMode 
+              ? (item.read ? '#2d2d2d' : '#434343') 
+              : (item.read ? '#fff' : '#f6ffed'),
             padding: '8px 16px' 
           }}
         >
           <List.Item.Meta
-            title={<span style={{ fontSize: 14 }}>{item.message}</span>}
+            title={<span style={{ fontSize: 14 , color: isDarkMode ? 'rgba(255, 255, 255, 0.85)' : 'inherit'}}>{item.message}</span>}
             description={
               <span style={{ fontSize: 12, color: '#999' }}>
                 {new Date(item.createdAt).toLocaleDateString()}
@@ -408,10 +415,13 @@ const groupTasks = (tasks) => {
 
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible theme="light" width={200}>
+    <Layout style={{ minHeight: '100vh',background: isDarkMode ? '#141414' : '#f0f2f5' }}>
+      <Sider collapsible theme={isDarkMode ? "dark" : "light"} width={200}className={isDarkMode ? "dark-mode-sider" : ""}>
         <div className="logo" style={{ padding: 16, textAlign: 'center' }}>
-          <Title level={4} style={{ margin: 0 }} className="sidebar-title">Interface technicien</Title>
+          <Title level={4}  style={{ 
+      margin: 0,
+      color: isDarkMode ? '#fff' : 'inherit' 
+    }}  className="sidebar-title">Interface technicien</Title>
         </div><div style={{ 
   padding: '10px 16px',
   textAlign: 'center',
@@ -427,17 +437,17 @@ const groupTasks = (tasks) => {
       backgroundColor: '#e6f7ff'
     }}
   />
-  <div style={{ padding: '0 8px' }}>
-    <Text strong style={{ display: 'block', fontSize: 16, marginBottom: 4 }}>
+  <div style={{ padding: '0 8px',color: isDarkMode ? '#fff' : 'inherit' }}>
+    <Text strong style={{ display: 'block', fontSize: 16, marginBottom: 4, color: isDarkMode ? '#fff' : 'rgba(0, 0, 0, 0.85)' }}>
       {userData?.name}
     </Text>
-    <Text type="secondary" style={{ fontSize: 14 }}>
+    <Text type="secondary" style={{ fontSize: 14 ,color: isDarkMode ? 'rgba(255, 255, 255, 0.65)' : 'rgba(0, 0, 0, 0.45)' }}>
       Technicien certifié
     </Text>
   </div>
 </div>
         <Menu
-          theme="light"
+          theme={isDarkMode ? "dark" : "light"}
           mode="inline"
           selectedKeys={[selectedMenu]}
           items={menuItems}
@@ -447,41 +457,57 @@ const groupTasks = (tasks) => {
       </Sider>
 
       <Layout style={{ padding: '0 24px 24px' }}>
-        <Header style={{
-          background: '#fff',
-          padding: '0 24px',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center'
-        }}>
-        
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16,marginLeft: 'auto'  }}>
-            {/* Notification Button with Badge */}
-           
-<Badge count={notifications.filter(n => !n.read).length}>
-  <Popover 
-    content={notificationContent} 
-    title="Notifications" 
-    trigger="click"
-  >
+      <Header style={{
+  background: isDarkMode ? '#1f1f1f' : '#fff',
+  borderBottom: isDarkMode ? '1px solid #303030' : '1px solid #f0f0f0',
+  padding: '0 24px',
+  display: 'flex',
+  alignItems: 'center'
+}}>
+  <div style={{ 
+    display: 'flex',
+    alignItems: 'center',
+    gap: 16,
+    marginLeft: 'auto'
+  }}>
     <Button
-      icon={<BellOutlined />}
-      shape="circle"
-      style={{ fontSize: 20 }}
-    />
-  </Popover>
-</Badge>
-          <Button
-            icon={<LogoutOutlined />}
-            onClick={logout}
-            danger
-          >
-            Déconnexion
-          </Button>
-          </div>
-        </Header>
+      icon={isDarkMode ? <SunOutlined /> : <MoonOutlined />}
+      onClick={toggleDarkMode}
+      style={{ 
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+       
+      }}
+    >
+      
+    </Button>
 
-        <Content style={{ margin: '24px 16px', padding: 24, background: '#fff' }}>
+    <Badge count={notifications.filter(n => !n.read).length}>
+      <Popover content={notificationContent} title="Notifications" trigger="click">
+        <Button
+          icon={<BellOutlined />}
+          shape="circle"
+          style={{ fontSize: 20 }}
+        />
+      </Popover>
+    </Badge>
+
+    <Button
+      icon={<LogoutOutlined />}
+      onClick={logout}
+      danger
+      style={{
+        color: isDarkMode ? '#ff7875' : 'inherit'
+      }}
+    >
+      Déconnexion
+    </Button>
+  </div>
+</Header>
+
+        <Content style={{ margin: '24px 16px', padding: 24, background: isDarkMode ? '#1f1f1f' : '#fff',
+  color: isDarkMode ? 'rgba(255, 255, 255, 0.85)' : 'inherit' }}>
           {loading ? (
            <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />
           ) : (
@@ -490,6 +516,7 @@ const groupTasks = (tasks) => {
 {selectedMenu === '1' && (
   <Card
     title="Mes Interventions"
+    className={isDarkMode ? "dark-mode-card" : ""}
     bordered={false}
     extra={<Tag color="blue">{tasks.length} tâches</Tag>}
   >
@@ -502,6 +529,7 @@ const groupTasks = (tasks) => {
   statusFilter={['planifié', 'en cours', 'terminé']}
   vehicules={vehicules} 
   handleStatusChange={handleStatusChange}
+  isDarkMode={isDarkMode}
 />
 
 <TaskSection
@@ -512,6 +540,7 @@ const groupTasks = (tasks) => {
   collapsed={true}
   vehicules={vehicules}
   handleStatusChange={handleStatusChange}
+  isDarkMode={isDarkMode}
 />
 
 <TaskSection
@@ -522,6 +551,7 @@ const groupTasks = (tasks) => {
   collapsed={true}
   vehicules={vehicules} 
   handleStatusChange={handleStatusChange}
+  isDarkMode={isDarkMode}
 />
     </div>
   </Card>
@@ -531,7 +561,7 @@ const groupTasks = (tasks) => {
             
             <>
               <Card title="Créer un Rapport" bordered={false}>
-  <Form form={form} layout="vertical" onFinish={handleReportSubmit}>
+  <Form className={isDarkMode ? "dark-mode-form" : ""} form={form} layout="vertical" onFinish={handleReportSubmit}>
     {/* Nouveau champ Titre */}
     <Form.Item
       label="Titre"

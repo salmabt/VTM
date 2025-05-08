@@ -392,3 +392,69 @@
     padding: 1px 2px;
   }
 }
+/* Dark mode overrides */
+.dark-mode-sider {
+  background-color: #1f1f1f !important;
+}
+
+.dark-mode-sider .ant-menu {
+  background-color: #1f1f1f;
+}
+
+.dark-mode-sider .ant-menu-item {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.dark-mode-sider .ant-menu-item-selected {
+  background-color: #2d2d2d !important;
+  color: #fff !important;
+}
+
+.dark-mode-card {
+  background-color: #2d2d2d !important;
+  border-color: #434343 !important;
+}
+
+.dark-mode-card .ant-card-head-title {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-mode-card .ant-collapse {
+  background-color: #2d2d2d;
+  border-color: #434343;
+}
+
+.dark-mode-card .ant-collapse-header {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-mode-card .ant-tag {
+  background-color: #434343;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dark-mode-card .ant-select-selector {
+  background-color: #434343 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+/* Dark mode - Textes spécifiques */
+.dark-mode-sider .sidebar-title {
+  color: #fff !important;
+}
+
+.dark-mode-sider .ant-avatar + div {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-mode-sider .technician-certification {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+/* Dans le fichier CSS */
+.ant-layout-header.dark-mode-header {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-mode-header .ant-badge-count {
+  background: #1890ff !important;
+  color: #fff !important;
+}
