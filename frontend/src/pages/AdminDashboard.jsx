@@ -1,9 +1,22 @@
 //frontend/src/pages/admindashboard
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Input, Button, List, Card, Typography, message,Tag, Spin,
-   Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber, Table, Select } from 'antd';
+   Modal, Popconfirm, Tabs,Row,Col,Timeline,Statistic,Space,Tooltip,InputNumber, Table, Select,Badge,
+   Descriptions, 
+  Collapse,
+  Empty} from 'antd';
+
 import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchOutlined, 
-  EditOutlined, DeleteOutlined, EyeOutlined, PlusOutlined, MoonOutlined, SunOutlined,BellOutlined, PhoneOutlined,MailOutlined, AreaChartOutlined } from '@ant-design/icons';
+  EditOutlined, DeleteOutlined, EyeOutlined,
+   PlusOutlined, MoonOutlined, SunOutlined,
+   BellOutlined, PhoneOutlined,MailOutlined, AreaChartOutlined, IdcardOutlined,TeamOutlined,WarningOutlined,  AlignLeftOutlined,  FieldTimeOutlined,  SolutionOutlined, FileImageOutlined,
+  FilePdfOutlined, FormOutlined,EnvironmentOutlined,
+  HomeOutlined,FileSearchOutlined,
+  ClockCircleOutlined,
+  UserSwitchOutlined,
+  CarOutlined,
+  FlagOutlined,
+  PaperClipOutlined,} from '@ant-design/icons';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import techniciensApi from '../api/techniciens';
@@ -528,16 +541,33 @@ const handleSearchUsers = (value) => {
         title: 'ID',
         dataIndex: '_id',
         key: '_id',
+        render: (text) => (
+          <Space>
+            <IdcardOutlined style={{ color: ' #60ae94' }} />
+            <Text strong>{text}</Text>
+          </Space>
+        ),
       },
       {
         title: 'Nom et Prénom',
         dataIndex: 'name',
         key: 'name',
+        render: (text) => (
+          <Space>
+            <UserOutlined style={{ color: '#60ae94' }} />
+            <Text strong>{text}</Text>
+          </Space>
+        ),
       },
       {
         title: 'Email',
         dataIndex: 'email',
-        key: 'email',
+        key: 'email', render: (_, record) => (
+          <>
+            
+            <div><MailOutlined style={{ color: '#60ae94' }}/> {record.email}</div>
+          </>
+        ),
       },
       {
         title: 'Ville',
@@ -547,7 +577,12 @@ const handleSearchUsers = (value) => {
       {
         title: 'Téléphone',
         dataIndex: 'phone',
-        key: 'phone',
+        key: 'phone', render: (_, record) => (
+          <>
+            
+            <div><PhoneOutlined style={{ color: '#60ae94' }}/> {record.phone}</div>
+          </>
+        ),
       },
   
      {
@@ -932,21 +967,43 @@ const gestionnaireColumns = [
     title: 'ID',
     dataIndex: '_id',
     key: '_id',
+    render: (text) => (
+      <Space>
+        <IdcardOutlined style={{ color: ' #60ae94' }} />
+        <Text strong>{text}</Text>
+      </Space>
+    ),
   },
   {
     title: 'Nom et Prénom',
     dataIndex: 'name',
     key: 'name',
+    render: (text) => (
+      <Space>
+        <UserOutlined style={{ color: '#60ae94' }} />
+        <Text strong>{text}</Text>
+      </Space>
+    ),
   },
   {
     title: 'Email',
     dataIndex: 'email',
-    key: 'email',
+    key: 'email', render: (_, record) => (
+      <>
+        
+        <div><MailOutlined style={{ color: '#60ae94' }}/> {record.email}</div>
+      </>
+    ),
   },
   {
     title: 'Téléphone',
     dataIndex: 'phone',
-    key: 'phone',
+    key: 'phone', render: (_, record) => (
+      <>
+        
+        <div><PhoneOutlined style={{ color: '#60ae94' }}/> {record.phone}</div>
+      </>
+    ),
   },
   {
     title: 'Mot de passe',
@@ -1179,95 +1236,161 @@ const menuItems = [
               )}
 
                     {selectedTask && (
-              <Modal
-              title="Détails de la tâche"
-              visible={!!selectedTask}
-              onCancel={() => setSelectedTask(null)}
-              footer={[
-                <Button key="close" onClick={() => setSelectedTask(null)}>
-                  Fermer
-                </Button>
-              ]}
-            >
-              <div>
-                <Text strong>Titre : </Text>
-                <Text>{selectedTask.title}</Text><br/>
-                
-                <Text strong>Client : </Text>
-                <Text>{selectedTask.client}</Text><br/>
-                
-                <Text strong>Localisation : </Text>
-                <Text>{selectedTask.location}</Text><br/>
-                <Text strong>Adresse du client: </Text>
-                <Text>{selectedTask.adresse}</Text><br/>
-                
-                {/* Modification ici pour afficher seulement l'heure */}
-               {/* Modifier l'affichage de la période */}
-            <Text strong>Période : </Text>
-            <Text>
-              {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
-              {moment(selectedTask.endDate).format('DD/MM HH:mm')}
-            </Text>    <br/>
-            <Text strong>Technicien : </Text>
-<Text>
-  {techniciens.find(t => t._id === selectedTask.technicien)?.name || 'Non assigné'}
-</Text><br/>
-
-<Text strong>Véhicule : </Text>
-<Text>
-  {vehicules.find(v => v._id === selectedTask.vehicule)?.model || 'Non assigné'}
-</Text><br/>
-                
-                <Text strong>Statut : </Text>
-                <Tag color={
-                  selectedTask.status === 'planifié' ? '#80e2fd' :
-                  selectedTask.status === 'en cours' ? '#b1e68c' : '#ef5b82'
-                }>
-                  {selectedTask.status}
-                  
-                </Tag>
-                <br/>
-                <Text strong>Pièces jointes :</Text>
-            {selectedTask.attachments?.map(attachment => (
-              <div key={attachment.filename}>
-                <a 
-                  href={`http://localhost:3000/uploads/${attachment.filename}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  📄 {attachment.originalName} ({Math.round(attachment.size/1024)}KB)
-                </a>
-              </div>
-            ))}
-             {/* Section des rapports d'intervention */}
-    <div style={{ marginTop: 20 }}>
-      <Title level={5}>Rapports d'intervention</Title>
-      {selectedTask.reports?.length > 0 ? (
-        selectedTask.reports.map(report => (
-          <Card 
-            key={report._id} 
-            style={{ marginBottom: 16, backgroundColor: '#fafafa' }}
-          >
-            <Text strong>{report.title}</Text>
-            <div style={{ marginTop: 8 }}>
-              <Text>Statut final: </Text>
-              <Tag color={report.finalStatus === 'reussi' ? 'green' : 'red'}>
-                {report.finalStatus}
-              </Tag>
-            </div>
-            <Text>Durée: {report.timeSpent} heures</Text><br/>
-            <Text>Description: {report.description}</Text><br/>
-            <Text>Problèmes: {report.issuesEncountered}</Text><br/>
-            <Text>Date: {new Date(report.createdAt).toLocaleDateString()}</Text>
-          </Card>
-        ))
-      ) : (
-        <Text type="secondary">Aucun rapport soumis pour cette tâche</Text>
-      )}
-    </div>
-              </div>
-            </Modal>
-            
+               <Modal
+               title={
+                 <Space>
+                   <FileTextOutlined style={{ color: '#1890ff', fontSize: '20px' }} />
+                   <span>Détails de la tâche</span>
+                 </Space>
+               }
+               visible={!!selectedTask}
+               onCancel={() => setSelectedTask(null)}
+               footer={[
+                 <Button key="close" onClick={() => setSelectedTask(null)}>
+                   Fermer
+                 </Button>
+               ]}
+               width={600}
+             >
+               <div style={{ padding: '12px 16px' }}>
+                 {/* Section Principale */}
+                 <Row gutter={12}>
+                   <Col span={12}>
+                     <div style={{ marginBottom: 16 }}>
+                       <Title level={5} style={{ color: '#1890ff' }}>
+                         <CalendarOutlined style={{ marginRight: 8 }} />
+                         Informations de base
+                       </Title>
+                       <Descriptions column={1}>
+                         <Descriptions.Item label={<Text strong><FormOutlined /> Titre</Text>}>
+                           {selectedTask.title}
+                         </Descriptions.Item>
+                         <Descriptions.Item label={<Text strong><UserOutlined /> Client</Text>}>
+                           {selectedTask.client || 'Non spécifié'}
+                         </Descriptions.Item>
+                         <Descriptions.Item label={<Text strong><EnvironmentOutlined /> Localisation</Text>}>
+                           {selectedTask.location}
+                         </Descriptions.Item>
+                         <Descriptions.Item label={<Text strong><HomeOutlined /> Adresse</Text>}>
+                           {selectedTask.adresse || 'Non spécifiée'}
+                         </Descriptions.Item>
+                       </Descriptions>
+                     </div>
+                   </Col>
+           
+                   <Col span={12}>
+                     <div style={{ marginBottom: 16 }}>
+                       <Title level={5} style={{ color: '#1890ff' }}>
+                         <TeamOutlined style={{ marginRight: 8 }} />
+                         Assignation
+                       </Title>
+                       <Descriptions column={1}>
+                         <Descriptions.Item label={<Text strong><ClockCircleOutlined /> Période</Text>}>
+                           {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
+                           {moment(selectedTask.endDate).format('DD/MM HH:mm')}
+                         </Descriptions.Item>
+                         <Descriptions.Item label={<Text strong><UserSwitchOutlined /> Technicien</Text>}>
+                           {techniciens.find(t => t._id === selectedTask.technicien)?.name || 'Non assigné'}
+                         </Descriptions.Item>
+                         <Descriptions.Item label={<Text strong><CarOutlined /> Véhicule</Text>}>
+                           {vehicules.find(v => v._id === selectedTask.vehicule)?.model || 'Non assigné'}
+                         </Descriptions.Item>
+                         <Descriptions.Item label={<Text strong><FlagOutlined /> Statut</Text>}>
+                           <Tag color={
+                             selectedTask.status === 'planifié' ? '#80e2fd' :
+                             selectedTask.status === 'en cours' ? '#b1e68c' : '#ef5b82'
+                           }>
+                             {selectedTask.status}
+                           </Tag>
+                         </Descriptions.Item>
+                       </Descriptions>
+                     </div>
+                   </Col>
+                 </Row>
+           
+                 {/* Pièces jointes */}
+                 <div style={{ margin: '16px 0' }}>
+                   <Title level={5} style={{ color: '#1890ff' }}>
+                     <PaperClipOutlined style={{ marginRight: 8 }} />
+                     Pièces jointes
+                   </Title>
+                   {selectedTask.attachments?.length > 0 ? (
+                     <List
+                       dataSource={selectedTask.attachments}
+                       renderItem={attachment => (
+                         <List.Item>
+                           <a 
+                             href={`http://localhost:3000/uploads/${attachment.filename}`}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                           >
+                             <Space>
+                               {attachment.filename.endsWith('.pdf') ? 
+                                 <FilePdfOutlined style={{ color: '#ff4d4f', fontSize: '20px' }} /> :
+                                 <FileImageOutlined style={{ color: '#52c41a', fontSize: '20px' }} />
+                               }
+                               <Text>{attachment.originalName} ({Math.round(attachment.size/1024)}KB)</Text>
+                             </Space>
+                           </a>
+                         </List.Item>
+                       )}
+                     />
+                   ) : (
+                     <Text type="secondary">Aucune pièce jointe</Text>
+                   )}
+                 </div>
+           
+                 {/* Rapports d'intervention */}
+                 <div style={{ marginTop: 16 }}>
+                   <Title level={5} style={{ color: '#1890ff' }}>
+                     <SolutionOutlined style={{ marginRight: 2 }} />
+                     Rapports d'intervention
+                   </Title>
+                   
+                   {selectedTask.reports?.length > 0 ? (
+                    <div style={{ maxWidth: '520px' }}>
+                     <Collapse accordion>
+                       {selectedTask.reports.map(report => (
+                         <Collapse.Panel 
+                           key={report._id}
+                           header={
+                             <Space>
+                               <Text strong>{report.title}</Text>
+                               <Tag color={report.finalStatus === 'reussi' ? 'green' : 'red'}>
+                                 {report.finalStatus}
+                               </Tag>
+                               <Text type="secondary">
+                                 {new Date(report.createdAt).toLocaleDateString()}
+                               </Text>
+                             </Space>
+                           }
+                         >
+                           <Descriptions column={1} bordered>
+                             <Descriptions.Item label={<Text strong><FieldTimeOutlined /> Durée</Text>}>
+                               {report.timeSpent} 
+                             </Descriptions.Item>
+                             <Descriptions.Item label={<Text strong><AlignLeftOutlined /> Description</Text>}>
+                               {report.description}
+                             </Descriptions.Item>
+                             <Descriptions.Item label={<Text strong><WarningOutlined /> Problèmes</Text>}>
+                               {report.issuesEncountered || 'Aucun problème signalé'}
+                             </Descriptions.Item>
+                           </Descriptions>
+                         </Collapse.Panel>
+                       ))}
+                     </Collapse>
+                     </div>
+                   ) : (
+                     <Card bordered={false}>
+                       <Empty
+                         image={<FileSearchOutlined style={{ fontSize: '48px', color: '#d9d9d9' }} />}
+                         description="Aucun rapport soumis pour cette tâche"
+                       />
+                     </Card>
+                   )}
+                 </div>
+               </div>
+             </Modal>
             )}
 
               <TaskModal
@@ -1282,11 +1405,16 @@ const menuItems = [
 
 
              {selectedMenu === '3' && (
-              <Card title="Gestion des Clients" variant="borderless" className="padding-clients">
+              <Card title={
+              <Space>
+              <TeamOutlined style={{ fontSize: '18px', color: '#1890ff' }} />
+              <span>Gestion des Clients</span>
+            </Space>}
+      variant="borderless" className="padding-clients">
                    <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
                      <Input
                       placeholder="Rechercher un client"
-                      prefix={<SearchOutlined />}
+                      prefix={<SearchOutlined  style={{ color: '#1890ff' }} />}
                       onChange={(e) => {
                         setSearchTerm(e.target.value);
                       }}
@@ -1301,14 +1429,24 @@ const menuItems = [
                     title: 'ID',
                     dataIndex: '_id',
                     key: 'id',
-                    render: (text) => <Text strong>{text}</Text>,
+                    render: (text) => (
+                      <Space>
+                        <IdcardOutlined style={{ color: ' #60ae94' }} />
+                        <Text strong>{text}</Text>
+                      </Space>
+                    ),
                     width: 160
                   },
                   {
                     title: 'Nom',
                     dataIndex: 'nom_client',
                     key: 'nom_client',
-                    render: (text) => <Text strong>{text}</Text>,
+                    render: (text) => (
+                      <Space>
+                        <UserOutlined style={{ color: '#60ae94' }} />
+                        <Text strong>{text}</Text>
+                      </Space>
+                    ),
                     width: 120
                   },
                   {
@@ -1317,7 +1455,7 @@ const menuItems = [
                     render: (_, record) => (
                       <>
                         
-                        <div><MailOutlined /> {record.email}</div>
+                        <div><MailOutlined style={{ color: '#60ae94' }}/> {record.email}</div>
                       </>
                     ),
                     width: 180
@@ -1328,7 +1466,7 @@ const menuItems = [
                     key: 'telephone', render: (_, record) => (
                       <>
                         
-                        <div><PhoneOutlined /> {record.phone}</div>
+                        <div><PhoneOutlined style={{ color: '#60ae94' }}/> {record.phone}</div>
                       </>
                     ),
                   
@@ -1379,11 +1517,16 @@ const menuItems = [
              
 
               {selectedMenu === '4' && (
-                <Card title="Gestion des Techniciens" variant="borderless" className="padding-technicien">
+                <Card title={
+                  <Space>
+              <TeamOutlined style={{ fontSize: '18px', color: '#1890ff' }} />
+              <span>Gestion des Techniciens</span>
+            </Space>}
+               variant="borderless" className="padding-technicien">
                   <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
                     <Input
                       placeholder="Rechercher un technicien"
-                      prefix={<SearchOutlined />}
+                      prefix={<SearchOutlined style={{ color: '#1890ff' }}/>}
                       onChange={(e) => {
                         setSearchTerm(e.target.value);
                         handleSearchUsers(e.target.value);
@@ -1445,11 +1588,16 @@ const menuItems = [
               )}
 
 {selectedMenu === '5' && (
-  <Card title="Gestion des Gestionnaires" variant="borderless" className="padding-gestionnaire">
+  <Card title={
+    <Space>
+              <TeamOutlined style={{ fontSize: '18px', color: '#1890ff' }} />
+              <span>Gestion des Gestionnaires</span>
+            </Space>}
+     variant="borderless" className="padding-gestionnaire">
     <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
       <Input
         placeholder="Rechercher un gestionnaire"
-        prefix={<SearchOutlined />}
+        prefix={<SearchOutlined style={{ color: '#1890ff' }} />}
         onChange={(e) => {
           setSearchTerm(e.target.value);
           handleSearchGestionnaires(e.target.value);
