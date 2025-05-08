@@ -16,7 +16,7 @@ import { CalendarOutlined, UndoOutlined, FileTextOutlined, UserOutlined, SearchO
   UserSwitchOutlined,
   CarOutlined,
   FlagOutlined,
-  PaperClipOutlined,} from '@ant-design/icons';
+  PaperClipOutlined} from '@ant-design/icons';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import techniciensApi from '../api/techniciens';
