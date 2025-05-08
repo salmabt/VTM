@@ -9,10 +9,10 @@ export const translations = {
       follow: "SUIVEZ-NOUS",
       
       // Hero Section
-      quickPlanning: "Planification rapide et facile",
-      planningManagement: "Excellente Gestion de Planning des Techniciens et des Voitures!",
-      planningText1: "Vous aviez peut-être l'habitude de faire votre planning sur Excel mais vous avez des besoins plus complexes ? Il est temps de vous tourner vers un logiciel qui vous permette de gérer le <strong>planning prévisionnel</strong> de votre société.",
-      planningText2: "Gérez vos ressources humaines et matérielles ainsi que les congés, rendez-vous, projets, horaires etc. PlanningPME s'adapte à tous les secteurs d'activité et vous permet <strong>d'optimiser votre rentabilité</strong>.",
+      quickPlanning: "Bienvenue sur VTM",
+      planningManagement: "Votre Solution Intelligente pour la Gestion des Techniciens et des Véhicules 🚀",
+      planningText1: "VTM est une plateforme moderne et intuitive conçue pour simplifier la<strong> gestion des plannings des techniciens et des véhicules de service.</strong> Que ce soit pour planifier des interventions, suivre l'état des véhicules, ou coordonner les équipes sur le terrain, VTM vous offre tous les outils nécessaires pour maximiser l'efficacité, réduire les conflits de réservation, et assurer un suivi précis des activités.",
+      planningText2: "Rejoignez-nous pour une gestion plus intelligente et plus fluide de vos ressources !",
       
       // Features Section
       features: "NOS FONCTIONALITÉS",
