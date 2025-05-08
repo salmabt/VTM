@@ -826,163 +826,174 @@ const handleDeleteInteraction = async (interactionId) => {
    
   </Menu>
 </Sider>
-        {selectedTask && (
+{selectedTask && (
   <Modal
-  title={
-    <Space>
-      <FileTextOutlined style={{ color: '#1890ff', fontSize: '20px' }} />
-      <span>Détails de la tâche</span>
-    </Space>
-  }
-  visible={!!selectedTask}
-  onCancel={() => setSelectedTask(null)}
-  footer={[
-    <Button key="close" onClick={() => setSelectedTask(null)}>
-      Fermer
-    </Button>
-  ]}
-  width={600}
->
-  <div style={{ padding: '12px 16px' }}>
-    {/* Section Principale */}
-    <Row gutter={12}>
-      <Col span={12}>
-        <div style={{ marginBottom: 16 }}>
-          <Title level={5} style={{ color: '#1890ff' }}>
-            <CalendarOutlined style={{ marginRight: 8 }} />
-            Informations de base
-          </Title>
-          <Descriptions column={1}>
-            <Descriptions.Item label={<Text strong><FormOutlined /> Titre</Text>}>
-              {selectedTask.title}
-            </Descriptions.Item>
-            <Descriptions.Item label={<Text strong><UserOutlined /> Client</Text>}>
-              {selectedTask.client || 'Non spécifié'}
-            </Descriptions.Item>
-            <Descriptions.Item label={<Text strong><EnvironmentOutlined /> Localisation</Text>}>
-              {selectedTask.location}
-            </Descriptions.Item>
-            <Descriptions.Item label={<Text strong><HomeOutlined /> Adresse</Text>}>
-              {selectedTask.adresse || 'Non spécifiée'}
-            </Descriptions.Item>
-          </Descriptions>
-        </div>
-      </Col>
+    title={
+      <Space>
+        <FileTextOutlined style={{ color: '#1890ff' }} />
+        <span>Détails de la tâche</span>
+      </Space>
+    }
+    visible={!!selectedTask}
+    onCancel={() => setSelectedTask(null)}
+    footer={[
+      <Button key="close" onClick={() => setSelectedTask(null)}>
+        Fermer
+      </Button>
+    ]}
+    width={650}
+  >
+    <div style={{ padding: '12px 16px' }}>
+      {/* Section Principale */}
+      <Row gutter={12}>
+        <Col span={12}>
+          <div style={{ marginBottom: 16 }}>
+            <Title level={5} style={{ color: '#1890ff', marginBottom: 8 }}>
+              <CalendarOutlined style={{ marginRight: 8 }} />
+              Informations de base
+            </Title>
+            <Descriptions column={1} size="small">
+              <Descriptions.Item label={<Text strong><FormOutlined /> Titre</Text>}>
+                {selectedTask.title}
+              </Descriptions.Item>
+              <Descriptions.Item label={<Text strong><UserOutlined /> Client</Text>}>
+                {selectedTask.client || 'Non spécifié'}
+              </Descriptions.Item>
+              <Descriptions.Item label={<Text strong><EnvironmentOutlined /> Localisation</Text>}>
+                {selectedTask.location}
+              </Descriptions.Item>
+              <Descriptions.Item label={<Text strong><HomeOutlined /> Adresse</Text>}>
+                {selectedTask.adresse || 'Non spécifiée'}
+              </Descriptions.Item>
+            </Descriptions>
+          </div>
+        </Col>
 
-      <Col span={12}>
-        <div style={{ marginBottom: 16 }}>
-          <Title level={5} style={{ color: '#1890ff' }}>
-            <TeamOutlined style={{ marginRight: 8 }} />
-            Assignation
-          </Title>
-          <Descriptions column={1}>
-            <Descriptions.Item label={<Text strong><ClockCircleOutlined /> Période</Text>}>
-              {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
-              {moment(selectedTask.endDate).format('DD/MM HH:mm')}
-            </Descriptions.Item>
-            <Descriptions.Item label={<Text strong><UserSwitchOutlined /> Technicien</Text>}>
-              {techniciens.find(t => t._id === selectedTask.technicien)?.name || 'Non assigné'}
-            </Descriptions.Item>
-            <Descriptions.Item label={<Text strong><CarOutlined /> Véhicule</Text>}>
-              {vehicules.find(v => v._id === selectedTask.vehicule)?.model || 'Non assigné'}
-            </Descriptions.Item>
-            <Descriptions.Item label={<Text strong><FlagOutlined /> Statut</Text>}>
-              <Tag color={
-                selectedTask.status === 'planifié' ? '#80e2fd' :
-                selectedTask.status === 'en cours' ? '#b1e68c' : '#ef5b82'
-              }>
-                {selectedTask.status}
-              </Tag>
-            </Descriptions.Item>
-          </Descriptions>
-        </div>
-      </Col>
-    </Row>
+        <Col span={12}>
+          <div style={{ marginBottom: 16 }}>
+            <Title level={5} style={{ color: '#1890ff', marginBottom: 8 }}>
+              <TeamOutlined style={{ marginRight: 8 }} />
+              Assignation
+            </Title>
+            <Descriptions column={1} size="small">
+              <Descriptions.Item label={<Text strong><ClockCircleOutlined /> Période</Text>}>
+                {moment(selectedTask.startDate).format('DD/MM HH:mm')} -{' '}
+                {moment(selectedTask.endDate).format('DD/MM HH:mm')}
+              </Descriptions.Item>
+              <Descriptions.Item label={<Text strong><UserSwitchOutlined /> Technicien</Text>}>
+                {techniciens.find(t => t._id === selectedTask.technicien)?.name || 'Non assigné'}
+              </Descriptions.Item>
+              <Descriptions.Item label={<Text strong><CarOutlined /> Véhicule</Text>}>
+                {vehicules.find(v => v._id === selectedTask.vehicule)?.model || 'Non assigné'}
+              </Descriptions.Item>
+              <Descriptions.Item label={<Text strong><FlagOutlined /> Statut</Text>}>
+                <Tag color={
+                  selectedTask.status === 'planifié' ? '#80e2fd' :
+                  selectedTask.status === 'en cours' ? '#b1e68c' : '#ef5b82'
+                }>
+                  {selectedTask.status}
+                </Tag>
+              </Descriptions.Item>
+            </Descriptions>
+          </div>
+        </Col>
+      </Row>
 
-    {/* Pièces jointes */}
-    <div style={{ margin: '16px 0' }}>
-      <Title level={5} style={{ color: '#1890ff' }}>
-        <PaperClipOutlined style={{ marginRight: 8 }} />
-        Pièces jointes
-      </Title>
-      {selectedTask.attachments?.length > 0 ? (
-        <List
-          dataSource={selectedTask.attachments}
-          renderItem={attachment => (
-            <List.Item>
-              <a 
-                href={`http://localhost:3000/uploads/${attachment.filename}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Space>
-                  {attachment.filename.endsWith('.pdf') ? 
-                    <FilePdfOutlined style={{ color: '#ff4d4f', fontSize: '20px' }} /> :
-                    <FileImageOutlined style={{ color: '#52c41a', fontSize: '20px' }} />
-                  }
-                  <Text>{attachment.originalName} ({Math.round(attachment.size/1024)}KB)</Text>
-                </Space>
-              </a>
-            </List.Item>
-          )}
-        />
-      ) : (
-        <Text type="secondary">Aucune pièce jointe</Text>
-      )}
-    </div>
-
-    {/* Rapports d'intervention */}
-    <div style={{ marginTop: 16 }}>
-      <Title level={5} style={{ color: '#1890ff' }}>
-        <SolutionOutlined style={{ marginRight: 2 }} />
-        Rapports d'intervention
-      </Title>
-      
-      {selectedTask.reports?.length > 0 ? (
-       <div style={{ maxWidth: '520px' }}>
-        <Collapse accordion>
-          {selectedTask.reports.map(report => (
-            <Collapse.Panel 
-              key={report._id}
-              header={
-                <Space>
-                  <Text strong>{report.title}</Text>
-                  <Tag color={report.finalStatus === 'reussi' ? 'green' : 'red'}>
-                    {report.finalStatus}
-                  </Tag>
-                  <Text type="secondary">
-                    {new Date(report.createdAt).toLocaleDateString()}
-                  </Text>
-                </Space>
-              }
-            >
-              <Descriptions column={1} bordered>
-                <Descriptions.Item label={<Text strong><FieldTimeOutlined /> Durée</Text>}>
-                  {report.timeSpent} 
-                </Descriptions.Item>
-                <Descriptions.Item label={<Text strong><AlignLeftOutlined /> Description</Text>}>
-                  {report.description}
-                </Descriptions.Item>
-                <Descriptions.Item label={<Text strong><WarningOutlined /> Problèmes</Text>}>
-                  {report.issuesEncountered || 'Aucun problème signalé'}
-                </Descriptions.Item>
-              </Descriptions>
-            </Collapse.Panel>
-          ))}
-        </Collapse>
-        </div>
-      ) : (
-        <Card bordered={false}>
-          <Empty
-            image={<FileSearchOutlined style={{ fontSize: '48px', color: '#d9d9d9' }} />}
-            description="Aucun rapport soumis pour cette tâche"
+      {/* Pièces jointes */}
+      <div style={{ marginBottom: 16 }}>
+        <Title level={5} style={{ color: '#1890ff', marginBottom: 8 }}>
+          <PaperClipOutlined style={{ marginRight: 8 }} />
+          Pièces jointes
+        </Title>
+        {selectedTask.attachments?.length > 0 ? (
+          <List
+            size="small"
+            dataSource={selectedTask.attachments}
+            renderItem={attachment => (
+              <List.Item style={{ padding: '4px 0' }}>
+                <a 
+                  href={`http://localhost:3000/uploads/${attachment.filename}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Space>
+                    {attachment.filename.endsWith('.pdf') ? 
+                      <FilePdfOutlined style={{ color: '#ff4d4f' }} /> :
+                      <FileImageOutlined style={{ color: '#52c41a' }} />
+                    }
+                    <Text>{attachment.originalName} ({Math.round(attachment.size/1024)}KB)</Text>
+                  </Space>
+                </a>
+              </List.Item>
+            )}
           />
-        </Card>
-      )}
-    </div>
-  </div>
-</Modal>
+        ) : (
+          <Text type="secondary">Aucune pièce jointe</Text>
+        )}
+      </div>
 
+      {/* Rapports d'intervention - Version compacte */}
+      <div>
+        <Title level={5} style={{ color: '#1890ff', marginBottom: 8 }}>
+          <SolutionOutlined style={{ marginRight: 8 }} />
+          Rapports d'intervention
+        </Title>
+        
+        {selectedTask.reports?.length > 0 ? (
+          <div style={{ 
+            border: '1px solid #d9d9d9', 
+            borderRadius: '4px',
+            padding: '8px'
+          }}>
+            {selectedTask.reports.map(report => (
+              <div key={report._id} style={{ marginBottom: 8 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 4
+                }}>
+                  <Text strong>{report.title}</Text>
+                  <Space>
+                    <Tag color={report.finalStatus === 'reussi' ? 'green' : 'red'}>
+                      {report.finalStatus}
+                    </Tag>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {new Date(report.createdAt).toLocaleDateString()}
+                    </Text>
+                  </Space>
+                </div>
+                <div style={{ paddingLeft: 8 }}>
+                  <div style={{ marginBottom: 4 }}>
+                    <FieldTimeOutlined style={{ marginRight: 8, color: '#888' }} />
+                    <Text>Durée: {report.timeSpent} heures</Text>
+                  </div>
+                  <div style={{ marginBottom: 4 }}>
+                    <AlignLeftOutlined style={{ marginRight: 8, color: '#888' }} />
+                    <Text>Description: {report.description}</Text>
+                  </div>
+                  <div>
+                    <WarningOutlined style={{ marginRight: 8, color: '#888' }} />
+                    <Text>Problèmes: {report.issuesEncountered || 'Aucun'}</Text>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ 
+            border: '1px dashed #d9d9d9',
+            borderRadius: '4px',
+            padding: '16px',
+            textAlign: 'center'
+          }}>
+            <FileSearchOutlined style={{ fontSize: '24px', color: '#d9d9d9' }} />
+            <div style={{ color: 'rgba(0, 0, 0, 0.25)' }}>Aucun rapport soumis</div>
+          </div>
+        )}
+      </div>
+    </div>
+  </Modal>
 )}
  <Modal
   title="Confirmation de suppression"
