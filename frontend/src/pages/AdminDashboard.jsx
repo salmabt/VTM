@@ -570,9 +570,14 @@ const handleSearchUsers = (value) => {
         ),
       },
       {
-        title: 'Ville',
+        title: 'Gouvernorat',
         dataIndex: 'location',
         key: 'location',
+        render: (_, record) => (
+          <>
+            <div><EnvironmentOutlined style={{ color: '#6094ae' }} /> {record.location}</div>
+          </>
+        ),
       },
       {
         title: 'Téléphone',
