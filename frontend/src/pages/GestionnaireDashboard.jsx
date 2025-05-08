@@ -728,7 +728,17 @@ if (selectedInteraction) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
  
-
+// Add this function in the component
+const handleDeleteInteraction = async (interactionId) => {
+  try {
+    await axios.delete(`/api/interactions/${interactionId}`);
+    setInteractions(prev => prev.filter(i => i._id !== interactionId));
+    message.success('Demande client supprimée avec succès');
+  } catch (error) {
+    console.error('Delete error:', error);
+    message.error('Erreur lors de la suppression de la demande');
+  }
+};
 
 
   const menuItems = [
@@ -765,13 +775,13 @@ if (selectedInteraction) {
     <Text strong style={{ fontSize: '20px' }}>Interface Gestionnaire</Text>
           </div>
     <img 
-      src="src/assets/gestionnaire-logo.jpg" 
+      src="src/assets/gestionnaire.png" 
       alt="Logo Gestionnaire" 
       className="gestionnaire-logo"
       style={{ 
-        width: '130px', 
-        height: '130px', 
-        marginBottom: '10px',
+        width: '150px', 
+        height: '170px', 
+        marginBottom: '15px',
         borderRadius: '50%',
         objectFit: 'cover'
       }}
@@ -1053,7 +1063,7 @@ if (selectedInteraction) {
           <tr style={{ backgroundColor: '#f0f0f0' }}>
             <th style={{ padding: '12px', border: '1px solid #ddd' }}>Nom</th>
             <th style={{ padding: '12px', border: '1px solid #ddd' }}>Contact</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd' }}>Service</th>
+            
             <th style={{ padding: '12px', border: '1px solid #ddd' }}>Titre</th>
             <th style={{ padding: '12px', border: '1px solid #ddd' }}>Description</th>
             <th style={{ padding: '12px', border: '1px solid #ddd' }}>Adresse</th>
@@ -1086,10 +1096,7 @@ if (selectedInteraction) {
                   <div><PhoneOutlined /> {interaction.phone}</div>
                   <div><MailOutlined /> {interaction.email}</div>
                 </td>
-                <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
-                data-label="Service">
-                  {interaction.service}
-                </td>
+                
                 <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
                 data-label="Titre">
                   {interaction.title_de_livraison}
@@ -1113,28 +1120,39 @@ if (selectedInteraction) {
                 </td>
                 <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
                 data-label="Actions">
-                  <Button 
-                    type="primary" 
-                    onClick={() => {
-                      setNewTask({
-                        ...newTask,
-                        title: interaction.title_de_livraison,
-                        description: interaction.description,
-                        client: interaction.nom_client,
-                        location: interaction.address,
-                        phone: interaction.phone,
-                        email: interaction.email
-                      });
-                      setIsModalVisible(true);
-                      setSelectedInteraction(interaction);
-                    }}
-                    disabled={!!interaction.relatedTask}
-                    style={{ marginBottom: '4px' }}
-                    className={interaction.relatedTask ? "disabled-request-button" : ""}
-                    block
-                  >
-                    {interaction.relatedTask ? 'Déjà traité' : 'Créer Tâche'}
-                  </Button>
+          <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }} data-label="Actions">
+  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+    <Button 
+      type="primary" 
+      onClick={() => {
+        setNewTask({
+          ...newTask,
+          title: interaction.title_de_livraison,
+          description: interaction.description,
+          client: interaction.nom_client,
+          location: interaction.address,
+          phone: interaction.phone,
+          email: interaction.email
+        });
+        setIsModalVisible(true);
+        setSelectedInteraction(interaction);
+      }}
+      disabled={!!interaction.relatedTask}
+      style={{ flex: '1 1 45%', minWidth: '140px' }}
+      className={interaction.relatedTask ? "disabled-request-button" : ""}
+    >
+      {interaction.relatedTask ? 'Déjà traité' : 'Créer Tâche'}
+    </Button>
+    <Button 
+      danger 
+      onClick={() => handleDeleteInteraction(interaction._id)}
+      style={{ flex: '1 1 45%', minWidth: '140px' }}
+    >
+      Supprimer
+    </Button>
+  </div>
+</td>
+
                   {interaction.relatedTask && (
                     <span className="task-reference">
                       Tâche #{interaction.relatedTask}
@@ -1186,7 +1204,8 @@ if (selectedInteraction) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
         {/* Colonne 1 - Informations de base */}
         <div>
-          <h4 style={{ marginBottom: 16 }}>Informations de base</h4>
+        <h3 style={{ marginBottom: 30, color: '#0f7219' }}>Informations de base :</h3>
+
           
           <div style={{ marginBottom: 16 }}>
             <Text strong>Titre *</Text>
@@ -1247,12 +1266,12 @@ if (selectedInteraction) {
 
         {/* Colonne 2 - Localisation et planning */}
         <div>
-          <h4 style={{ marginBottom: 16 }}>Localisation et planning</h4>
+        <h3 style={{ marginBottom: 30, color: '#0f7219' }}>Localisation et planning :</h3>
           
           <div style={{ marginBottom: 16 }}>
-            <Text strong>Ville *</Text>
+            <Text strong>Gouvernorat *</Text>
             <Select
-              placeholder="Sélectionner une ville"
+              placeholder="Sélectionner une gouvernorat"
               onChange={(value) => {
                 setSelectedCity(value);
                 const region = getRegionFromCity(value);
@@ -1298,7 +1317,7 @@ if (selectedInteraction) {
 
         {/* Colonne 3 - Ressources */}
         <div>
-          <h4 style={{ marginBottom: 16 }}>Ressources</h4>
+        <h3 style={{ marginBottom: 30, color: '#0f7219' }}>Ressources :</h3>
           
           <div style={{ marginBottom: 16 }}>
             <Text strong>Technicien *</Text>
@@ -1417,20 +1436,21 @@ if (selectedInteraction) {
      {/* Tableau des tâches */}
     <div style={{ overflowX: 'auto' }} >
       <table style={{ width: '100%', borderCollapse: 'collapse' }} className="tasks-table">
-        <thead>
-          <tr style={{ backgroundColor: '#f0f0f0' }}>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Titre</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Information sur le Client</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Ville</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Adresse compléte</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Statut</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Période</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Technicien</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Véhicule</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Pièces jointes</th>
-            <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left' }}>Actions</th>
-          </tr>
-        </thead>
+      <thead>
+  <tr style={{ backgroundColor: '#f0f0f0' }}>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Titre</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Information sur le Client</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Gouvernorat</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Adresse complète</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Statut</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Période</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Nom et Prénom du Technicien</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Véhicule</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Pièces jointes</th>
+    <th style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'left', color: '#27c0eb' }}>Actions</th>
+  </tr>
+</thead>
+
         <tbody>
           {tasks
             .filter(task => {
@@ -1943,7 +1963,12 @@ if (selectedInteraction) {
   </Card>
 )}
        {selectedMenu === '7' && (
-  <Card title="Chronologie des notes" bordered={false} className="tous-padding">
+  <Card 
+  title={<span style={{ color: 'red' }}> Chronologie des notes :</span>}  
+  bordered={false} 
+  className="tous-padding"
+>
+
     <div style={{ 
       maxWidth: '500px', // Limite la largeur maximale
        // Centre le contenu

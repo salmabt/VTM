@@ -87,7 +87,8 @@ const TechniciensSection = ({
                 style={{
                    backgroundColor: '#7ec8e3' }}
               />
-              <div style={{ marginTop: 8, fontWeight: 500 }}>{tech.name}</div>
+              <div style={{ marginTop: 8, fontWeight: 500, color: '#0e1891' }}>{tech.name}</div>
+
             </div>
           ))}
         </div>
@@ -106,7 +107,8 @@ const TechniciensSection = ({
 
         {/* Modal des détails */}
         <Modal 
-          title={`Détails de ${selectedTech?.name}`}
+         title={<span style={{ color: '#ea20c8' }}>{`Détails de ${selectedTech?.name}`}</span>}
+
           visible={isModalVisible}
           onCancel={handleCloseModal}
           footer={[
@@ -138,7 +140,7 @@ const TechniciensSection = ({
 // Les sous-composants restent inchangés
 const UserInfoSection = ({ selectedTech }) => (
   <div>
-    <Title level={5} style={{ color: '#1890ff' }}>Informations personnelles</Title>
+    <Title level={5} style={{ color: '#1890ff' }}>Informations personnelles:</Title>
     <div style={{ lineHeight: 1.6 }}>
       <Text strong>Email: </Text>{selectedTech.email || 'Non renseigné'}<br/>
       <Text strong>Téléphone: </Text>{selectedTech.phone || 'Non renseigné'}
@@ -150,7 +152,7 @@ const SkillsSection = ({ selectedTech }) => (
   <>
     <Divider />
     <div>
-      <Title level={5} style={{ color: '#1890ff' }}>Compétences techniques</Title>
+      <Title level={5} style={{ color: '#1890ff' }}>Compétences techniques:</Title>
       <div style={{ marginTop: 8 }}>
         {selectedTech.skills?.length > 0 ? (
           selectedTech.skills.map((skill, index) => (
@@ -170,7 +172,7 @@ const TasksSection = ({ tasks, vehicules }) => (
   <>
     <Divider />
     <div>
-      <Title level={5} style={{ color: '#1890ff' }}>Interventions planifiées</Title>
+      <Title level={5} style={{ color: '#1890ff' }}>Les Interventions (planifié,en cours et terminé):</Title>
       <List
         size="small"
         dataSource={tasks}
@@ -219,7 +221,7 @@ const VehiclesSection = ({ vehicles }) => (
   <>
     <Divider />
     <div>
-      <Title level={5} style={{ color: '#1890ff' }}>Véhicules attribués</Title>
+      <Title level={5} style={{ color: '#1890ff' }}>Véhicules attribués:</Title>
       <List
         size="small"
         dataSource={vehicles}

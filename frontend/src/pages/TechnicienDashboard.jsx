@@ -560,11 +560,15 @@ const groupTasks = (tasks) => {
 {selectedMenu === '2' && (
             
             <>
-              <Card title="Créer un Rapport" bordered={false}>
+              <Card 
+  title={<span style={{ fontWeight: 'bold', color: '#1e78ad' }}>Créer un Rapport</span>} 
+  bordered={false}
+>
+
   <Form className={isDarkMode ? "dark-mode-form" : ""} form={form} layout="vertical" onFinish={handleReportSubmit}>
     {/* Nouveau champ Titre */}
     <Form.Item
-      label="Titre"
+      label="Titre :"
       name="title"
       rules={[{ required: true, message: 'Veuillez entrer le titre' }]}
     >
@@ -573,7 +577,7 @@ const groupTasks = (tasks) => {
 
     {/* Sélection de la tâche */}
     <Form.Item
-      label="Tâche associée"
+      label="Tâche associée :"
       name="taskId"
       rules={[{ required: true, message: 'Veuillez sélectionner une tâche' }]}
     >
@@ -590,7 +594,7 @@ const groupTasks = (tasks) => {
 
     {/* Correction des noms de champs */}
     <Form.Item
-      label="Description de l'intervention"
+      label="Description de l'intervention effectuée:"
       name="description"
       rules={[{ required: true }]}
     >
@@ -598,22 +602,22 @@ const groupTasks = (tasks) => {
     </Form.Item>
 
     <Form.Item
-      label="Temps passé (heures)"
+      label="Temps passé (heures/minutes) dans la missions :"
       name="timeSpent"
       rules={[{ required: true }]}
     >
-      <Input type="number" />
+      <Input type="string" />
     </Form.Item>
 
     <Form.Item
-      label="Problèmes rencontrés"
+      label="Problèmes rencontrés dans la mission :"
       name="issuesEncountered" 
     >
       <TextArea rows={4} />
     </Form.Item>
 
     <Form.Item
-      label="Statut final"
+      label="Statut final de la mission :"
       name="finalStatus" // <-- Nom corrigé
       rules={[{ required: true }]}
     >
@@ -663,7 +667,7 @@ const groupTasks = (tasks) => {
           description={
             <div style={{ lineHeight: 1.6 }}>
               <Text>Date: {new Date(report.createdAt).toLocaleDateString()}</Text><br />
-              <Text>Temps passé: {report.timeSpent} heures</Text><br />
+              <Text>Temps passé: {report.timeSpent}</Text><br />
               <Text>Statut: {report.finalStatus}</Text><br />
               <Text>Problèmes: {report.issuesEncountered}</Text>
             </div>

@@ -4,7 +4,7 @@ import { Alert, Card, Flex, Form, Typography, Input, Spin, Button } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import loginImage from '../assets/signIn_signUp.avif';
 import useLogin from '../hooks/useLogin';
-import logo from '../assets/VTM-logo.png';
+import logo from '../assets/VTM-preview.png';
 
 const Login = () => {
   const { loading, error, loginUser } = useLogin();
@@ -130,7 +130,7 @@ const Login = () => {
           {`
             /* Modified page-container */
              .page-container {
-            background-color: #e0e0e0;
+            background-color: #eaf4f0;
             min-height: 100vh;
             display: flex;
             justify-content: center;

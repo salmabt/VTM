@@ -113,9 +113,9 @@ const TaskModal = ({
       />
 
       <Select
-        placeholder="Sélectionner une ville *"
+        placeholder="Sélectionner une gouvernorat *"
         onChange={(value) => {
-          console.log("Ville sélectionnée:", value);
+          console.log("Gouvernorat sélectionnée:", value);
           setSelectedCity(value);
           const region = getRegionFromCity(value);
           setSelectedRegion(region); // Définir la région basée sur la ville sélectionnée

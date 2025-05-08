@@ -4,7 +4,7 @@ import { Alert, Card, Flex, Form, Typography, Input, Spin, Button, Select } from
 import { Link, useNavigate } from 'react-router-dom';
 import registerImage from '../assets/signIn_signUp.avif';
 import useSignup from '../hooks/useSignup';
-import logo from '../assets/VTM-logo.png'; 
+import logo from '../assets/VTM-preview.png'; 
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
@@ -91,7 +91,7 @@ const Register = () => {
             Créer un compte
           </Typography.Title>
           <Typography.Text type="secondary" strong className="slogan">
-            Inscrivez-vous pour accéder à nos services !
+            Inscrivez-vous pour devenir Technicien !
           </Typography.Text>
           <Form layout="vertical" onFinish={handleRegister} autoComplete="off" form={form}>
             <Form.Item
@@ -172,16 +172,16 @@ const Register = () => {
 
             {/* Sélection de la localisation */}
             <Form.Item
-              label="Ville"
+              label="Gouvernorat"
               name="location"
               rules={[
                 {
                   required: true,
-                  message: 'Veuillez sélectionner votre ville !',
+                  message: 'Veuillez sélectionner votre gouvernorat !',
                 },
               ]}
             >
-              <Select size="large" placeholder="Sélectionnez votre ville">
+              <Select size="large" placeholder="Sélectionnez votre gouvernorat">
                 {cities.map((city, index) => (
                   <Option key={index} value={city}>
                     {city}
@@ -202,7 +202,7 @@ const Register = () => {
               ]}
               extra={
             <div style={{ fontSize: '0.8rem', color: '#666', marginTop: 5 }}>
-              <InfoCircleOutlined /> Séparez les compétences par des virgules (ex: Plomberie, Électricité)
+              <InfoCircleOutlined /> Séparez les compétences par des virgules (ex: Chauffeur, avoir licence de conduire)
             </div>
           }
             >
@@ -321,7 +321,7 @@ const Register = () => {
           /* Conteneur principal */
           /* Modified page-container */
           .page-container {
-            background-color: #e0e0e0;
+            background-color: #eaf4f0;
             min-height: 100vh;
             display: flex;
             justify-content: center;

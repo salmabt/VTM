@@ -36,7 +36,7 @@ const TechnicienFiltering = ({ techniciens }) => {
       width: '30%'
     },
     {
-      title: 'Ville',
+      title: 'Gouvernorat',
       dataIndex: 'location',
       key: 'location',
       render: (location) => <Tag color="blue">{location}</Tag>,
