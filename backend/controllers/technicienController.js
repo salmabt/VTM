@@ -125,7 +125,7 @@ exports.getArchivedTechniciens = async (req, res) => {
     const techniciens = await Technicien.find({ 
       role: 'technicien',
       archived: true
-    }).select('name email phone skills archived'); // Ajoutez les champs nécessaires
+    }).select('name email phone skills location phone password archived'); // Ajoutez les champs nécessaires
     res.json(techniciens);
   } catch (error) {
     res.status(500).json({ message: error.message });
