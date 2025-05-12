@@ -1571,8 +1571,8 @@ const handleDeleteInteraction = async (interactionId) => {
                   <td style={{ padding: '12px', border: '1px solid #ddd', verticalAlign: 'top' }}
                   data-label="Statut">
                     <Tag color={
-                      task.status === 'planifié' ? 'blue' :
-                      task.status === 'en cours' ? 'orange' : 'green'
+                      task.status === 'planifié' ? '#80e2fd' :
+                      task.status === 'en cours' ? '#b1e68c' : '#ef5b82'
                     }>
                       {task.status}
                     </Tag>
