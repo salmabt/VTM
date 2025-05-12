@@ -1380,7 +1380,7 @@ const menuItems = [
                 <div style={{ paddingLeft: 8 }}>
                   <div style={{ marginBottom: 4 }}>
                     <FieldTimeOutlined style={{ marginRight: 8, color: '#888' }} />
-                    <Text>Durée: {report.timeSpent} heures</Text>
+                    <Text>Durée: {report.timeSpent} </Text>
                   </div>
                   <div style={{ marginBottom: 4 }}>
                     <AlignLeftOutlined style={{ marginRight: 8, color: '#888' }} />
