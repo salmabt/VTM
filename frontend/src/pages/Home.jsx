@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import '../styles/Home.css';
 import logo from '../assets/VTM-preview.png';
-import home from '../assets/home.png';
+import home from '../assets/home1.png';
 import calander from '../assets/calander.png';
 import planningIcon from '../assets/planning-icon.png';
 import alertIcon from '../assets/alert-icon.png';

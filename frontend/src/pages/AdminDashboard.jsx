@@ -575,7 +575,7 @@ const handleSearchUsers = (value) => {
         key: 'location',
         render: (_, record) => (
           <>
-            <div><EnvironmentOutlined style={{ color: '#6094ae' }} /> {record.location}</div>
+            <div><EnvironmentOutlined style={{ color: '#60ae94' }} /> {record.location}</div>
           </>
         ),
       },
@@ -1493,7 +1493,12 @@ const menuItems = [
                   {
                     title: 'Adresse',
                     dataIndex: 'address',
-                    key: 'address',
+                    key: 'address', render: (_, record) => (
+                    <>
+                    <div><EnvironmentOutlined style={{ color: '#60ae94' }} /> {record.location}</div>
+                  
+                      </>
+                    ),
                     width: 150
                   },
                   
