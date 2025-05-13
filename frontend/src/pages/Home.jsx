@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import '../styles/Home.css';
 import logo from '../assets/VTM-preview.png';
-import home from '../assets/home1.png';
+import home from '../assets/Design sans titre (1).mp4';
 import calander from '../assets/calander.png';
 import planningIcon from '../assets/planning-icon.png';
 import alertIcon from '../assets/alert-icon.png';
@@ -118,8 +118,10 @@ const Home = () => {
           <p dangerouslySetInnerHTML={{ __html: t('planningText2') }} />
         </div>
         <div className="hero-images">
-          <img src={home} alt="DashboardAdmin" className="large-image" />
-          <img src={calander} alt="Calandrier" className="medium-image" />
+          <video autoPlay loop muted className="large-image">
+        <source src={home} type="video/mp4" />
+        Votre navigateur ne supporte pas la vidéo.
+      </video>
         </div>
       </section>
 
