@@ -111,3 +111,32 @@ exports.getVehiculeUtilisation = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.updateVehiculeStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    // Validation du statut
+    const validStatuses = ['disponible', 'en entretien', 'réservé'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Statut invalide' });
+    }
+
+    const vehicule = await Vehicule.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+    
+    if (!vehicule) {
+      return res.status(404).json({ error: 'Véhicule non trouvé' });
+    }
+
+    res.json(vehicule);
+    
+  } catch (err) {
+    console.error('Erreur lors de la mise à jour du statut:', err);
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -18,6 +18,8 @@ export default {
   getVehiculeById: (id) => api.get(`/vehicules/${id}`),
   createVehicule: (data) => api.post('/vehicules', data),
   updateVehicule: (id, data) => api.put(`/vehicules/${id}`, data),
+  // Modification ici - envoie directement l'objet avec le statut
+  updateVehiculeStatus: (id, status) => api.patch(`/vehicules/${id}/status`, { status }),
   deleteVehicule: (id) => api.delete(`/vehicules/${id}`),
   getVehiculesByTechnicien: (technicienId) => 
     api.get(`/vehicules/technicien/${technicienId}`)

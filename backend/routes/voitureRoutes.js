@@ -15,6 +15,8 @@ router.get('/:id', voitureController.getVehiculeById); // Utilise 'getVehiculeBy
 // ➜ Mettre à jour une voiture
 router.put('/:id', voitureController.updateVehicule); // Utilise 'updateVehicule' comme dans le contrôleur
 
+router.patch('/:id/status', voitureController.updateVehiculeStatus);
+
 // ➜ Supprimer une voiture
 router.delete('/:id', voitureController.deleteVehicule); // Utilise 'deleteVehicule' comme dans le contrôleur
 

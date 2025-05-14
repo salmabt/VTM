@@ -18,6 +18,7 @@ import {
   HomeOutlined,FileSearchOutlined,
   UserSwitchOutlined,
   FlagOutlined,
+  ExclamationCircleFilled,
 } from '@ant-design/icons';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -126,6 +127,8 @@ const [assignedVehicles, setAssignedVehicles] = useState([]);
     status: 'planifié',
     files: []
   });
+  const [isTaskDeleteModalVisible, setIsTaskDeleteModalVisible] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
   // Ajoute ces états pour le modal et la date sélectionnée
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -243,30 +246,47 @@ const handleAddNote = async () => {
       </div>
     );
   };
-  // Ajouter ce useEffect pour synchroniser périodiquement
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const { data } = await vehiculesApi.getAllVehicules();
-        // Garder le statut réservé si une tâche existe
-        const updated = data.map(veh => {
-          // Vérifiez si le véhicule est associé à une tâche active
-          const associatedTask = tasks.find(t => t.vehicule === veh._id && t.status !== 'terminé');
-          return {
-            ...veh,
-            status: associatedTask ? 'réservé' : veh.status // Seulement si la tâche n'est pas terminée
-          };
-        });
-        setVehiculesList(updated);
-        setVehicules(updated);
-      } catch (error) {
-        console.error('Sync error:', error);
-      }
-    }, 5000); // Synchroniser toutes les 5 secondes
+
+useEffect(() => {
+  const syncVehiculesStatus = async () => {
+    try {
+      // 1. Récupérer les véhicules depuis l'API
+      const { data: apiVehicules } = await vehiculesApi.getAllVehicules();
+      
+      // 2. Calculer les statuts basés sur les tâches
+      const vehiculesWithCalculatedStatus = apiVehicules.map(veh => {
+        const hasActiveTask = tasks.some(t => 
+          (t.vehicule === veh._id || t.vehicule?._id === veh._id) && 
+          t.status !== 'terminé'
+        );
+        
+        return {
+          ...veh,
+          // Si le véhicule a une tâche active, il est réservé, sinon on garde son statut actuel
+          status: hasActiveTask ? 'réservé' : veh.status
+        };
+      });
+
+      // 3. Mettre à jour l'état local
+      setVehicules(vehiculesWithCalculatedStatus);
+      setVehiculesList(vehiculesWithCalculatedStatus);
+
+    } catch (error) {
+      console.error('Erreur de synchronisation:', error);
+    }
+  };
+
+  // Synchronisation immédiate
+  syncVehiculesStatus();
+
+  // Synchronisation périodique
+  const interval = setInterval(syncVehiculesStatus, 30000); // Toutes les 30 secondes
+
+  return () => clearInterval(interval);
+}, [tasks]);
   
-    return () => clearInterval(interval);
-  }, [tasks]);
-  
+
+
 // Modification du chargement initial
 useEffect(() => {
   const loadAllData = async () => {
@@ -673,15 +693,63 @@ if (selectedInteraction) {
     }
   };
 
-  const handleDeleteTask = async (id) => {
-    try {
-      await tasksApi.deleteTask(id);
-      setTasks(tasks.filter(t => t._id !== id));
-      message.success('Tâche supprimée avec succès');
-    } catch (error) {
-      message.error(error.response?.data?.message || 'Erreur de suppression');
+const handleDeleteTask = async (id) => {
+  try {
+    setLoading(true);
+    const taskToDelete = tasks.find(t => t._id === id);
+    if (!taskToDelete) {
+      throw new Error('Tâche non trouvée dans l\'état local');
     }
-  };
+    
+    const vehicleId = taskToDelete.vehicule;
+
+    // 1. Supprimer la tâche d'abord
+    await tasksApi.deleteTask(id);
+    
+    // 2. Mise à jour optimiste de l'état local
+    setTasks(prev => prev.filter(t => t._id !== id));
+
+    // 3. Vérifier s'il faut mettre à jour le statut du véhicule
+    if (vehicleId) {
+      try {
+        // Vérifier les autres tâches actives pour ce véhicule
+        const remainingTasks = tasks.filter(t => 
+          t._id !== id && 
+          t.vehicule === vehicleId && 
+          t.status !== 'terminé'
+        );
+
+        if (remainingTasks.length === 0) {
+          // Mettre à jour le statut du véhicule
+          await vehiculesApi.updateVehiculeStatus(vehicleId, 'disponible');
+          
+          // Mise à jour optimiste des états locaux
+          setVehicules(prev => 
+            prev.map(v => 
+              v._id === vehicleId ? { ...v, status: 'disponible' } : v
+            )
+          );
+          setVehiculesList(prev => 
+            prev.map(v => 
+              v._id === vehicleId ? { ...v, status: 'disponible' } : v
+            )
+          );
+        }
+      } catch (vehError) {
+        console.error('Erreur mise à jour véhicule:', vehError);
+        message.error('Tâche supprimée mais erreur sur le véhicule');
+      }
+    }
+    
+    message.success('Tâche supprimée avec succès');
+  } catch (error) {
+    console.error('Erreur complète:', error);
+    message.error(error.response?.data?.message || 'Erreur lors de la suppression');
+  } finally {
+    setLoading(false);
+    setIsTaskDeleteModalVisible(false);
+  }
+};
 
      // Calculer le nombre de tâches "planifiées" et "en cours" pour chaque technicien
      const calculateTaskCount = (technicienId) => {
@@ -1010,6 +1078,38 @@ const handleDeleteInteraction = async (interactionId) => {
   ]}
 >
   <p>Êtes-vous sûr de vouloir supprimer ce véhicule ?</p>
+</Modal>
+
+<Modal
+  title="Confirmation de suppression"
+  visible={isTaskDeleteModalVisible}
+  onCancel={() => setIsTaskDeleteModalVisible(false)}
+  footer={[
+    <Button key="back" onClick={() => setIsTaskDeleteModalVisible(false)}>
+      Annuler
+    </Button>,
+    <Button 
+      key="submit" 
+      type="primary" 
+      danger 
+      onClick={() => {
+        handleDeleteTask(taskToDelete);
+        setIsTaskDeleteModalVisible(false);
+      }}
+    >
+      Confirmer la suppression
+    </Button>,
+  ]}
+>
+  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+    <ExclamationCircleFilled style={{ fontSize: 24, color: '#ff4d4f' }} />
+    <div>
+      <Text strong>Êtes-vous sûr de vouloir supprimer cette tâche ?</Text>
+      <p style={{ marginTop: 8, color: 'rgba(0, 0, 0, 0.45)' }}>
+        Cette action est irréversible et supprimera définitivement la tâche.
+      </p>
+    </div>
+  </div>
 </Modal>
         <Layout>
            <Header style={{ 
@@ -1636,9 +1736,18 @@ const handleDeleteInteraction = async (interactionId) => {
                     >
                       Modifier
                     </Button>
-                    <Button danger onClick={() => handleDeleteTask(task._id)}>
-                      Supprimer
-                    </Button>
+
+                    
+                <Button 
+                  danger 
+                  onClick={() => {
+                    setTaskToDelete(task._id); // Stocke l'ID de la tâche à supprimer
+                    setIsTaskDeleteModalVisible(true); // Ouvre le modal de confirmation
+                  }}
+                  loading={loading && taskToDelete === task._id}
+                >
+                  Supprimer
+                </Button>
                   </td>
                 </tr>
               );
