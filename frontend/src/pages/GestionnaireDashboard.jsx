@@ -193,6 +193,18 @@ const handleAddNote = async () => {
     }
   }
 };
+const initialTaskState = {
+  title: '',
+  description: '',
+  client: '',
+  location: '',
+  adresse: '',
+  startDate: null,
+  endDate: null,
+  technicien: undefined,
+  vehicule: undefined,
+  files: []
+};
 
 
   
@@ -399,6 +411,7 @@ useEffect(() => {
   }
 }, [selectedTask?._id]);
 
+
 /////////client
 // Ajouter dans les useEffect
 useEffect(() => {
@@ -572,6 +585,10 @@ const handleDeleteVehicule = async () => {
         status: 'planifié',
         files: []
       });
+      setNewTask(initialTaskState);
+    setSelectedTechnicien(null);
+    setSelectedCity(null);
+    setSelectedRegion(null);
   
       setIsModalVisible(false);
       message.success('Tâche créée avec succès !');
@@ -817,6 +834,7 @@ const handleDeleteInteraction = async (interactionId) => {
     message.error('Erreur lors de la suppression de la demande');
   }
 };
+
 
 
   const menuItems = [
@@ -1205,14 +1223,24 @@ const handleDeleteInteraction = async (interactionId) => {
                               selectable
                             // Dans le composant Calendar
                              // Modifier onSelectSlot dans le composant Calendar
-                              onSelectSlot={(slotInfo) => {
-                                setNewTask({ 
-                                  ...newTask,
-                                  startDate: slotInfo.start,
-                                  endDate: slotInfo.end
-                                });
-                                setIsModalVisible(true);
-                              }}
+                           // Dans le composant Calendar
+onSelectSlot={(slotInfo) => {
+  setIsModalVisible(true);
+  // Réinitialiser avant de définir les nouvelles dates
+  setNewTask({
+    title: '',
+    description: '',
+    client: '',
+    location: '',
+    adresse: '',
+    startDate: slotInfo.start,
+    endDate: slotInfo.end,
+    technicien: '',
+    vehicule: '',
+    status: 'planifié',
+    files: []
+  });
+}}
                               
                             />
                             </div>
@@ -1351,15 +1379,16 @@ const handleDeleteInteraction = async (interactionId) => {
 
                             
                             {/* Affichage du modal pour ajouter une tâche */}
-                              <TaskModal
-                                isModalVisible={isModalVisible}
-                                setIsModalVisible={setIsModalVisible}
-                                newTask={newTask}
-                                setNewTask={setNewTask}
-                                handleCreateTask={handleCreateTask}
-                                techniciens={techniciens}
-                                vehiculesList={vehiculesList}
-                              />
+                          <TaskModal
+  key={isModalVisible ? "modal-open" : "modal-closed"}
+  isModalVisible={isModalVisible}
+  setIsModalVisible={setIsModalVisible}
+  newTask={newTask}
+  setNewTask={setNewTask}
+  handleCreateTask={handleCreateTask}
+  techniciens={techniciens}
+  vehiculesList={vehicules}
+/>
                                 
   {selectedMenu === '2' && (
   <Card title="Gestion des tâches" bordered={false} className="tous-padding">
@@ -1452,6 +1481,7 @@ const handleDeleteInteraction = async (interactionId) => {
             <Text strong>Gouvernorat *</Text>
             <Select
               placeholder="Sélectionner une gouvernorat"
+              value={newTask.location}
               onChange={(value) => {
                 setSelectedCity(value);
                 const region = getRegionFromCity(value);
@@ -1485,6 +1515,11 @@ const handleDeleteInteraction = async (interactionId) => {
             <RangePicker
               showTime
               format="DD/MM/YYYY HH:mm"
+                value={
+    newTask.startDate && newTask.endDate 
+      ? [moment(newTask.startDate), moment(newTask.endDate)] 
+      : null
+  }
               onChange={(dates) => setNewTask({
                 ...newTask,
                 startDate: dates?.[0]?.toISOString(),
@@ -1502,6 +1537,7 @@ const handleDeleteInteraction = async (interactionId) => {
           <div style={{ marginBottom: 16 }}>
             <Text strong>Technicien *</Text>
             <Select
+            value={newTask.technicien}
               placeholder="Sélectionner un technicien"
               onChange={(value) => {
                 setNewTask({ ...newTask, technicien: value });
@@ -1526,6 +1562,7 @@ const handleDeleteInteraction = async (interactionId) => {
           <div style={{ marginBottom: 16 }}>
             <Text strong>Véhicule *</Text>
             <Select
+            
               placeholder="Sélectionner un véhicule"
               onChange={(value) => setNewTask({...newTask, vehicule: value})}
               value={newTask.vehicule}

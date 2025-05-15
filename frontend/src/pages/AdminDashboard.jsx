@@ -395,7 +395,23 @@ useEffect(() => {
   }
 }, [selectedMenu]);
 
-  
+useEffect(() => {
+  if (!isTaskModalVisible) {
+    setNewTask({
+      title: '',
+      description: '',
+      client: '',
+      location: '',
+      adresse: '',
+      startDate: null,
+      endDate: null,
+      technicien: '',
+      vehicule: '',
+      status: 'planifié',
+      files: []
+    });
+  }
+}, [isTaskModalVisible]);
 
 const handleSearchUsers = (value) => {
   const searchValue = value.trim().toLowerCase();
@@ -1210,14 +1226,23 @@ const menuItems = [
                     eventPropGetter={eventStyleGetter} // ✅ Appliquer le style personnalisé
                   
                     onSelectEvent={handleSelectEvent}
-                    onSelectSlot={(slotInfo) => {
-                      setNewTask({
-                        ...newTask,
-                        startDate: slotInfo.start.toISOString(),
-                        endDate: slotInfo.end.toISOString(),
-                      });
-                      setIsTaskModalVisible(true);
-                    }}
+                onSelectSlot={(slotInfo) => {
+  // Réinitialiser complètement newTask
+  setNewTask({
+    title: '',
+    description: '',
+    client: '',
+    location: '',
+    adresse: '',
+    startDate: slotInfo.start.toISOString(),
+    endDate: slotInfo.end.toISOString(),
+    technicien: '',
+    vehicule: '',
+    status: 'planifié',
+    files: []
+  });
+  setIsTaskModalVisible(true);
+}}
                     selectable
                     startAccessor="start"
                     endAccessor="end"
@@ -1410,6 +1435,7 @@ const menuItems = [
   </Modal>
 )}
               <TaskModal
+                key={isTaskModalVisible ? "open" : "closed"}
                 isModalVisible={isTaskModalVisible}
                 setIsModalVisible={setIsTaskModalVisible}
                 newTask={newTask}

@@ -35,6 +35,15 @@ const TaskModal = ({
 
     fetchTasks();
   }, []);
+  useEffect(() => {
+  if (isModalVisible) {
+    // Réinitialiser tous les états locaux quand le modal s'ouvre
+    setFiles([]);
+    setSelectedTechnicien(null);
+    setSelectedCity(null);
+    setSelectedRegion(null);
+  }
+}, [isModalVisible]);
 
   const handleFileChange = (e) => {
     const files = e.target.files ? Array.from(e.target.files) : [];

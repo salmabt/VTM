@@ -173,13 +173,13 @@ const handleRateChange = async (techId) => {
 
   const techniciensColumns = [
     {
-      title: 'Nom',
+      title: 'Nom et Prénom',
       dataIndex: 'name',
       key: 'name',
       responsive: ['md'],
     },
     {
-      title: 'Missions',
+      title: 'Missions Terminées',
       dataIndex: 'completedTasks',
       key: 'completedTasks',
       render: (text) => text > 0 ? text : 'Aucune',
