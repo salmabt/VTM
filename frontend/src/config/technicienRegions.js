@@ -1,4 +1,4 @@
-//onfig/technicienRegions
+//config/technicienRegions
 export const technicienRegions = {
     nord: [
       'Tunis', 'Ariana', 'Ben Arous', 'La Manouba', 

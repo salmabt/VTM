@@ -393,15 +393,22 @@ useEffect(() => {
 }, [tasks, vehicules]); // Déclenché à chaque changement de tâches ou véhicules
   // Gestion véhicules
 // Remplacer l'effet existant par :
+// Dans le useEffect qui charge les détails de la tâche
 useEffect(() => {
   if (selectedTask) {
     const loadTaskDetails = async () => {
       try {
         const response = await tasksApi.getTaskById(selectedTask._id);
+        const taskData = response.data;
+        
+        // Déterminer la région à partir de la localisation
+        const region = getRegionFromCity(taskData.location);
+        setSelectedRegion(region);
+
         setSelectedTask({
-          ...response.data,
-          technicien: response.data.technicien?._id || response.data.technicien,
-          vehicule: response.data.vehicule?._id || response.data.vehicule
+          ...taskData,
+          technicien: taskData.technicien?._id || taskData.technicien,
+          vehicule: taskData.vehicule?._id || taskData.vehicule
         });
       } catch (error) {
         message.error('Erreur de chargement des détails');
@@ -442,6 +449,12 @@ useEffect(() => {
     acc[key].count++;
     return acc;
   }, {});
+  // Dans la fonction de filtrage
+const filteredVehicules = vehicules.filter(vehicule => 
+  vehicule.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  vehicule.registration.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  vehicule.region.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   const frequentClients = Object.values(clientMap)
     .filter(client => client.count >= 3)
@@ -1561,33 +1574,38 @@ onSelectSlot={(slotInfo) => {
           
           <div style={{ marginBottom: 16 }}>
             <Text strong>Véhicule *</Text>
-            <Select
-            
-              placeholder="Sélectionner un véhicule"
-              onChange={(value) => setNewTask({...newTask, vehicule: value})}
-              value={newTask.vehicule}
-              style={{ width: '100%' }}
-              showSearch
-              optionFilterProp="children"
-              filterOption={(input, option) => 
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
-            >
-              {vehiculesList
-                .filter(veh => 
-                  (veh.status === 'disponible' && 
-                  !tasks.some(t => 
-                    t.vehicule === veh._id && 
-                    t.status !== 'terminé'
-                  )) || 
-                  veh._id === newTask.vehicule
-                )
-                .map(veh => (
-                  <Option key={veh._id} value={veh._id}>
-                    {veh.model} ({veh.registration}) - {veh.status}
-                  </Option>
-                ))}
-            </Select>
+            {/* Dans la section de sélection de véhicule */}
+<Select
+  placeholder="Sélectionner un véhicule"
+  onChange={(value) => setNewTask({...newTask, vehicule: value})}
+  value={newTask.vehicule}
+  style={{ width: '100%' }}
+  showSearch
+  optionFilterProp="children"
+  filterOption={(input, option) => 
+    option.children.toLowerCase().includes(input.toLowerCase())
+  }
+>
+  {vehiculesList
+    .filter(veh => {
+      const isAvailable = veh.status === 'disponible' && 
+        !tasks.some(t => 
+          t.vehicule === veh._id && 
+          t.status !== 'terminé'
+        );
+      
+      // Vérification régionale
+      const vehiculeRegion = veh.region;
+      const taskRegion = selectedRegion; // Déjà défini par la sélection de la ville
+      
+      return isAvailable && vehiculeRegion === taskRegion;
+    })
+    .map(veh => (
+      <Option key={veh._id} value={veh._id}>
+        {veh.model} ({veh.registration}) - {veh.region}
+      </Option>
+    ))}
+</Select>
           </div>
           
           <div style={{ marginBottom: 16 }}>
@@ -1963,22 +1981,26 @@ onSelectSlot={(slotInfo) => {
           </Option>
         ))}
     </Select>
-    <Select
-      placeholder="Sélectionner un véhicule"
-      value={editingTask?.vehicule || ''}
-      onChange={(value) =>
-        setEditingTask({ ...editingTask, vehicule: value })
-      }
-      style={{ width: '100%', marginBottom: 16 }}
-    >
-      {vehiculesList
-        .filter((veh) => veh.status === 'disponible')
-        .map((veh) => (
-          <Option key={veh._id} value={veh._id}>
-            {veh.model} ({veh.registration})
-          </Option>
-        ))}
-    </Select>
+  <Select
+  placeholder="Sélectionner un véhicule"
+  value={editingTask?.vehicule || ''}
+  onChange={(value) =>
+    setEditingTask({ ...editingTask, vehicule: value })
+  }
+  style={{ width: '100%', marginBottom: 16 }}
+  disabled={!selectedRegion}
+>
+  {vehiculesList
+    .filter(veh => 
+      veh.status === 'disponible' && 
+      veh.region === selectedRegion // Filtre régional
+    )
+    .map(veh => (
+      <Option key={veh._id} value={veh._id}>
+        {veh.model} ({veh.registration}) - {veh.region}
+      </Option>
+  ))}
+</Select>
     {/* Gestion des dates (startDate et endDate) */}
     <RangePicker
                       showTime
@@ -2084,6 +2106,18 @@ onSelectSlot={(slotInfo) => {
         <Option value="en entretien">En entretien</Option>
         <Option value="réservé">Réservé</Option>
       </Select>
+      {/* Dans la section d'ajout de véhicule */}
+<Select
+  placeholder="Région"
+  value={newVehicule.region}
+  onChange={value => setNewVehicule({...newVehicule, region: value})}
+  style={{ marginBottom: 16 }}
+>
+  <Option value="nord">Nord</Option>
+  <Option value="milieu">Milieu</Option>
+  <Option value="sahel">Sahel</Option>
+  <Option value="sud">Sud</Option>
+</Select>
       <Button
         type="primary"
         onClick={handleAddVehicule}
@@ -2142,6 +2176,10 @@ onSelectSlot={(slotInfo) => {
                   {vehicule.status}
                 </Tag>
               </div>
+              {/* Dans le tableau des véhicules */}
+<Descriptions.Item label="Région">
+  <Tag color="geekblue">{vehicule.region}</Tag>
+</Descriptions.Item>
             </div>
             <div className="vehicule-actions">
               <Button 

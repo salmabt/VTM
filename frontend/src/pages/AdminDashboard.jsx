@@ -1521,7 +1521,7 @@ const menuItems = [
                     dataIndex: 'address',
                     key: 'address', render: (_, record) => (
                     <>
-                    <div><EnvironmentOutlined style={{ color: '#60ae94' }} /> {record.location}</div>
+                    <div><EnvironmentOutlined style={{ color: '#60ae94' }} /> {record.address}</div>
                   
                       </>
                     ),

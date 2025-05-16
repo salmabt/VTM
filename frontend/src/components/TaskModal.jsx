@@ -169,20 +169,24 @@ const TaskModal = ({
         ))}
       </Select>
 
-      {/* Sélectionner un véhicule */}
-      <Select
-        placeholder="Sélectionner un véhicule *"
-        onChange={(value) => setNewTask({...newTask, vehicule: value})}
-        style={{ marginBottom: 8, width: "100%" }}
-      >
-        {vehiculesList
-          .filter(veh => veh.status === 'disponible')
-          .map(veh => (
-            <Option key={veh._id} value={veh._id}>
-              {veh.model} ({veh.registration})
-            </Option>
-        ))}
-      </Select>
+     {/* Sélectionner un véhicule */}
+<Select
+  placeholder="Sélectionner un véhicule *"
+  onChange={(value) => setNewTask({...newTask, vehicule: value})}
+  style={{ marginBottom: 8, width: "100%" }}
+  disabled={!selectedRegion} // Désactivé tant qu'une région n'est pas sélectionnée
+>
+  {vehiculesList
+    .filter(veh => 
+      veh.status === 'disponible' && 
+      veh.region === selectedRegion // Filtre par région
+    )
+    .map(veh => (
+      <Option key={veh._id} value={veh._id}>
+        {veh.model} ({veh.registration}) - {veh.region}
+      </Option>
+  ))}
+</Select>
 
       {/* Sélection de la plage horaire */}
       <RangePicker
