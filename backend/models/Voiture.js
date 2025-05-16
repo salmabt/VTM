@@ -20,6 +20,11 @@ const voitureSchema = new mongoose.Schema({
   image: {
     type: String, // Base64 ou URL
     required: false
+  },
+  region: {
+    type: String,
+    enum: ['nord', 'milieu', 'sahel', 'sud'],
+    required: true
   }
 
 });
