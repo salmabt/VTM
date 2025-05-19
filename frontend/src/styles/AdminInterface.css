@@ -149,7 +149,7 @@
   }
 
   .responsive-table {
-    font-size: 14px;
+    overflow-x: auto;
   }
 
   .ant-card-extra {

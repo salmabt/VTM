@@ -558,22 +558,24 @@ const handleSearchUsers = (value) => {
         dataIndex: '_id',
         key: '_id',
         render: (text) => (
-          <Space>
-            <IdcardOutlined style={{ color: ' #60ae94' }} />
-            <Text strong>{text}</Text>
-          </Space>
+        <Space>
+          <IdcardOutlined style={{ color: '#60ae94' }} />
+          <Text strong>{text}</Text>
+        </Space>
         ),
+         width: 160
       },
       {
         title: 'Nom et Prénom',
         dataIndex: 'name',
         key: 'name',
         render: (text) => (
-          <Space>
-            <UserOutlined style={{ color: '#60ae94' }} />
-            <Text strong>{text}</Text>
-          </Space>
+        <Space>
+         <UserOutlined style={{ color: '#60ae94' }} />
+          <Text strong>{text}</Text>
+        </Space>
         ),
+         width: 160
       },
       {
         title: 'Email',
@@ -584,6 +586,7 @@ const handleSearchUsers = (value) => {
             <div><MailOutlined style={{ color: '#60ae94' }}/> {record.email}</div>
           </>
         ),
+         width: 120
       },
       {
         title: 'Gouvernorat',
@@ -594,6 +597,7 @@ const handleSearchUsers = (value) => {
             <div><EnvironmentOutlined style={{ color: '#60ae94' }} /> {record.location}</div>
           </>
         ),
+         width: 100
       },
       {
         title: 'Téléphone',
@@ -604,6 +608,7 @@ const handleSearchUsers = (value) => {
             <div><PhoneOutlined style={{ color: '#60ae94' }}/> {record.phone}</div>
           </>
         ),
+         width: 100
       },
   
      {
@@ -613,7 +618,9 @@ const handleSearchUsers = (value) => {
   render: (text) => {
     // Si vous voulez afficher le hash crypté
     return text; // Affichez directement le hash crypté
-  }
+  },
+   width: 140
+  
 },
       {
         title: 'Actions',
@@ -642,6 +649,7 @@ const handleSearchUsers = (value) => {
             )}
           </Space>
         ),
+         width: 90
       },
     ];
     ////////////////////////
@@ -994,6 +1002,7 @@ const gestionnaireColumns = [
         <Text strong>{text}</Text>
       </Space>
     ),
+    width: 180
   },
   {
     title: 'Nom et Prénom',
@@ -1005,6 +1014,7 @@ const gestionnaireColumns = [
         <Text strong>{text}</Text>
       </Space>
     ),
+    width: 180
   },
   {
     title: 'Email',
@@ -1015,6 +1025,7 @@ const gestionnaireColumns = [
         <div><MailOutlined style={{ color: '#60ae94' }}/> {record.email}</div>
       </>
     ),
+    width: 180
   },
   {
     title: 'Téléphone',
@@ -1025,12 +1036,14 @@ const gestionnaireColumns = [
         <div><PhoneOutlined style={{ color: '#60ae94' }}/> {record.phone}</div>
       </>
     ),
+    width: 120
   },
   {
     title: 'Mot de passe',
     dataIndex: 'password',
     key: 'password',
-    render: (text) => text // Afficher le hash
+    render: (text) => text,
+    width: 180 // Afficher le hash
   },
   {
     title: 'Actions',
@@ -1054,6 +1067,7 @@ const gestionnaireColumns = [
         )}
       </Space>
     ),
+    width: 100
   },
 ];
 const menuItems = [
