@@ -12,14 +12,14 @@ const Login = () => {
 
   const handleLogin = async (values) => {
     try {
-      console.log('Logging in user with values:', values);
+      console.log('Connexion de l`utilisateur avec les valeurs :', values);
       const result = await loginUser(values);
       if (result.success) {
         navigate('/dashboard');
       }
     } catch (err) {
-      console.error('Error during login:', err);
-      alert('An error occurred during login. Please try again later.');
+      console.error('Erreur lors de la connexion :', err);
+      alert('Une erreur s`est produite lors de la connexion. Veuillez réessayer plus tard.');
     }
   };
 
@@ -58,15 +58,15 @@ const Login = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please input your Email!',
+                    message: 'Veuillez saisir votre Email!',
                   },
                   {
                     type: 'email',
-                    message: 'The input is not valid Email!',
+                    message: 'Lemail n`est pas valide !',
                   },
                 ]}
               >
-                <Input size="large" placeholder="Enter your email" />
+                <Input size="large" placeholder="Entrer votre email" />
               </Form.Item>
 
               <Form.Item
@@ -75,11 +75,11 @@ const Login = () => {
                 rules={[
                   {
                     required: true,
-                    message: 'Please input your Password!',
+                    message: 'Veuillez saisir votre mot de passe !',
                   },
                 ]}
               >
-                <Input.Password size="large" placeholder="Enter your password" />
+                <Input.Password size="large" placeholder="Entrer votre mot de passe" />
               </Form.Item>
 
               {error && (

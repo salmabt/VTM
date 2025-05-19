@@ -41,11 +41,11 @@ const Register = () => {
 
     // Vérification des mots de passe
     if (password !== passwordConfirm) {
-      alert('Passwords do not match. Please check your password and try again.');
+      alert('Les mots de passe ne correspondent pas. Veuillez vérifier votre mot de passe et réessayer.');
       return;
     }
 
-    console.log('Values being sent:', values); // Vérifiez que "location" est bien présent
+    console.log('Valeurs étant envoyées:', values); // Vérifiez que "location" est bien présent
     // Si le rôle et les mots de passe sont valides, appeler la fonction pour enregistrer l'utilisateur
     try {
      
@@ -57,8 +57,8 @@ const Register = () => {
         navigate('/pending-approval');
       }
     } catch (err) {
-      console.error('Error during registration:', err);
-      alert('An error occurred during registration. Please try again later.'); // Afficher un message d'erreur à l'utilisateur
+      console.error('Erreur lors de l`inscription :', err);
+      alert('Une erreur s`est produite lors de l`inscription. Veuillez réessayer plus tard.'); // Afficher un message d'erreur à l'utilisateur
     }
   };
 
