@@ -1,3 +1,4 @@
+//frontend/hooks/useSignup
 import { useState } from 'react';
 import { message } from 'antd';
 
@@ -35,6 +36,11 @@ const useSignup = () => {
       const data = await res.json();
 
       // Gestion de la réponse
+      // Ajoutez cette condition pour le statut 409
+if (res.status === 409) {
+  setError(data.message || 'Email déjà utilisé');
+  return { success: false, error: data.message };
+}
       if (res.status === 201) {
         message.success(data.message); // Afficher un message de succès
         return { success: true, data }; // Retourner les données en cas de succès
