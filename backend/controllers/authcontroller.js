@@ -24,14 +24,17 @@ exports.signup = async (req, res, next) => {
     const { name, email, password, role, phone, skills, location} = req.body;
 
     // Vérifier si l'utilisateur existe déjà dans PendingUser
-    const existingPendingUser = await PendingUser.findOne({ email });
-    if (existingPendingUser) {
-      await PendingUser.deleteOne({ email });
-      return res.status(400).json({
-        status: 'error',
-        message: 'User with this email already exists in pending approval!',
-      });
-    }
+    // Vérifier si l'utilisateur existe déjà dans User ou PendingUser
+const existingUser = await User.findOne({ email });
+const existingPendingUser = await PendingUser.findOne({ email });
+
+if (existingUser || existingPendingUser) {
+  return res.status(409).json({
+    status: 'error',
+    message: 'User with this email already exists.',
+  });
+}
+
 
     // Vérification du rôle
     if (role !== 'technicien') {
