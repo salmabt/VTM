@@ -82,6 +82,18 @@ const AdminRapport = () => {
 
     fetchData();
   }, []);
+  
+  const getRegionColor = (region) => {
+  switch(region) {
+    case 'nord': return 'volcano';
+    case 'milieu': return 'gold';
+    case 'sahel': return 'cyan';
+    case 'sud': return 'purple';
+    default: return 'geekblue';
+  }
+};
+
+ 
 
   const exportToExcel = () => {
     const ws = XLSX.utils.book_new();
@@ -102,7 +114,8 @@ const AdminRapport = () => {
         Modèle: vehicle.model,
         Immatriculation: vehicle.registration,
         'Heures d\'utilisation': vehicle.utilisationHeures,
-        Statut: vehicle.status
+        Statut: vehicle.status,
+        Région: vehicle.region
       }))
     );
     XLSX.utils.book_append_sheet(ws, wsVehicules, 'Véhicules');
@@ -286,13 +299,18 @@ const handleRateChange = async (techId) => {
                   <List
                     dataSource={vehicules}
                     renderItem={(vehicle) => (
-                      <List.Item
-                        actions={[
-                          <Tag color={getVehicleStatusColor(vehicle.status)}>
-                            {vehicle.status}
-                          </Tag>
-                        ]}
-                      >
+                   <List.Item
+  actions={[
+    <Tag color={getVehicleStatusColor(vehicle.status)}>
+      {vehicle.status}
+    </Tag>,
+   
+ <Tag color={getRegionColor(vehicle.region)}>
+      {vehicle.region.toUpperCase()}
+    </Tag>
+  ]}
+
+>
                         <Statistic
                           title={`${vehicle.model} (${vehicle.registration})`}
                           value={vehicle.utilisationHeures}
@@ -321,15 +339,17 @@ const handleRateChange = async (techId) => {
                     {vehicules
                       .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                       .map((vehicle) => (
-                        <Timeline.Item 
-                          key={vehicle._id} 
-                          color={getVehicleStatusColor(vehicle.status)}
-                          label={`${vehicle.utilisationHeures}h`}
-                        >
-                          <Text strong>{vehicle.model}</Text>
-                          <br />
-                          <Text type="secondary">{vehicle.registration}</Text>
-                        </Timeline.Item>
+                      <Timeline.Item 
+  key={vehicle._id} 
+  color={getVehicleStatusColor(vehicle.status)}
+  label={`${vehicle.utilisationHeures}h`}
+>
+  <Text strong>{vehicle.model}</Text>
+  <br />
+  <Text type="secondary">{vehicle.registration}</Text>
+  <br />
+ 
+</Timeline.Item>
                       ))}
                   </Timeline>
                   <div style={{ textAlign: 'center', marginTop: 16 }}>
