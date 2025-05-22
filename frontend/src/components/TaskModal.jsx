@@ -44,6 +44,22 @@ const TaskModal = ({
     setSelectedRegion(null);
   }
 }, [isModalVisible]);
+useEffect(() => {
+  if (newTask.technicien && newTask.startDate) {
+    const techTasksSameDay = tasks.filter(t => 
+      t.technicien === newTask.technicien &&
+      moment(t.startDate).isSame(newTask.startDate, 'day')
+    );
+
+    if (techTasksSameDay.length > 0) {
+      const lastUsedVehicle = techTasksSameDay[0].vehicule;
+      setNewTask(prev => ({
+        ...prev,
+        vehicule: lastUsedVehicle
+      }));
+    }
+  }
+}, [newTask.technicien, newTask.startDate, tasks]);
 
   const handleFileChange = (e) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
@@ -169,23 +185,39 @@ const TaskModal = ({
         ))}
       </Select>
 
-     {/* Sélectionner un véhicule */}
+
 <Select
-  placeholder="Sélectionner un véhicule *"
+  placeholder="Sélectionner un véhicule"
   onChange={(value) => setNewTask({...newTask, vehicule: value})}
+  value={newTask.vehicule}
   style={{ marginBottom: 8, width: "100%" }}
-  disabled={!selectedRegion} // Désactivé tant qu'une région n'est pas sélectionnée
+  disabled={!selectedRegion}
+  showSearch
+  optionFilterProp="children"
+  filterOption={(input, option) => 
+    option.children.toLowerCase().includes(input.toLowerCase())
+  }
 >
   {vehiculesList
-    .filter(veh => 
-      veh.status === 'disponible' && 
-      veh.region === selectedRegion // Filtre par région
-    )
+    .filter(veh => {
+      // Filtre régional
+      const isInRegion = veh.region === selectedRegion;
+      
+      // Vérifier si le véhicule est déjà utilisé par ce technicien aujourd'hui
+      const isUsedByTech = tasks.some(t => 
+        t.technicien === newTask.technicien &&
+        t.vehicule === veh._id &&
+        moment(t.startDate).isSame(newTask.startDate, 'day')
+      );
+
+      // Inclure les véhicules disponibles OU ceux déjà utilisés par le tech
+      return isInRegion && (veh.status === 'disponible' || isUsedByTech);
+    })
     .map(veh => (
       <Option key={veh._id} value={veh._id}>
         {veh.model} ({veh.registration}) - {veh.region}
       </Option>
-  ))}
+    ))}
 </Select>
 
       {/* Sélection de la plage horaire */}

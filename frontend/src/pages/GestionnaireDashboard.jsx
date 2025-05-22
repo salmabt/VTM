@@ -297,7 +297,22 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, [tasks]);
   
+useEffect(() => {
+  if (newTask.technicien && newTask.startDate) {
+    const techTasksSameDay = tasks.filter(t => 
+      t.technicien === newTask.technicien &&
+      moment(t.startDate).isSame(newTask.startDate, 'day')
+    );
 
+    if (techTasksSameDay.length > 0) {
+      const lastUsedVehicle = techTasksSameDay[0].vehicule;
+      setNewTask(prev => ({
+        ...prev,
+        vehicule: lastUsedVehicle
+      }));
+    }
+  }
+}, [newTask.technicien, newTask.startDate, tasks]);
 
 // Modification du chargement initial
 useEffect(() => {
@@ -1875,6 +1890,17 @@ onSelectSlot={(slotInfo) => {
       onChange={e => setEditingVehicule({...editingVehicule, model: e.target.value})}
       style={{ marginBottom: 16 }}
     />
+     <Select
+    placeholder="Région"
+    value={editingVehicule?.region || ''}
+    onChange={value => setEditingVehicule({...editingVehicule, region: value})}
+    style={{ width: '100%', marginBottom: 16 }}
+  >
+    <Option value="nord">Nord</Option>
+    <Option value="milieu">Milieu</Option>
+    <Option value="sahel">Sahel</Option>
+    <Option value="sud">Sud</Option>
+  </Select>
     <Select
       value={editingVehicule?.status || 'disponible'}
       onChange={value => setEditingVehicule({...editingVehicule, status: value})}
@@ -1981,25 +2007,37 @@ onSelectSlot={(slotInfo) => {
           </Option>
         ))}
     </Select>
-  <Select
+<Select
   placeholder="Sélectionner un véhicule"
-  value={editingTask?.vehicule || ''}
-  onChange={(value) =>
-    setEditingTask({ ...editingTask, vehicule: value })
+  onChange={(value) => setNewTask({...newTask, vehicule: value})}
+  value={newTask.vehicule}
+  style={{ width: '100%' }}
+  showSearch
+  optionFilterProp="children"
+  filterOption={(input, option) => 
+    option.children.toLowerCase().includes(input.toLowerCase())
   }
-  style={{ width: '100%', marginBottom: 16 }}
-  disabled={!selectedRegion}
 >
   {vehiculesList
-    .filter(veh => 
-      veh.status === 'disponible' && 
-      veh.region === selectedRegion // Filtre régional
-    )
+    .filter(veh => {
+      // Filtre régional
+      const isInRegion = veh.region === selectedRegion;
+      
+      // Vérifier si le véhicule est déjà utilisé par ce technicien aujourd'hui
+      const isUsedByTech = tasks.some(t => 
+        t.technicien === newTask.technicien &&
+        t.vehicule === veh._id &&
+        moment(t.startDate).isSame(newTask.startDate, 'day')
+      );
+
+      // Inclure les véhicules disponibles OU ceux déjà utilisés par le tech
+      return isInRegion && (veh.status === 'disponible' || isUsedByTech);
+    })
     .map(veh => (
       <Option key={veh._id} value={veh._id}>
         {veh.model} ({veh.registration}) - {veh.region}
       </Option>
-  ))}
+    ))}
 </Select>
     {/* Gestion des dates (startDate et endDate) */}
     <RangePicker
