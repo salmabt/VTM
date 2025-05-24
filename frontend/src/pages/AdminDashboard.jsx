@@ -558,10 +558,10 @@ const handleSearchUsers = (value) => {
         dataIndex: '_id',
         key: '_id',
         render: (text) => (
-        <Space>
-          <IdcardOutlined style={{ color: '#60ae94' }} />
-          <Text strong>{text}</Text>
-        </Space>
+        <Text ellipsis style={{ maxWidth: '150px' }}>
+        <IdcardOutlined style={{ color: '#60ae94', marginRight: 8 }} />
+        {text}
+      </Text>
         ),
          width: 160
       },
@@ -570,12 +570,12 @@ const handleSearchUsers = (value) => {
         dataIndex: 'name',
         key: 'name',
         render: (text) => (
-        <Space>
-         <UserOutlined style={{ color: '#60ae94' }} />
-          <Text strong>{text}</Text>
-        </Space>
+        <Text ellipsis style={{ maxWidth: '150px' }}>
+        <UserOutlined style={{ color: '#60ae94', marginRight: 8 }} />
+        {text}
+      </Text>
         ),
-         width: 160
+         width: 180
       },
       {
         title: 'Email',
@@ -597,7 +597,7 @@ const handleSearchUsers = (value) => {
             <div><EnvironmentOutlined style={{ color: '#60ae94' }} /> {record.location}</div>
           </>
         ),
-         width: 100
+         width: 140
       },
       {
         title: 'Téléphone',
@@ -608,7 +608,7 @@ const handleSearchUsers = (value) => {
             <div><PhoneOutlined style={{ color: '#60ae94' }}/> {record.phone}</div>
           </>
         ),
-         width: 100
+         width: 140
       },
   
      {
@@ -619,7 +619,7 @@ const handleSearchUsers = (value) => {
     // Si vous voulez afficher le hash crypté
     return text; // Affichez directement le hash crypté
   },
-   width: 140
+   width: 120
   
 },
       {
@@ -997,10 +997,10 @@ const gestionnaireColumns = [
     dataIndex: '_id',
     key: '_id',
     render: (text) => (
-      <Space>
-        <IdcardOutlined style={{ color: ' #60ae94' }} />
-        <Text strong>{text}</Text>
-      </Space>
+       <Text ellipsis style={{ maxWidth: '150px' }}>
+        <IdcardOutlined style={{ color: '#60ae94', marginRight: 8 }} />
+        {text}
+      </Text>
     ),
     width: 180
   },
@@ -1009,10 +1009,10 @@ const gestionnaireColumns = [
     dataIndex: 'name',
     key: 'name',
     render: (text) => (
-      <Space>
-        <UserOutlined style={{ color: '#60ae94' }} />
-        <Text strong>{text}</Text>
-      </Space>
+       <Text ellipsis style={{ maxWidth: '150px' }}>
+        <UserOutlined style={{ color: '#60ae94', marginRight: 8 }} />
+        {text}
+      </Text>
     ),
     width: 180
   },
@@ -1036,14 +1036,14 @@ const gestionnaireColumns = [
         <div><PhoneOutlined style={{ color: '#60ae94' }}/> {record.phone}</div>
       </>
     ),
-    width: 120
+    width: 140
   },
   {
     title: 'Mot de passe',
     dataIndex: 'password',
     key: 'password',
     render: (text) => text,
-    width: 180 // Afficher le hash
+    width: 140 // Afficher le hash
   },
   {
     title: 'Actions',
@@ -1486,10 +1486,10 @@ const menuItems = [
                     dataIndex: '_id',
                     key: 'id',
                     render: (text) => (
-                      <Space>
-                        <IdcardOutlined style={{ color: ' #60ae94' }} />
-                        <Text strong>{text}</Text>
-                      </Space>
+                      <Text ellipsis style={{ maxWidth: '150px' }}>
+        <IdcardOutlined style={{ color: '#60ae94', marginRight: 8 }} />
+        {text}
+      </Text>
                     ),
                     width: 160
                   },
@@ -1498,10 +1498,12 @@ const menuItems = [
                     dataIndex: 'nom_client',
                     key: 'nom_client',
                     render: (text) => (
-                      <Space>
-                        <UserOutlined style={{ color: '#60ae94' }} />
-                        <Text strong>{text}</Text>
-                      </Space>
+                     
+                      <Text ellipsis style={{ maxWidth: '150px' }}>
+                      <UserOutlined style={{ color: '#60ae94', marginRight: 8 }} />
+                      {text}
+                    </Text>
+        
                     ),
                     width: 120
                   },
@@ -1569,7 +1571,7 @@ const menuItems = [
                   rowKey="_id"
               
                   pagination={{ pageSize: 8 }}
-                  scroll={{ x: 'max-content', y: 240 }}
+                 
                   size="small"
                   className="responsive-table"
                 />
@@ -1607,12 +1609,18 @@ const menuItems = [
                     </Button>
                   </div>
                   <Table
-                  scroll={{ x: 'max-content', y: 240 }}
+                 
                   size="small"
                   className="responsive-table"
                     dataSource={searchTerm ? filteredUsers : (showArchived ? archivedTechniciens : techniciens)}
                     columns={columns}
                     rowKey="_id"
+                    pagination={{
+          pageSize: 8,
+          showSizeChanger: true,
+          pageSizeOptions: ['10', '20', '50'],
+          showTotal: (total) => `Total ${total} techniciens`
+        }}
                     renderItem={(tech) => (
                       <List.Item
                         actions={
@@ -1688,8 +1696,13 @@ const menuItems = [
       dataSource={searchTerm ? filteredGestionnaires : (showArchivedGestionnaires ? archivedGestionnaires  : gestionnaires)}
       columns={gestionnaireColumns}
       rowKey="_id"
-      pagination={{ pageSize: 8 }}
-      scroll={{ x: 'max-content', y: 240 }}
+      pagination={{ 
+        pageSize: 8,
+        showSizeChanger: true,
+        pageSizeOptions: ['10', '20', '50'],
+        showTotal: (total) => `Total ${total} gestionnaires`
+       }}
+    
   size="small"
   className="responsive-table"
     />
