@@ -26,6 +26,7 @@ const TechnicienMap = ({
   clientPosition,
   showRoute = true
 }) => {
+  
  // Dans TechnicienMap.js, modifiez la fonction getValidPosition :
 const getValidPosition = (pos, fallback) => {
     if (Array.isArray(pos) && pos.length === 2 && 
