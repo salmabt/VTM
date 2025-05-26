@@ -2007,11 +2007,12 @@ onSelectSlot={(slotInfo) => {
           </Option>
         ))}
     </Select>
+
 <Select
   placeholder="Sélectionner un véhicule"
-  onChange={(value) => setNewTask({...newTask, vehicule: value})}
-  value={newTask.vehicule}
-  style={{ width: '100%' }}
+  value={editingTask?.vehicule}
+  onChange={(value) => setEditingTask({ ...editingTask, vehicule: value })}
+  style={{ width: '100%', marginBottom: 16 }}
   showSearch
   optionFilterProp="children"
   filterOption={(input, option) => 
@@ -2020,25 +2021,19 @@ onSelectSlot={(slotInfo) => {
 >
   {vehiculesList
     .filter(veh => {
-      // Filtre régional
       const isInRegion = veh.region === selectedRegion;
+      const isAssignedVehicle = veh._id === editingTask.vehicule;
       
-      // Vérifier si le véhicule est déjà utilisé par ce technicien aujourd'hui
-      const isUsedByTech = tasks.some(t => 
-        t.technicien === newTask.technicien &&
-        t.vehicule === veh._id &&
-        moment(t.startDate).isSame(newTask.startDate, 'day')
-      );
-
-      // Inclure les véhicules disponibles OU ceux déjà utilisés par le tech
-      return isInRegion && (veh.status === 'disponible' || isUsedByTech);
+      // Afficher les véhicules disponibles dans la région OU le véhicule déjà assigné
+      return isInRegion && (veh.status === 'disponible' || isAssignedVehicle);
     })
     .map(veh => (
       <Option key={veh._id} value={veh._id}>
-        {veh.model} ({veh.registration}) - {veh.region}
+        {veh.model} ({veh.registration}) - {veh.region} - {veh.status}
       </Option>
     ))}
 </Select>
+
     {/* Gestion des dates (startDate et endDate) */}
     <RangePicker
                       showTime
