@@ -202,7 +202,7 @@ const Register = () => {
               ]}
               extra={
             <div style={{ fontSize: '0.8rem', color: '#666', marginTop: 5 }}>
-              <InfoCircleOutlined /> Séparez les compétences par des virgules (ex: Chauffeur, avoir licence de conduire)
+              <InfoCircleOutlined /> Séparez les compétences par des virgules (ex: Chauffeur, avoir licence de conduire,nombre d'années d'expérience pour ce domaine)
             </div>
           }
             >
