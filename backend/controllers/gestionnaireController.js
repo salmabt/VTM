@@ -86,6 +86,8 @@ exports.createGestionnaire = async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        phone: newUser.phone, // Ajout du téléphone
+        password: newUser.password 
       }
     });
   } catch (error) {

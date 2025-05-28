@@ -235,6 +235,20 @@ exports.updateTask = async (req, res) => {
       attachments
     };
 
+
+   // Dans taskController.js, modifiez updateTask
+if (req.body.location || req.body.adresse) {
+  const fullAddress = `${req.body.adresse || existingTask.adresse}, ${req.body.location || existingTask.location}, Tunisie`;
+  const geocodingResult = await geocodeWithFallback(fullAddress);
+  
+  updateData.coordinates = {
+    type: "Point",
+    coordinates: geocodingResult.coordinates
+  };
+  updateData.address = geocodingResult.success 
+    ? geocodingResult.formattedAddress 
+    : fullAddress;
+}
     // Mettre à jour la tâche
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
@@ -242,6 +256,7 @@ exports.updateTask = async (req, res) => {
       { new: true, runValidators: true }
     ).populate('technicien vehicule');
 
+    
     // Créer la notification de modification
     const notificationMessage = `Mission modifiée: ${updatedTask.title} (${new Date(updatedTask.startDate).toLocaleDateString('fr-FR')})`;
     const notification = await Notification.create({
