@@ -112,23 +112,25 @@ exports.login = async (req, res, next) => {
       console.log(`Tentative de connexion avec un e-mail inconnu : ${email}`);
       return next(new createError('User not found!', 404));
     }
-    console.log("Mot de passe en clair saisi:", password);
-console.log("Mot de passe stocké en base:", user.password);
+
+    // ✅ AJOUTE CE BLOC :
+    if (user.archived) {
+      console.log(`Connexion bloquée - compte archivé : ${email}`);
+      return res.status(403).json({ message: 'Votre compte a été archivé. Veuillez contacter un administrateur.' });
+    }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     console.log("Résultat de la comparaison:", isPasswordValid);
     if (!isPasswordValid) {
-      console.log(`Tentative de connexion avec un mot de passe incorrect pour l'utilisateur : ${email}`);
       return next(new createError('Invalid email or password', 401));
     }
 
     if (!user.isApproved) {
-      console.log(`Tentative de connexion avec un compte non approuvé : ${email}`);
       return next(new createError('Your account is pending approval by the admin.', 403));
     }
 
     const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '7d' });
-    console.log(`Connexion réussie pour l'utilisateur : ${email}`);
+
     res.status(200).json({
       status: 'success',
       token,
@@ -144,6 +146,7 @@ console.log("Mot de passe stocké en base:", user.password);
     next(error);
   }
 };
+
 
 // VALIDATION PAR L'ADMINISTRATEUR
 exports.validateUser = async (req, res, next) => {
