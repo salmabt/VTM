@@ -14,12 +14,19 @@ const Login = () => {
     try {
       console.log('Connexion de l`utilisateur avec les valeurs :', values);
       const result = await loginUser(values);
+
+    if (!result) {
+      console.log("Aucun résultat retourné");
+      return;
+    }
       if (result.success) {
         navigate('/dashboard');
-      }
+      } 
+
+       console.log("Résultat de connexion:", result);
+       console.log("Erreur:", error);
     } catch (err) {
       console.error('Erreur lors de la connexion :', err);
-      alert('Une erreur s`est produite lors de la connexion. Veuillez réessayer plus tard.');
     }
   };
 
@@ -82,15 +89,21 @@ const Login = () => {
                 <Input.Password size="large" placeholder="Entrer votre mot de passe" />
               </Form.Item>
 
-              {error && (
-                <Alert
-                  description={error}
-                  type="error"
-                  showIcon
-                  closable
-                  className="alert"
-                />
-              )}
+               {error && (
+              <Alert
+                description={
+                  error === 'Compte archivé' 
+                    ? 'Votre compte a été archivé. Veuillez contacter un administrateur.'
+                    : error === 'Erreur de connexion'
+                    ? 'Une erreur s\'est produite lors de la connexion. Veuillez réessayer plus tard.'
+                    : error
+                }
+                type="error"
+                showIcon
+                closable
+                className="alert"
+              />
+            )}
 
               <Form.Item>
                 <Button
@@ -270,6 +283,17 @@ const Login = () => {
               .main-flex {
                 flex-direction: column-reverse;
               }
+
+              .alert {
+  margin: 20px 0;
+  z-index: 1;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
             }
 
             /* Desktop styles */
